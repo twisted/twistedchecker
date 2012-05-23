@@ -7,4 +7,4 @@ sys.path.insert(0, os.path.abspath(os.getcwd()))
 
 from twistedchecker.core.runner import Runner
 
-Runner().run(sys.arg[1:])
+Runner().run(sys.argv[1:])

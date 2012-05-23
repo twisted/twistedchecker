@@ -21,9 +21,8 @@ class Runner():
         """
         Output help message of twistedchecker.
         """
-        print >> self.outputStream if self.outputStream else sys.stderr ,"""
-                 HELP INFOMATION
-                 """
+        print >> self.outputStream if self.outputStream else sys.stderr ,\
+                 """---\nHELP INFOMATION"""
 
     def run(self,args):
         """
