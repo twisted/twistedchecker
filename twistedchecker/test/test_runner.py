@@ -4,19 +4,25 @@ from twisted.trial import unittest
 
 from twistedchecker.core.runner import Runner
 
+
 class RunnerTestCase(unittest.TestCase):
+    """
+    Test for twistedchecker.core.runner.Runner .
+    """
 
-    def testRun(self):
-        resultOutput = StringIO.StringIO()
-        stdout = sys.stdout
-        sys.stdout = resultOutput
+    def setUp(self):
+        """
+        Redirect stdout to a temp C{StringIO} stream
+        """
+        self.outputStream = StringIO.StringIO()
+        self.patch(sys, "stdout", self.outputStream)
+
+
+    def test_run(self):
+        """
+        Pass argument "--version" to C{runner.run}, and it should show
+        a version infomation, then exit.
+        """
         runner = Runner()
-        runner.setOutput(resultOutput)
-        try:
-            self.assertRaises(SystemExit,runner.run,["--version"])
-            sys.stdout = stdout
-        except:
-            sys.stdout = stdout
-            self.fail("Could not load runner")
-
-
+        runner.setOutput(self.outputStream)
+        self.assertRaises(SystemExit, runner.run, ["--version"])
