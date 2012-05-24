@@ -9,12 +9,13 @@ class Runner():
     """
     Run and control the checking process.
     """
-    outputStream = None
+    outputStream = sys.stderr
 
 
     def setOutput(self, stream):
         """
         Set the stream to output result of checking.
+
         @param stream: output stream, defaultly it should be stdout
         """
         self.outputStream = stream
@@ -24,13 +25,15 @@ class Runner():
         """
         Output help message of twistedchecker.
         """
-        print >> self.outputStream if self.outputStream else sys.stderr, \
-                 """---\nHELP INFOMATION"""
+        print >> self.outputStream, """---\nHELP INFOMATION"""
 
 
     def run(self, args):
         """
         Setup the environment, and run pylint.
+
+        @param args: arguments will be passed to pylint
+        @type args: list of string
         """
         linter = PyLinter(())
         # register standard checkers
