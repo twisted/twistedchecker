@@ -41,11 +41,9 @@ class Runner():
         # register standard checkers
         linter.load_default_plugins()
         # read configuration
-        pathConfig = "%s/configuration/pylintrc" % twistedchecker.abspath
-        if os.path.exists(pathConfig):
-            linter.read_config_file(pathConfig)
-        else:
-            linter.read_config_file()
+        pathConfig = os.path.join(twistedchecker.abspath,
+                                  "configuration", "pylintrc")
+        linter.read_config_file(pathConfig)
         # is there some additional plugins in the file configuration, in
         config_parser = linter.cfgfile_parser
         if config_parser.has_option('MASTER', 'load-plugins'):

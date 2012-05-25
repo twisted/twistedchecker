@@ -26,10 +26,13 @@ class FormatTestCase(unittest.TestCase):
         """
         runner = Runner()
         runner.setOutput(self.outputStream)
-        testmodule = "twistedchecker.testsuit.indentation"
+        testmodule = "twistedchecker.functionaltests.indentation"
         runner.run([testmodule])
         messagesShouldAppear = \
-            ["W:  7,0: Bad indentation. Found 2 spaces, expected 4",
-             "W: 11,0: Found indentation with tabs instead of spaces"]
+            ["Bad indentation. Found 2 spaces, expected 4",
+             "Found indentation with tabs instead of spaces"]
         for message in messagesShouldAppear:
-            self.assertTrue(self.outputStream.getvalue().count(message) > 0)
+            self.assertTrue(self.outputStream.getvalue().count(message) == 1)
+        messageShouldNotAppear = "Bad indentation. Found 4 spaces,"
+        self.assertTrue(self.outputStream.getvalue().
+                        count(messageShouldNotAppear) == 0)
