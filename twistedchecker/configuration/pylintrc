@@ -1,0 +1,48 @@
+[MASTER]
+
+# Profiled execution.
+profile=no
+
+
+[MESSAGES CONTROL]
+
+
+[REPORTS]
+
+# Set the output format. Available formats are text, parseable, colorized, msvs
+# (visual studio) and html
+output-format=text
+
+# Tells whether to display a full report or only the messages
+reports=no
+
+[FORMAT]
+
+# String used as indentation unit. This is usually " " (4 spaces) or "\t" (1
+# tab).
+indent-string='    '
+
+
+[MISCELLANEOUS]
+
+
+[VARIABLES]
+
+
+[TYPECHECK]
+
+
+[BASIC]
+
+
+[SIMILARITIES]
+
+
+[IMPORTS]
+
+
+[DESIGN]
+
+
+[CLASSES]
+

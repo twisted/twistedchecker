@@ -1,5 +1,6 @@
 import sys
 import StringIO
+
 from twisted.trial import unittest
 
 from twistedchecker.core.runner import Runner
