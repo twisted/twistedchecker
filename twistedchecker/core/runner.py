@@ -4,6 +4,8 @@ import os
 
 from pylint.lint import PyLinter
 
+import twistedchecker
+
 
 class Runner():
     """
@@ -39,7 +41,19 @@ class Runner():
         # register standard checkers
         linter.load_default_plugins()
         # read configuration
-        linter.read_config_file()
+        pathConfig = "%s/configuration/pylintrc" % twistedchecker.abspath
+        if os.path.exists(pathConfig):
+            linter.read_config_file(pathConfig)
+        else:
+            linter.read_config_file()
+        # is there some additional plugins in the file configuration, in
+        config_parser = linter.cfgfile_parser
+        if config_parser.has_option('MASTER', 'load-plugins'):
+            plugins = splitstrip(config_parser.get('MASTER', 'load-plugins'))
+            linter.load_plugin_modules(plugins)
+        # now we can load file config and command line, plugins (which can
+        # provide options) have been registered
+        linter.load_config_file()
         # set output stream
         if self.outputStream:
             linter.reporter.set_output(self.outputStream)
