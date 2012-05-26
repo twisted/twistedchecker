@@ -12,6 +12,27 @@ class Runner():
     Run and control the checking process.
     """
     outputStream = sys.stderr
+    linter = None
+
+    def __init__(self):
+        """
+        Initialize C{PyLinter} object, and load configuration file.
+        """
+        self.linter = PyLinter(())
+        # register standard checkers.
+        self.linter.load_default_plugins()
+        # read configuration.
+        pathConfig = os.path.join(twistedchecker.abspath,
+                                  "configuration", "pylintrc")
+        self.linter.read_config_file(pathConfig)
+        # is there some additional plugins in the file configuration.
+        config_parser = self.linter.cfgfile_parser
+        if config_parser.has_option('MASTER', 'load-plugins'):
+            plugins = splitstrip(config_parser.get('MASTER', 'load-plugins'))
+            self.linter.load_plugin_modules(plugins)
+        # now we can load file config and command line, plugins (which can
+        # provide options) have been registered.
+        self.linter.load_config_file()
 
 
     def setOutput(self, stream):
@@ -37,26 +58,11 @@ class Runner():
         @param args: arguments will be passed to pylint
         @type args: list of string
         """
-        linter = PyLinter(())
-        # register standard checkers
-        linter.load_default_plugins()
-        # read configuration
-        pathConfig = os.path.join(twistedchecker.abspath,
-                                  "configuration", "pylintrc")
-        linter.read_config_file(pathConfig)
-        # is there some additional plugins in the file configuration, in
-        config_parser = linter.cfgfile_parser
-        if config_parser.has_option('MASTER', 'load-plugins'):
-            plugins = splitstrip(config_parser.get('MASTER', 'load-plugins'))
-            linter.load_plugin_modules(plugins)
-        # now we can load file config and command line, plugins (which can
-        # provide options) have been registered
-        linter.load_config_file()
-        # set output stream
+        # set output stream.
         if self.outputStream:
-            linter.reporter.set_output(self.outputStream)
+            self.linter.reporter.set_output(self.outputStream)
         try:
-            args = linter.load_command_line_configuration(args)
+            args = self.linter.load_command_line_configuration(args)
         except SystemExit, exc:
             if exc.code == 2:  # bad options
                 exc.code = 32
@@ -64,6 +70,6 @@ class Runner():
         if not args:
             self.displayHelp()
         # insert current working directory to the python path to have a correct
-        # behaviour
+        # behaviour.
         sys.path.insert(0, os.getcwd())
-        linter.check(args)
+        self.linter.check(args)
