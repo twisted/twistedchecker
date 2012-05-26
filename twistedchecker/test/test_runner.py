@@ -111,5 +111,5 @@ class RunnerTestCase(unittest.TestCase):
                     # the test should pass
                     self.assertTrue(line not in self.resultMessages,
                         msg="%s in %s should pass" % (line, testfile))
-            print >> sys.stderr, "\tchecked test file: %s.py" % testfile
-        print >> sys.stderr, "\t----------------"
+            print >> sys.stderr, "\tchecked test file: %s.py\n" % testfile
+        print >> sys.stderr, "\t----------------\n"
