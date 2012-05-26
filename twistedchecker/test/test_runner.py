@@ -35,6 +35,10 @@ class RunnerTestCase(unittest.TestCase):
         """
         This hack method will replace C{add_message} in the reporter
         of C{PyLinter}, and record check results
+
+        @param msg_id: message id
+        @param location: detailed location information
+        @param msg: text message
         """
         assert self.currentRunner, "could not find the runner currently using"
         reporter = self.currentRunner.linter.reporter
