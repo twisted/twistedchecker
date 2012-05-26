@@ -44,6 +44,15 @@ class Runner():
         self.outputStream = stream
 
 
+    def setReporter(self, reporter):
+        """
+        Set the reporter of pylint.
+
+        @param reporter: reporter used to show messages
+        """
+        self.linter.set_reporter(reporter)
+
+
     def displayHelp(self):
         """
         Output help message of twistedchecker.

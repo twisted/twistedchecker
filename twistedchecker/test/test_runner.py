@@ -6,6 +6,7 @@ from twisted.trial import unittest
 
 import twistedchecker
 from twistedchecker.core.runner import Runner
+from twistedchecker.reporters.test import TestReporter
 
 
 class RunnerTestCase(unittest.TestCase):
@@ -28,36 +29,6 @@ class RunnerTestCase(unittest.TestCase):
         self.outputStream = StringIO.StringIO()
         self.patch(sys, "stdout", self.outputStream)
         self.currentRunner = None
-        self.resultMessages = None
-
-
-    def hackMethodAddMessage(self, msg_id, location, msg):
-        """
-        This hack method will replace C{add_message} in the reporter
-        of C{PyLinter}, and record check results
-
-        @param msg_id: message id
-        @param location: detailed location information
-        @param msg: text message
-        """
-        assert self.currentRunner, "could not find the runner currently using"
-        reporter = self.currentRunner.linter.reporter
-        module, obj, line, col_offset = location[1:]
-        if module not in reporter._modules:
-            if module:
-                reporter.writeln('************* Module %s' % module)
-                reporter._modules[module] = 1
-            else:
-                reporter.writeln('************* %s' % module)
-        if obj:
-            obj = ':%s' % obj
-        if reporter.include_ids:
-            sigle = msg_id
-        else:
-            sigle = msg_id[0]
-        self.resultMessages["line:%s" % line] = msg_id
-        reporter.writeln('%s:%3s,%s%s: %s' %
-                         (sigle, line, col_offset, obj, msg))
 
 
     def test_run(self):
@@ -90,11 +61,13 @@ class RunnerTestCase(unittest.TestCase):
             self.resultMessages = {}
             runner = Runner()
             runner.setOutput(self.outputStream)
+            testreporter = TestReporter()
+            runner.setReporter(testreporter)
             # record currently using runner.
             self.currentRunner = runner
-            # replace the add_message method of the reporter to
+            # set the reporter to C{twistedchecker.reporters.test.TestReporter}
+
             # C{RunnerTestCase.hackMethodAddMessage}.
-            runner.linter.reporter.add_message = self.hackMethodAddMessage
             runner.run(["twistedchecker.functionaltests.%s" % testfile])
             # check if the results
             for line in self.configFunctionalTest[testfile]:
@@ -102,18 +75,19 @@ class RunnerTestCase(unittest.TestCase):
                 predictResult.setdefault("msgid", None)
                 if predictResult["shouldfail"] and predictResult["msgid"]:
                     # the test should fail with a specified message id
-                    self.assertTrue(line in self.resultMessages and
-                        predictResult["msgid"] == self.resultMessages[line],
+                    self.assertTrue(line in testreporter.resultMessages and
+                        predictResult["msgid"] ==
+                            testreporter.resultMessages[line],
                         msg="%s in %s should fail with a message %s, got %s" %
                             (line, testfile, predictResult["msgid"],
-                             self.resultMessages[line]))
+                             testreporter.resultMessages[line]))
                 elif predictResult["shouldfail"]:
                     # the test should fail
-                    self.assertTrue(line in self.resultMessages,
+                    self.assertTrue(line in testreporter.resultMessages,
                         msg="%s in %s should fail" % (line, testfile))
                 else:
                     # the test should pass
-                    self.assertTrue(line not in self.resultMessages,
+                    self.assertTrue(line not in testreporter.resultMessages,
                         msg="%s in %s should pass" % (line, testfile))
             print >> sys.stderr, "\tchecked test file: %s.py\n" % testfile
         print >> sys.stderr, "\t----------------\n"
