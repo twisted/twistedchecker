@@ -25,6 +25,9 @@ include-ids=yes
 # tab).
 indent-string='    '
 
+# Maximum number of characters on a single line.
+# In Twisted projects, Lines are flowed at 79 columns.
+max-line-length=79
 
 [MISCELLANEOUS]
 
