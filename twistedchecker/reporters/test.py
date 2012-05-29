@@ -22,34 +22,20 @@ class TestReporter(BaseReporter):
         @param output: output stream
         """
         BaseReporter.__init__(self, output)
-        self._modules = {}
-        self.resultMessages = {}
 
 
     def add_message(self, msg_id, location, msg):
         """
         Manage message of different type and in the context of path.
-        It will save result messages.
+        Output error message in format of [line number]: [message id]
 
         @param msg_id: message id
         @param location: detailed location information
         @param msg: text add_message
         """
         module, obj, line, col_offset = location[1:]
-        if module not in self._modules:
-            if module:
-                self.writeln('************* Module %s' % module)
-                self._modules[module] = 1
-            else:
-                self.writeln('************* %s' % module)
-        if obj:
-            obj = ':%s' % obj
-        if self.include_ids:
-            sigle = msg_id
-        else:
-            sigle = msg_id[0]
-        self.resultMessages["line:%s" % line] = msg_id
-        self.writeln('%s:%3s,%s%s: %s' % (sigle, line, col_offset, obj, msg))
+        
+        self.writeln('%s: %s' % (line, msg_id))
 
 
     def _display(self, layout):
