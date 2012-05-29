@@ -91,10 +91,10 @@ class RunnerTestCase(unittest.TestCase):
                      if file.endswith(".py") and file != "__init__.py"]
         for testfile in testfiles:
             pathTestFile = os.path.join(twistedchecker.abspath,
-                                        "functionaltests", "input", testfile)
+                              "functionaltests", "input", testfile)
             resultfile = testfile.replace(".py", ".txt")
             pathResultFile = os.path.join(twistedchecker.abspath,
-                                        "functionaltests", "input", resultfile)
+                               "functionaltests", "results", resultfile)
             self.assertTrue(os.path.exists(pathTestFile),
                        msg="could not find testfile: %s" % testfile)
             self.assertTrue(os.path.exists(pathResultFile),
