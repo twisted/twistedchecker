@@ -34,7 +34,6 @@ class TestReporter(BaseReporter):
         @param msg: text add_message
         """
         module, obj, line, col_offset = location[1:]
-        
         self.writeln('%s: %s' % (line, msg_id))
 
 

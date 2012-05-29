@@ -23,13 +23,13 @@ class RunnerTestCase(unittest.TestCase):
         self.patch(sys, "stdout", self.outputStream)
 
 
-    def _removeSpaces(self,str):
+    def _removeSpaces(self, str):
         """
         Remove whitespaces in str.
 
         @param: a string
         """
-        return str.strip().replace(" ","")
+        return str.strip().replace(" ", "")
 
 
     def _limitMessages(self, testfile, runner):
@@ -46,7 +46,7 @@ class RunnerTestCase(unittest.TestCase):
         if "enable" not in firstline and "disable" not in firstline:
             # could not find enable or disable messages
             return
-        action,messages = firstline.strip("#").strip().split(":")
+        action, messages = firstline.strip("#").strip().split(":")
         messages = self._removeSpaces(messages).split(",")
         action = action.strip()
 
@@ -90,11 +90,11 @@ class RunnerTestCase(unittest.TestCase):
         testfiles = [file for file in os.listdir(pathInputTestFiles)
                      if file.endswith(".py") and file != "__init__.py"]
         for testfile in testfiles:
-            pathTestFile = os.path.join(twistedchecker.abspath, "functionaltests",
-                                      "input", testfile)
-            resultfile = testfile.replace(".py",".txt")
-            pathResultFile = os.path.join(twistedchecker.abspath, "functionaltests",
-                                      "results", resultfile)
+            pathTestFile = os.path.join(twistedchecker.abspath,
+                                        "functionaltests", "input", testfile)
+            resultfile = testfile.replace(".py", ".txt")
+            pathResultFile = os.path.join(twistedchecker.abspath,
+                                        "functionaltests", "input", resultfile)
             self.assertTrue(os.path.exists(pathTestFile),
                        msg="could not find testfile: %s" % testfile)
             self.assertTrue(os.path.exists(pathResultFile),
@@ -105,15 +105,16 @@ class RunnerTestCase(unittest.TestCase):
             runner.setOutput(self.outputStream)
             # set the reporter to C{twistedchecker.reporters.test.TestReporter}
             runner.setReporter(TestReporter())
-            self._limitMessages(pathTestFile,runner)
-            runner.run(["twistedchecker.functionaltests.input.%s" % testfile.replace(".py","")])
+            self._limitMessages(pathTestFile, runner)
+            runner.run(["twistedchecker.functionaltests.input.%s" % \
+                        testfile.replace(".py", "")])
             # check the results
             if self.debug:
                 print >> sys.stderr, self.outputStream.getvalue()
             predictResult = self._removeSpaces(open(pathResultFile).read())
             outputResult = self._removeSpaces(self.outputStream.getvalue())
-            self.assertEqual(outputResult,predictResult,
-                             "Incorrect result of %s, should be:\n---\n%s\n---" % \
-                             (testfile,predictResult))
+            self.assertEqual(outputResult, predictResult,
+                 "Incorrect result of %s, should be:\n---\n%s\n---" % \
+                 (testfile, predictResult))
             print >> sys.stderr, "\tchecked test file: %s\n" % testfile
         print >> sys.stderr, "\t----------------\n"
