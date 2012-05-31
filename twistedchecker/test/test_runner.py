@@ -23,6 +23,13 @@ class RunnerTestCase(unittest.TestCase):
         self.patch(sys, "stdout", self.outputStream)
 
 
+    def clearOutputStream(self):
+        """
+        A function to clear output stream.
+        """
+        self.outputStream = StringIO.StringIO()
+
+
     def _removeSpaces(self, str):
         """
         Remove whitespaces in str.
@@ -48,19 +55,16 @@ class RunnerTestCase(unittest.TestCase):
             return
         action, messages = firstline.strip("#").strip().split(":")
         messages = self._removeSpaces(messages).split(",")
+        messages = [msgid for msgid in messages if msgid]
         action = action.strip()
 
         if action == "enable":
             # disable all other messages
             runner.linter.disable_noerror_messages()
             for msgid in messages:
-                if not msgid:
-                    continue
                 runner.linter.enable(msgid)
         else:
             for msgid in messages:
-                if not msgid:
-                    continue
                 runner.linter.disable(msgid)
 
 
@@ -69,8 +73,7 @@ class RunnerTestCase(unittest.TestCase):
         Pass argument "--version" to C{runner.run}, and it should show
         a version infomation, then exit. So that I could know it called pylint.
         """
-        # clear output stream
-        self.outputStream.truncate(0)
+        self.clearOutputStream()
         runner = Runner()
         runner.setOutput(self.outputStream)
         self.assertRaises(SystemExit, runner.run, ["--version"])
@@ -99,8 +102,7 @@ class RunnerTestCase(unittest.TestCase):
                        msg="could not find testfile: %s" % testfile)
             self.assertTrue(os.path.exists(pathResultFile),
                        msg="could not find resultfile: %s" % resultfile)
-            # clear output stream and check results.
-            self.outputStream.truncate(0)
+            self.clearOutputStream()
             runner = Runner()
             runner.setOutput(self.outputStream)
             # set the reporter to C{twistedchecker.reporters.test.TestReporter}
