@@ -12,18 +12,18 @@ from pylint.checkers.utils import check_messages, clobber_in_except, is_inside_e
 class CopyrightChecker(BaseChecker):
     """
     A checker for checking copyright headers.
-    Every Twisted file should have copyright header likes bellow:
+    Every Twisted file should have copyright header like bellow:
     # Copyright (c) Twisted Matrix Laboratories.
     # See LICENSE for details.
     """
     msgs = {
-     'W9001': ('Missing copyright header', 
-               'Used when a python file of Twisted has no copyright header.'),
+     'W9001': ('# Missing copyright header',
+               '# Used when a python file of Twisted has no copyright header.'),
     }
     __implements__ = IASTNGChecker
     name = 'copyright'
     options = ()
-    docstringsRequired = ("Copyright (c) Twisted Matrix Laboratories.",
+    commentsRequired = ("Copyright (c) Twisted Matrix Laboratories.",
                           "See LICENSE for details.")
 
     def visit_module(self, node):
@@ -38,7 +38,7 @@ class CopyrightChecker(BaseChecker):
         Check the module has no copyright header
         """
         text = open(node.file).read()
-        for docstring in self.docstringsRequired:
+        for docstring in self.commentsRequired:
             if text.count(docstring) == 0:
                 self.add_message('W9001', node=node)
                 break
