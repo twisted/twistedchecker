@@ -1,7 +1,6 @@
 import os
 import sys
 
-from logilab.common.ureports import TextWriter
 from logilab.common.textutils import colorize_ansi
 
 from pylint.interfaces import IReporter
@@ -35,13 +34,3 @@ class TestReporter(BaseReporter):
         """
         module, obj, line, col_offset = location[1:]
         self.writeln('%s: %s' % (line, msg_id))
-
-
-    def _display(self, layout):
-        """
-        Launch layouts display.
-
-        @param layout: layout of display
-        """
-        print >> self.out
-        TextWriter().format(layout, self.out)

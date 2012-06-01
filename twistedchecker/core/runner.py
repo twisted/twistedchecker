@@ -11,7 +11,7 @@ class Runner():
     """
     Run and control the checking process.
     """
-    outputStream = sys.stderr
+    outputStream = None
     linter = None
     # Customized checkers.
     checkers = ("copyright.CopyrightChecker",
@@ -37,6 +37,8 @@ class Runner():
         # provide options) have been registered.
         self.linter.load_config_file()
         self.registerCheckers()
+        # set default output stream to stderr
+        self.setOutput(sys.stderr)
 
 
     def setOutput(self, stream):
@@ -46,6 +48,7 @@ class Runner():
         @param stream: output stream, defaultly it should be stdout
         """
         self.outputStream = stream
+        sys.stdout = stream
 
 
     def setReporter(self, reporter):
@@ -61,7 +64,20 @@ class Runner():
         """
         Output help message of twistedchecker.
         """
-        print >> self.outputStream, """---\nHELP INFOMATION"""
+        print """---\nHELP INFOMATION"""
+
+
+    def registerCheckers(self):
+        """
+        Register all checkers of TwistedChecker to C{PyLinter}.
+        """
+        for strChecker in self.checkers:
+            modname, classname = strChecker.split(".")
+            strModule = "twistedchecker.checkers.%s" % modname
+            checker = getattr(__import__(strModule,
+                                        fromlist=["twistedchecker.checkers"]),
+                             classname)
+            self.linter.register_checker(checker(self.linter))
 
 
     def registerCheckers(self):
