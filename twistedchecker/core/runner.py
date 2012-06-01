@@ -11,7 +11,7 @@ class Runner():
     """
     Run and control the checking process.
     """
-    outputStream = sys.stderr
+    outputStream = None
     linter = None
 
     def __init__(self):
@@ -33,6 +33,8 @@ class Runner():
         # now we can load file config and command line, plugins (which can
         # provide options) have been registered.
         self.linter.load_config_file()
+        # set default output stream to stderr
+        self.setOutput(sys.stderr)
 
 
     def setOutput(self, stream):
@@ -42,6 +44,7 @@ class Runner():
         @param stream: output stream, defaultly it should be stdout
         """
         self.outputStream = stream
+        sys.stdout = stream
 
 
     def setReporter(self, reporter):
@@ -57,7 +60,7 @@ class Runner():
         """
         Output help message of twistedchecker.
         """
-        print >> self.outputStream, """---\nHELP INFOMATION"""
+        print """---\nHELP INFOMATION"""
 
 
     def run(self, args):
