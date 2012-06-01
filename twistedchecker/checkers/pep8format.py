@@ -34,7 +34,7 @@ class PEP8Checker(FormatChecker):
         @param linter: C{PyLinter} object.
         """
         BaseRawChecker.__init__(self, linter)
-        self.config.max_module_lines = 1000s
+        self.config.max_module_lines = 1000
 
 
     def new_line(self, tok_type, line, linenum, junk):
