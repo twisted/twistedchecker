@@ -88,16 +88,15 @@ class RunnerTestCase(unittest.TestCase):
         """
         print >> sys.stderr, "\n\t----------------"
         pathInputTestFiles = os.path.join(twistedchecker.abspath,
-                                          "functionaltests",
-                                          "input")
+                                          "functionaltests")
         testfiles = [file for file in os.listdir(pathInputTestFiles)
                      if file.endswith(".py") and file != "__init__.py"]
         for testfile in testfiles:
             pathTestFile = os.path.join(twistedchecker.abspath,
-                              "functionaltests", "input", testfile)
-            resultfile = testfile.replace(".py", ".txt")
+                              "functionaltests", testfile)
+            resultfile = testfile.replace(".py", ".result")
             pathResultFile = os.path.join(twistedchecker.abspath,
-                               "functionaltests", "results", resultfile)
+                               "functionaltests", resultfile)
             self.assertTrue(os.path.exists(pathTestFile),
                        msg="could not find testfile: %s" % testfile)
             self.assertTrue(os.path.exists(pathResultFile),
@@ -108,7 +107,7 @@ class RunnerTestCase(unittest.TestCase):
             # set the reporter to C{twistedchecker.reporters.test.TestReporter}
             runner.setReporter(TestReporter())
             self._limitMessages(pathTestFile, runner)
-            runner.run(["twistedchecker.functionaltests.input.%s" % \
+            runner.run(["twistedchecker.functionaltests.%s" % \
                         testfile.replace(".py", "")])
             # check the results
             if self.debug:
