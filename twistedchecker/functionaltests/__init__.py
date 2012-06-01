@@ -1,3 +1,0 @@
-"""
-Functional tests of TwistedChecker.
-"""
