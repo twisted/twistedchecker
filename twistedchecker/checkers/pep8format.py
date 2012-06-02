@@ -1,17 +1,17 @@
 import sys
+import StringIO
 
 from logilab import astng
 from logilab.common.ureports import Table
 from logilab.astng import are_exclusive
 
-from pylint.interfaces import IRawChecker, IASTNGChecker
-from pylint.checkers import BaseRawChecker
-from pylint.checkers.utils import check_messages
-from pylint.checkers.format import FormatChecker
+from pylint.interfaces import IASTNGChecker
+from pylint.reporters import diff_string
+from pylint.checkers import BaseChecker, EmptyReport
 
 import pep8
 
-class PEP8Checker(FormatChecker):
+class PEP8Checker(BaseChecker):
     """
     A checker for checking pep8 issues.
     Need pep8 installed.
@@ -22,42 +22,48 @@ class PEP8Checker(FormatChecker):
      'W0293': ('Blank line contains whitespace',
                'Used when found a line contains whitespace.')
     }
-    __implements__ = (IRawChecker, IASTNGChecker)
+    __implements__ = IASTNGChecker
     name = 'pep8'
-    options = ()
+
+    mapPEP8Messages = {
+        'W291': 'W0291',
+        'W293': 'W0293',
+    }
 
 
-    def __init__(self, linter=None):
+    def visit_module(self, node):
         """
-        Mannualy set max_module_lines to avoid errors.
-
-        @param linter: C{PyLinter} object.
+        A interface will be called when visiting a module.
         """
-        BaseRawChecker.__init__(self, linter)
-        self.config.max_module_lines = 1000
+        self._runPEP8Checker(node.file)
 
 
-    def new_line(self, tok_type, line, linenum, junk):
+    def _runPEP8Checker(self, file):
         """
-        a new line has been encountered.
-
-        @param tok_type: token type
-        @param line: line
-        @param linenum: line number
-        @param junk: junk tokens
+        Call the checker of pep8
         """
-        self._checkTrailingSpace(line, linenum)
+        pep8.options = pep8.process_options([file])[0]
+        checker = pep8.Checker(file)
+        # backup stdout
+        bakStdout = sys.stdout
+        # set a stream to replace stdout, and get results in it
+        streamResult = StringIO.StringIO()
+        sys.stdout = streamResult
+        checker.check_all()
+        sys.stdout = bakStdout
+        self._outputMessages(streamResult.getvalue())
 
 
-    def _checkTrailingSpace(self, line, linenum):
+    def _outputMessages(self, pep8result):
         """
-        Check line contains a trailing space.
+        Map pep8 results to messages in pylint, then output them.
 
-        @param line: line to check
-        @param linenum: line number
+        @param pep8result: results of pep8
         """
-        result = pep8.trailing_whitespace(line)
-        if result:
-            column, msg = result
-            msgid = msg.split(" ")[0].replace("W", "W0")
-            self.add_message(msgid, line=linenum)
+        linesResult = [l for l in pep8result.split("\n") if l]
+        for line in linesResult:
+            msgidInPEP8 = line.split(" ")[1]
+            if msgidInPEP8 in self.mapPEP8Messages:
+                msgid = self.mapPEP8Messages[msgidInPEP8]
+                linenum = line.split(":")[1]
+                self.add_message(msgid, line=linenum)
