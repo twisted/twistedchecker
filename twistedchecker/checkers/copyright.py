@@ -17,14 +17,14 @@ class CopyrightChecker(BaseChecker):
     # See LICENSE for details.
     """
     msgs = {
-     'W9001': ('# Missing copyright header',
-               '# Used when a python file of Twisted has no copyright header.'),
+     'W9001': ('Missing copyright header',
+               'Used when a python file of Twisted has no copyright header.'),
     }
     __implements__ = IASTNGChecker
     name = 'copyright'
     options = ()
-    commentsRequired = ("Copyright (c) Twisted Matrix Laboratories.",
-                          "See LICENSE for details.")
+    commentsRequired = ("# Copyright (c) Twisted Matrix Laboratories.",
+                        "# See LICENSE for details.")
 
     def visit_module(self, node):
         """
