@@ -17,17 +17,17 @@ class PEP8Checker(BaseChecker):
     Need pep8 installed.
     """
     msgs = {
-     'W0291': ('Trailing whitespace found in the end of line',
+     'W9010': ('Trailing whitespace found in the end of line',
                'Used when a line contains a trailing space.'),
-     'W0293': ('Blank line contains whitespace',
+     'W9011': ('Blank line contains whitespace',
                'Used when found a line contains whitespace.')
     }
     __implements__ = IASTNGChecker
     name = 'pep8'
 
     mapPEP8Messages = {
-        'W291': 'W0291',
-        'W293': 'W0293',
+        'W291': 'W9010',
+        'W293': 'W9011',
     }
 
 
