@@ -1,77 +1,96 @@
 import sys
+import StringIO
 
 from logilab import astng
 from logilab.common.ureports import Table
 from logilab.astng import are_exclusive
 
-from pylint.interfaces import IRawChecker, IASTNGChecker
-from pylint.checkers import BaseRawChecker
-from pylint.checkers.utils import check_messages
-from pylint.checkers.format import FormatChecker
+from pylint.interfaces import IASTNGChecker
+from pylint.reporters import diff_string
+from pylint.checkers import BaseChecker, EmptyReport
 
 import pep8
 
-class PEP8Checker(FormatChecker):
+class PEP8Checker(BaseChecker):
     """
     A checker for checking pep8 issues.
     Need pep8 installed.
     """
     msgs = {
-     'W0291': ('Trailing whitespace found in the end of line',
+     'W9010': ('Trailing whitespace found in the end of line',
                'Used when a line contains a trailing space.'),
-     'W0293': ('Blank line contains whitespace',
+     'W9011': ('Blank line contains whitespace',
                'Used when found a line contains whitespace.'),
      # messages for checking blank lines
-     'E0301': ('expected 2 blank lines, found %d',
-               ''),
-     'E0302': ('expected 3 blank lines, found %d',
-               ''),
-     'E0303': ('too many blank lines, expected (%d)',
-               ''),
-     'E0304': ('blank lines found after function decorator',
-               ''),
-     'E0305': ('too many blank lines after docstring (%d)',
-               ''),
+     'W9012': ('expected 2 blank lines, found ',
+               'qwrqwre qw q qw qwrqwr'),
+     'W9013': ('expected 3 blank lines, found ',
+               'ccqcqwe qwe qw  q'),
+     'W9014': ('too many blank lines, expected ()',
+               'qwe afqd qw qweqwe qweq we qw wqe qwewq'),
+     'W9015': ('blank lines found after function decorator',
+               'casad qwe qw sd'),
+     'W9016': ('too many blank lines after docstring ()',
+               'qwfqw qwe q qwqg'),
     }
-    __implements__ = (IRawChecker, IASTNGChecker)
+    __implements__ = IASTNGChecker
     name = 'pep8'
-    options = ()
 
+    mapPEP8Messages = {
+        'W291': 'W9010',
+        'W293': 'W9011',
+        'E301': 'W9012',
+        'E302': 'W9013',
+        'E303': 'W9014',
+        'E304': 'W9015',
+        'E305': 'W9016',
+    }
 
-    def __init__(self, linter=None):
+    def __init__(self,linter):
         """
-        Mannualy set max_module_lines to avoid errors.
+        Change function of processing blank lines in pep8.
 
-        @param linter: C{PyLinter} object.
+        @param linter: current C{PyLinter} object.
         """
-        BaseRawChecker.__init__(self, linter)
-        self.config.max_module_lines = 1000
+        pep8.blank_lines = self.blank_lines
 
 
-    def new_line(self, tok_type, line, linenum, junk):
+    def visit_module(self, node):
         """
-        a new line has been encountered.
-
-        @param tok_type: token type
-        @param line: line
-        @param linenum: line number
-        @param junk: junk tokens
+        A interface will be called when visiting a module.
         """
-        self._checkTrailingSpace(line, linenum)
+        self._runPEP8Checker(node.file)
 
 
-    def _checkTrailingSpace(self, line, linenum):
+    def _runPEP8Checker(self, file):
         """
-        Check line contains a trailing space.
-
-        @param line: line to check
-        @param linenum: line number
+        Call the checker of pep8
         """
-        result = pep8.trailing_whitespace(line)
-        if result:
-            column, msg = result
-            msgid = msg.split(" ")[0].replace("W", "W0")
-            self.add_message(msgid, line=linenum)
+        pep8.options = pep8.process_options([file])[0]
+        checker = pep8.Checker(file)
+        # backup stdout
+        bakStdout = sys.stdout
+        # set a stream to replace stdout, and get results in it
+        streamResult = StringIO.StringIO()
+        sys.stdout = streamResult
+        checker.check_all()
+        sys.stdout = bakStdout
+        self._outputMessages(streamResult.getvalue())
+
+
+    def _outputMessages(self, pep8result):
+        """
+        Map pep8 results to messages in pylint, then output them.
+
+        @param pep8result: results of pep8
+        """
+        linesResult = [l for l in pep8result.split("\n") if l]
+        for line in linesResult:
+            msgidInPEP8 = line.split(" ")[1]
+            if msgidInPEP8 in self.mapPEP8Messages:
+                msgid = self.mapPEP8Messages[msgidInPEP8]
+                linenum = line.split(":")[1]
+                self.add_message(msgid, line=linenum)
 
 
     def blank_lines(logical_line, blank_lines, indent_level, line_number,
