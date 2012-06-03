@@ -22,15 +22,15 @@ class PEP8Checker(BaseChecker):
      'W9011': ('Blank line contains whitespace',
                'Used when found a line contains whitespace.'),
      # messages for checking blank lines
-     'W9012': ('expected 2 blank lines, found ',
-               'qwrqwre qw q qw qwrqwr'),
-     'W9013': ('expected 3 blank lines, found ',
+     'W9012': ('expected 2 blank lines, found %d',
+               'There should 2 lines between methods'),
+     'W9013': ('expected 3 blank lines, found %d',
                'ccqcqwe qwe qw  q'),
-     'W9014': ('too many blank lines, expected ()',
+     'W9014': ('too many blank lines, expected (%d)',
                'qwe afqd qw qweqwe qweq we qw wqe qwewq'),
      'W9015': ('blank lines found after function decorator',
                'casad qwe qw sd'),
-     'W9016': ('too many blank lines after docstring ()',
+     'W9016': ('too many blank lines after docstring (%d)',
                'qwfqw qwe q qwqg'),
     }
     __implements__ = IASTNGChecker
