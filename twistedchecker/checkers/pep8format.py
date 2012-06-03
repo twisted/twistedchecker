@@ -71,7 +71,7 @@ class PEP8Checker(BaseChecker):
                 linenum = line.split(":")[1]
                 arguments = []
                 if patternArguments:
-                    matchResult = re.match(patternArguments, line)
+                    matchResult = re.search(patternArguments, line)
                     if matchResult:
                         arguments = matchResult.groups()
                 self.add_message(msgid, line=linenum, args=arguments)
