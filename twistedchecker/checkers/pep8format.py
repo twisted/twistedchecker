@@ -1,5 +1,6 @@
 import sys
 import StringIO
+import re
 
 from logilab import astng
 from logilab.common.ureports import Table
@@ -10,6 +11,7 @@ from pylint.reporters import diff_string
 from pylint.checkers import BaseChecker, EmptyReport
 
 import pep8
+from pep8 import DOCSTRING_REGEX
 
 class PEP8Checker(BaseChecker):
     """
@@ -22,37 +24,36 @@ class PEP8Checker(BaseChecker):
      'W9011': ('Blank line contains whitespace',
                'Used when found a line contains whitespace.'),
      # messages for checking blank lines
-     'W9012': ('expected 2 blank lines, found %d',
-               'There should 2 lines between methods'),
-     'W9013': ('expected 3 blank lines, found %d',
-               'ccqcqwe qwe qw  q'),
-     'W9014': ('too many blank lines, expected (%d)',
-               'qwe afqd qw qweqwe qweq we qw wqe qwewq'),
-     'W9015': ('blank lines found after function decorator',
-               'casad qwe qw sd'),
-     'W9016': ('too many blank lines after docstring (%d)',
-               'qwfqw qwe q qwqg'),
+     'W9012': ('Expected 2 blank lines, found %s',
+               'Class-level functions should be separated '
+               'with 2 blank lines.'),
+     'W9013': ('Expected 3 blank lines, found %s',
+               'Top-level functions should be separated '
+               'with 3 blank lines.'),
+     'W9014': ('Too many blank lines, found %s',
+               'Used when too many blank lines found.'),
     }
     __implements__ = IASTNGChecker
     name = 'pep8'
-
+    # map pep8 messages to messages in pylint.
+    # it's foramt should like this:
+    # 'msgid in pep8' : ('msgid in pylint','a string to extract arguments')
     mapPEP8Messages = {
-        'W291': 'W9010',
-        'W293': 'W9011',
-        'E301': 'W9012',
-        'E302': 'W9013',
-        'E303': 'W9014',
-        'E304': 'W9015',
-        'E305': 'W9016',
+        'W291': ('W9010', ''),
+        'W293': ('W9011', ''),
+        'E301': ('W9012', r'expected 2 blank lines, found (\d+)'),
+        'E302': ('W9013', r'expected 3 blank lines, found (\d+)'),
+        'E303': ('W9014', r'too many blank lines \((\d+)\)'),
     }
 
-    def __init__(self,linter):
+    def __init__(self, linter):
         """
         Change function of processing blank lines in pep8.
 
         @param linter: current C{PyLinter} object.
         """
-        pep8.blank_lines = self.blank_lines
+        BaseChecker.__init__(self, linter)
+        pep8.blank_lines = modified_blank_lines
 
 
     def visit_module(self, node):
@@ -88,85 +89,91 @@ class PEP8Checker(BaseChecker):
         for line in linesResult:
             msgidInPEP8 = line.split(" ")[1]
             if msgidInPEP8 in self.mapPEP8Messages:
-                msgid = self.mapPEP8Messages[msgidInPEP8]
+                msgid, patternArguments = self.mapPEP8Messages[msgidInPEP8]
                 linenum = line.split(":")[1]
-                self.add_message(msgid, line=linenum)
+                arguments = []
+                if patternArguments:
+                    matchResult = re.search(patternArguments, line)
+                    if matchResult:
+                        arguments = matchResult.groups()
+                self.add_message(msgid, line=linenum, args=arguments)
 
 
-    def blank_lines(logical_line, blank_lines, indent_level, line_number,
+
+def modified_blank_lines(logical_line, blank_lines, indent_level, line_number,
                 previous_logical, previous_indent_level,
                 blank_lines_before_comment):
-        """
-        This function is copied from a modified pep8 checker fot Twisted.
-        See https://github.com/cyli/TwistySublime/blob/master/twisted_pep8.py
-        Twisted Coding Standard:
+    """
+    This function is copied from a modified pep8 checker fot Twisted.
+    See https://github.com/cyli/TwistySublime/blob/master/twisted_pep8.py
+    Twisted Coding Standard:
 
-        Separate top-level function and class definitions with three blank lines.
-        Method definitions inside a class are separated by two blank lines.
+    Separate top-level function and class definitions with three blank lines.
+    Method definitions inside a class are separated by two blank lines.
 
-        Extra blank lines may be used (sparingly) to separate groups of related
-        functions.  Blank lines may be omitted between a bunch of related
-        one-liners (e.g. a set of dummy implementations).
+    Extra blank lines may be used (sparingly) to separate groups of related
+    functions.  Blank lines may be omitted between a bunch of related
+    one-liners (e.g. a set of dummy implementations).
 
-        Use blank lines in functions, sparingly, to indicate logical sections.
+    Use blank lines in functions, sparingly, to indicate logical sections.
 
-        Okay: def a():\n    pass\n\n\n\ndef b():\n    pass
-        Okay: class A():\n    pass\n\n\n\nclass B():\n    pass
-        Okay: def a():\n    pass\n\n\n# Foo\n# Bar\n\ndef b():\n    pass
+    Okay: def a():\n    pass\n\n\n\ndef b():\n    pass
+    Okay: class A():\n    pass\n\n\n\nclass B():\n    pass
+    Okay: def a():\n    pass\n\n\n# Foo\n# Bar\n\ndef b():\n    pass
 
-        E301: class Foo:\n    b = 0\n    def bar():\n        pass
-        E302: def a():\n    pass\n\ndef b(n):\n    pass
-        E303: def a():\n    pass\n\n\n\ndef b(n):\n    pass
-        E303: def a():\n\n\n\n    pass
-        E304: @decorator\n\ndef a():\n    pass
-        E305: "comment"\n\n\ndef a():\n    pass
-        E306: variable="value"\ndef a():   pass
-        """
+    E301: class Foo:\n    b = 0\n    def bar():\n        pass
+    E302: def a():\n    pass\n\ndef b(n):\n    pass
+    E303: def a():\n    pass\n\n\n\ndef b(n):\n    pass
+    E303: def a():\n\n\n\n    pass
+    E304: @decorator\n\ndef a():\n    pass
+    E305: "comment"\n\n\ndef a():\n    pass
+    E306: variable="value"\ndef a():   pass
+    """
 
-        def isClassDefDecorator(thing):
-            return (thing.startswith('def ') or
-                    thing.startswith('class ') or
-                    thing.startswith('@'))
+    def isClassDefDecorator(thing):
+        return (thing.startswith('def ') or
+                thing.startswith('class ') or
+                thing.startswith('@'))
 
-        # Don't expect blank lines before the first line
-        if line_number == 1:
-            return
+    # Don't expect blank lines before the first line
+    if line_number == 1:
+        return
 
-        max_blank_lines = max(blank_lines, blank_lines_before_comment)
-        previous_is_comment = DOCSTRING_REGEX.match(previous_logical)
+    max_blank_lines = max(blank_lines, blank_lines_before_comment)
+    previous_is_comment = DOCSTRING_REGEX.match(previous_logical)
 
-        # no blank lines after a decorator
-        if previous_logical.startswith('@'):
-            if max_blank_lines:
-                return 0, "E304 blank lines found after function decorator"
+    # no blank lines after a decorator
+    if previous_logical.startswith('@'):
+        if max_blank_lines:
+            return 0, "E304 blank lines found after function decorator"
 
-        # should not have more than 3 blank lines
-        elif max_blank_lines > 3 or (indent_level and max_blank_lines > 2):
-            return 0, "E303 too many blank lines (%d)" % max_blank_lines
+    # should not have more than 3 blank lines
+    elif max_blank_lines > 3 or (indent_level and max_blank_lines > 2):
+        return 0, "E303 too many blank lines (%d)" % max_blank_lines
 
-        elif isClassDefDecorator(logical_line):
-            if indent_level:
-                # There should only be 1 line or less between docstrings and
-                # the next function
-                if previous_is_comment:
-                    if max_blank_lines > 1:
-                        return 0, (
-                            "E305 too many blank lines after docstring (%d)" %
-                            max_blank_lines)
+    elif isClassDefDecorator(logical_line):
+        if indent_level:
+            # There should only be 1 line or less between docstrings and
+            # the next function
+            if previous_is_comment:
+                if max_blank_lines > 1:
+                    return 0, (
+                        "E305 too many blank lines after docstring (%d)" %
+                        max_blank_lines)
 
-                # between first level functions, there should be 2 blank lines.
-                # any further indended functions can have one or zero lines
-                else:
-                    if not (max_blank_lines == 2 or
-                            indent_level > 4 or
-                            previous_indent_level <= indent_level):
-                        return 0, ("E301 expected 2 blank lines, found %d" %
-                                       max_blank_lines)
+            # between first level functions, there should be 2 blank lines.
+            # any further indended functions can have one or zero lines
+            else:
+                if not (max_blank_lines == 2 or
+                        indent_level > 4 or
+                        previous_indent_level <= indent_level):
+                    return 0, ("E301 expected 2 blank lines, found %d" %
+                                   max_blank_lines)
 
-            # top level, there should be 3 blank lines between class/function
-            # definitions (but not necessarily after varable declarations)
-            elif previous_indent_level and max_blank_lines != 3:
-                return 0, "E302 expected 3 blank lines, found %d" % max_blank_lines
+        # top level, there should be 3 blank lines between class/function
+        # definitions (but not necessarily after varable declarations)
+        elif previous_indent_level and max_blank_lines != 3:
+            return 0, "E302 expected 3 blank lines, found %d" % max_blank_lines
 
-        elif max_blank_lines > 1 and indent_level:
-            return 0, "E303 too many blank lines, expected (%d)" % max_blank_lines
+    elif max_blank_lines > 1 and indent_level:
+        return 0, "E303 too many blank lines, expected (%d)" % max_blank_lines
