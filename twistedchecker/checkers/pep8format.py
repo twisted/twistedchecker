@@ -1,5 +1,6 @@
 import sys
 import StringIO
+import re
 
 from logilab import astng
 from logilab.common.ureports import Table
@@ -24,10 +25,12 @@ class PEP8Checker(BaseChecker):
     }
     __implements__ = IASTNGChecker
     name = 'pep8'
-
+    # map pep8 messages to messages in pylint.
+    # it's foramt should like this:
+    # 'msgid in pep8' : ('msgid in pylint','a string to extract arguments')
     mapPEP8Messages = {
-        'W291': 'W9010',
-        'W293': 'W9011',
+        'W291': ('W9010', ''),
+        'W293': ('W9011', ''),
     }
 
 
@@ -64,6 +67,11 @@ class PEP8Checker(BaseChecker):
         for line in linesResult:
             msgidInPEP8 = line.split(" ")[1]
             if msgidInPEP8 in self.mapPEP8Messages:
-                msgid = self.mapPEP8Messages[msgidInPEP8]
+                msgid, patternArguments = self.mapPEP8Messages[msgidInPEP8]
                 linenum = line.split(":")[1]
-                self.add_message(msgid, line=linenum)
+                arguments = []
+                if patternArguments:
+                    matchResult = re.match(patternArguments, line)
+                    if matchResult:
+                        arguments = matchResult.groups()
+                self.add_message(msgid, line=linenum, args=arguments)
