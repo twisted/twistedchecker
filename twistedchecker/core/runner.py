@@ -60,7 +60,7 @@ class Runner():
         """
         Output help message of twistedchecker.
         """
-        print """---\nHELP INFOMATION"""
+        self.outputStream.write("""---\nHELP INFOMATION\n""")
 
 
     def run(self, args):

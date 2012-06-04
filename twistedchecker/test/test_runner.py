@@ -23,13 +23,6 @@ class RunnerTestCase(unittest.TestCase):
         self.patch(sys, "stdout", self.outputStream)
 
 
-    def clearOutputStream(self):
-        """
-        A function to clear output stream.
-        """
-        self.outputStream = StringIO.StringIO()
-
-
     def _removeSpaces(self, str):
         """
         Remove whitespaces in str.
@@ -73,11 +66,11 @@ class RunnerTestCase(unittest.TestCase):
         Pass argument "--version" to C{runner.run}, and it should show
         a version infomation, then exit. So that I could know it called pylint.
         """
-        self.clearOutputStream()
+        outputStream = StringIO.StringIO()
         runner = Runner()
-        runner.setOutput(self.outputStream)
+        runner.setOutput(outputStream)
         self.assertRaises(SystemExit, runner.run, ["--version"])
-        self.assertTrue(self.outputStream.getvalue().count("Python") > 0, \
+        self.assertTrue(outputStream.getvalue().count("Python") > 0, \
                         msg="failed to call pylint")
 
 
@@ -101,9 +94,9 @@ class RunnerTestCase(unittest.TestCase):
                        msg="could not find testfile: %s" % testfile)
             self.assertTrue(os.path.exists(pathResultFile),
                        msg="could not find resultfile: %s" % resultfile)
-            self.clearOutputStream()
+            outputStream = StringIO.StringIO()
             runner = Runner()
-            runner.setOutput(self.outputStream)
+            runner.setOutput(outputStream)
             # set the reporter to C{twistedchecker.reporters.test.TestReporter}
             runner.setReporter(TestReporter())
             self._limitMessages(pathTestFile, runner)
@@ -111,9 +104,9 @@ class RunnerTestCase(unittest.TestCase):
                         testfile.replace(".py", "")])
             # check the results
             if self.debug:
-                print >> sys.stderr, self.outputStream.getvalue()
+                print >> sys.stderr, outputStream.getvalue()
             predictResult = self._removeSpaces(open(pathResultFile).read())
-            outputResult = self._removeSpaces(self.outputStream.getvalue())
+            outputResult = self._removeSpaces(outputStream.getvalue())
             self.assertEqual(outputResult, predictResult,
                  "Incorrect result of %s, should be:\n---\n%s\n---" % \
                  (testfile, predictResult))
