@@ -14,7 +14,7 @@ class Runner():
     outputStream = None
     linter = None
     # Customized checkers.
-    checkers = ("copyright.CopyrightChecker",)
+    checkers = ("header.HeaderChecker",)
 
     def __init__(self):
         """
