@@ -25,7 +25,6 @@ include-ids=yes
 # tab).
 indent-string='    '
 
-
 [MISCELLANEOUS]
 
 
@@ -37,6 +36,9 @@ indent-string='    '
 
 [BASIC]
 
+# Regular expression which should only match correct module names
+# Modules must be named in all lower-case, or separated by underscores.
+module-rgx=(([a-z_][a-z0-9_]*))$
 
 [SIMILARITIES]
 
