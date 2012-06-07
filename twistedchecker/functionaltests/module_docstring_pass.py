@@ -1,8 +1,7 @@
-# enable: W9003
+# enable: C0111
 
 """
 Docstring of this module.
 """
 
-def a():
-  pass
+foo = 1
