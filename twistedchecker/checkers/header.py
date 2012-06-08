@@ -9,7 +9,7 @@ from pylint.interfaces import IASTNGChecker
 from pylint.reporters import diff_string
 from pylint.checkers import BaseChecker, EmptyReport
 
-from twistedchecker.core.util import isTestModule, isSpecialModule
+from twistedchecker.core.util import isTestModule, moduleNeedsTests
 
 class HeaderChecker(BaseChecker):
     """
@@ -32,10 +32,10 @@ class HeaderChecker(BaseChecker):
     __implements__ = IASTNGChecker
     name = 'header'
     options = ()
-    commentsCopyright = ("# Copyright (c) Twisted Matrix Laboratories.",
-                        "# See LICENSE for details.")
-    patternTestReference = \
-     r"# -\*- test-case-name: (([a-z_][a-z0-9_]*)\.)*[a-z_][a-z0-9_]* -\*-"
+    commentsCopyright = (r"# Copyright \(c\) Twisted Matrix Laboratories\.",
+                         r"# See LICENSE for details\.")
+    patternTestReference = (r"# -\*- test-case-name:"
+                            r" (([a-z_][a-z0-9_]*)\.)*[a-z_][a-z0-9_]* -\*-")
 
 
     def visit_module(self, node):
@@ -49,7 +49,7 @@ class HeaderChecker(BaseChecker):
             return
         text = node.file_stream.read()
         self._checkCopyright(text, node)
-        if not isTestModule(node.name) and not isSpecialModule(node.name):
+        if not isTestModule(node.name) and moduleNeedsTests:
             self._checkTestReference(text, node)
 
 
@@ -60,10 +60,8 @@ class HeaderChecker(BaseChecker):
         @param text: codes of the module
         @param node: node of the module
         """
-        for docstring in self.commentsCopyright:
-            if docstring not in text:
-                self.add_message('W9001', node=node)
-                break
+        if not re.search(r"%s\s*\n\s*%s" % self.commentsCopyright, text):
+            self.add_message('W9001', node=node)
 
 
     def _checkTestReference(self, text, node):

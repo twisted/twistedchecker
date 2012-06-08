@@ -11,12 +11,12 @@ def isTestModule(modulename):
 
 
 
-def isSpecialModule(modulename):
+def moduleNeedsTests(modulename):
     """
     Determine whether a module is a is a special module.
     like __init__
     """
-    return modulename.split(".")[-1].startswith("_")
+    return not modulename.split(".")[-1].startswith("_")
 
 
 
