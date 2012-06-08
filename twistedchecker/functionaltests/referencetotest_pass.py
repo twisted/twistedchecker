@@ -3,4 +3,4 @@
 # -*- test-case-name: test.testmodule -*-
 
 def a():
-  pass
+    pass

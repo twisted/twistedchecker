@@ -9,6 +9,8 @@ from pylint.interfaces import IASTNGChecker
 from pylint.reporters import diff_string
 from pylint.checkers import BaseChecker, EmptyReport
 
+from twistedchecker.core.util import isTestModule, isSpecialModule
+
 class HeaderChecker(BaseChecker):
     """
     A checker for checking headers.
@@ -26,8 +28,6 @@ class HeaderChecker(BaseChecker):
      'W9002': ('Missing a reference to test module in header',
                'Used when a module does not contain a reference'
                ' to test module.'),
-     'W9003': ('Missing docstring of this module',
-               'Used when a module does not contain docstring'),
     }
     __implements__ = IASTNGChecker
     name = 'header'
@@ -49,8 +49,8 @@ class HeaderChecker(BaseChecker):
             return
         text = node.file_stream.read()
         self._checkCopyright(text, node)
-        self._checkTestReference(text, node)
-        self._checkDocstring(text, node)
+        if not isTestModule(node.name) and not isSpecialModule(node.name):
+            self._checkTestReference(text, node)
 
 
     def _checkCopyright(self, text, node):
@@ -75,14 +75,3 @@ class HeaderChecker(BaseChecker):
         """
         if not re.search(self.patternTestReference, text):
             self.add_message('W9002', node=node)
-
-
-    def _checkDocstring(self, text, node):
-        """
-        Check whether docstring is contained.
-
-        @param text: codes of the module
-        @param node: node of the module
-        """
-        if not node.doc:
-            self.add_message('W9003', node=node)
