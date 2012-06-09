@@ -25,11 +25,6 @@ class Runner():
         pathConfig = os.path.join(twistedchecker.abspath,
                                   "configuration", "pylintrc")
         self.linter.read_config_file(pathConfig)
-        # is there some additional plugins in the file configuration.
-        config_parser = self.linter.cfgfile_parser
-        if config_parser.has_option('MASTER', 'load-plugins'):
-            plugins = splitstrip(config_parser.get('MASTER', 'load-plugins'))
-            self.linter.load_plugin_modules(plugins)
         # now we can load file config and command line, plugins (which can
         # provide options) have been registered.
         self.linter.load_config_file()
