@@ -14,7 +14,8 @@ class Runner():
     outputStream = None
     linter = None
     # Customized checkers.
-    checkers = ("header.HeaderChecker",)
+    checkers = ("header.HeaderChecker",
+                "modulename.ModuleNameChecker")
 
     def __init__(self):
         """
