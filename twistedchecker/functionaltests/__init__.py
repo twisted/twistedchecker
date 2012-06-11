@@ -1,3 +1,4 @@
-"""
-Functional tests of TwistedChecker.
-"""
+-"""
+-Input test files of TwistedChecker.
+-"""
+
