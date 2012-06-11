@@ -13,6 +13,8 @@ class Runner():
     """
     outputStream = None
     linter = None
+    # Customized checkers.
+    checkers = ("header.HeaderChecker",)
 
     def __init__(self):
         """
@@ -28,6 +30,7 @@ class Runner():
         # now we can load file config and command line, plugins (which can
         # provide options) have been registered.
         self.linter.load_config_file()
+        self.registerCheckers()
         # set default output stream to stderr
         self.setOutput(sys.stderr)
 
@@ -56,6 +59,19 @@ class Runner():
         Output help message of twistedchecker.
         """
         self.outputStream.write("""---\nHELP INFOMATION\n""")
+
+
+    def registerCheckers(self):
+        """
+        Register all checkers of TwistedChecker to C{PyLinter}.
+        """
+        for strChecker in self.checkers:
+            modname, classname = strChecker.split(".")
+            strModule = "twistedchecker.checkers.%s" % modname
+            checker = getattr(__import__(strModule,
+                                        fromlist=["twistedchecker.checkers"]),
+                             classname)
+            self.linter.register_checker(checker(self.linter))
 
 
     def run(self, args):
