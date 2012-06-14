@@ -52,6 +52,9 @@ module-rgx=(([a-z_][a-z0-9_]*))$
 method-rgx=((([a-z_])|([a-z]+_[a-z]))[a-zA-Z0-9]+)$|(__[a-z]+__)$
 
 # Regular expression which should only match correct instance attribute names
+# Attribute names should be in mixed case, with the first letter lower case,
+# each word separated by having its first letter capitalized just like method names.
+# And all private names should begin with an underscore.
 attr-rgx=((([a-z_])|([a-z]+_[a-z]))[a-zA-Z0-9]+)$
 
 
