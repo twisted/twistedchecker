@@ -26,7 +26,7 @@ class PEP8Checker(BaseChecker):
     __implements__ = IASTNGChecker
     name = 'pep8'
     # map pep8 messages to messages in pylint.
-    # it's foramt should like this:
+    # it's foramt should look like this:
     # 'msgid in pep8' : ('msgid in pylint','a string to extract arguments')
     mapPEP8Messages = {
         'W291': ('W9010', ''),
