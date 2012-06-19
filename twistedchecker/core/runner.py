@@ -15,7 +15,8 @@ class Runner():
     linter = None
     # Customized checkers.
     checkers = ("header.HeaderChecker",
-                "docstring.DocstringChecker")
+                "docstring.DocstringChecker",
+                "comment.CommentChecker")
 
     def __init__(self):
         """
