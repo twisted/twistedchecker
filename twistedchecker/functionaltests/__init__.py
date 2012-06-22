@@ -1,4 +1,4 @@
--"""
--Input test files of TwistedChecker.
--"""
+"""
+Input test files of TwistedChecker.
+"""
 
