@@ -23,13 +23,13 @@ class LimitedReporter(TextReporter):
     def __init__(self, output=sys.stdout):
         """
         Initiate the the limited reporter.
-        Load a list of allowed messages. 
+        Load a list of allowed messages.
 
         @param output: output stream
         """
         TextReporter.__init__(self, output)
         self._loadAllowedMessages()
-        
+
 
     def _updateMessageCache(self):
         """
@@ -40,7 +40,7 @@ class LimitedReporter(TextReporter):
                            [map(lambda f: os.path.join(pathDir, f), files)
                             for pathDir, _, files in os.walk(pathTests)]
                           )
-        lastTestModified = max(map(os.path.getmtime,testfiles))
+        lastTestModified = max(map(os.path.getmtime, testfiles))
         lastCacheModified = (os.path.getmtime(self.pathMessageCache)
                              if os.path.exists(self.pathMessageCache)
                              else 0)
@@ -53,7 +53,7 @@ class LimitedReporter(TextReporter):
                                               and ":" in firstline):
                     messages = firstline.split(":")[1].strip().split(",")
                     messagesAllowed.update(messages)
-            pickle.dump(messagesAllowed, open(self.pathMessageCache,"w"))
+            pickle.dump(messagesAllowed, open(self.pathMessageCache, "w"))
 
 
     def _loadAllowedMessages(self):
