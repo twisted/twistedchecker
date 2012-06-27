@@ -5,7 +5,7 @@ import os
 from pylint.lint import PyLinter
 
 import twistedchecker
-
+from twistedchecker.reporters.limited import LimitedReporter
 
 class Runner():
     """
@@ -34,6 +34,8 @@ class Runner():
         self.registerCheckers()
         # set default output stream to stderr
         self.setOutput(sys.stderr)
+        # set default reporter to limited reporter
+        self.setReporter(LimitedReporter())
 
 
     def setOutput(self, stream):
