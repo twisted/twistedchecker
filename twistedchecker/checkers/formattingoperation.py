@@ -17,7 +17,7 @@ class FormattingOperationChecker(StringFormatChecker):
     we sould always use a tuple for non-mapping values.
     """
     msgs = {
-     'W9301': ('String formatting operations should always use a tuple'
+     'W9501': ('String formatting operations should always use a tuple'
                'for non-mapping values',
                'Checking string formatting operations.'),
     }
@@ -40,4 +40,4 @@ class FormattingOperationChecker(StringFormatChecker):
         if "%(" not in pattern:
             tupleUsed = valueString.startswith('(')
             if not tupleUsed:
-                self.add_message('W9301', node=node)
+                self.add_message('W9501', node=node)
