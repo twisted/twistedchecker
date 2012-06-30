@@ -52,3 +52,5 @@ max-line-length=79
 
 [CLASSES]
 
+[TWISTEDCHECKER]
+check-python3 = yes
