@@ -13,7 +13,7 @@ print
 print >>sys.stderr, "fatal error"
 
 # Good examples corresponding to good examples
-# two lines of code is commented, because they will cause error in python 2.x
+# two lines of code are commented, because they will cause error in python 2.x
 
 print((1, 2))
 
