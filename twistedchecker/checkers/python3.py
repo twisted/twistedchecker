@@ -30,6 +30,8 @@ class Python3Checker(BaseChecker):
     def visit_module(self, node):
         """
         Save lines of the module currently checking.
+
+        @parm node: current node of checking
         """
         self.linesOfCurrentModule = node.file_stream.readlines()
 
@@ -37,6 +39,17 @@ class Python3Checker(BaseChecker):
     def visit_print(self, node):
         """
         Be invoked when visiting a print statement.
+
+        @parm node: current node of checking
+        """
+        self.checkPrintStatement(node)
+
+
+    def checkPrintStatement(self, node):
+        """
+        Check for print statement in python 3(W9601).
+
+        @parm node: current node of checking
         """
         linenoBegin = node.fromlineno - 1
         linenoEnd = node.tolineno - 1
