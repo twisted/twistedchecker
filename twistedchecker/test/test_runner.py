@@ -96,7 +96,7 @@ class RunnerTestCase(unittest.TestCase):
                     pathRelative = os.path.relpath(pathFile,
                                                    twistedchecker.abspath)
                     modulename = "twistedchecker." + \
-                                 pathRelative.strip(".py").replace(os.sep, ".")
+                        pathRelative.replace(".py", "").replace(os.sep, ".")
                     testmodules.append((pathFile, modulename))
         return testmodules
 

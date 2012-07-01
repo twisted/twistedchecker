@@ -23,6 +23,9 @@ class Python3Checker(BaseChecker):
     msgs = {
      'W9601': ('Use print() instead of print statement in Python 3',
                'Checking print statement for python 3.'),
+     'W9602': ('dict.has_key() has been removed in python 3, '
+               'use the in operator instead',
+               'Checking has_key issue for python 3.'),
     }
     options = ()
     linesOfCurrentModule = None
@@ -43,6 +46,53 @@ class Python3Checker(BaseChecker):
         @parm node: current node of checking
         """
         self.checkPrintStatement(node)
+
+
+    def visit_callfunc(self, node):
+        """
+        Be invoked when visiting a print statement.
+
+        @parm node: current node of checking
+        """
+        self.checkHasKeyIssue(node)
+
+
+    def checkHasKeyIssue(self, node):
+        """
+        Check for has_key issue in python 3(W9602).
+
+        @parm node: current node of checking
+        """
+        issueFound = False
+        try:
+            # get the function
+            func = node.func
+            # get attribute name, if an error is generated here,
+            # means that the node is a function call,
+            # we should filter these usages and capture dict.has_key
+            attrname = func.attrname
+            # check whether this method is has_key
+            if attrname != "has_key":
+                return
+            # now get the object which is called
+            # it should be the first child of the method node
+            objCalled = func.get_children().next()
+            if type(objCalled) == logilab.astng.node_classes.Dict:
+                # in this case, the statement should like
+                # {}.has_key()
+                issueFound = True
+            else:
+                # check for foo.has_key() and foo is defined as a dict
+                # elsewhere
+                # if an error is generated here, it means ast failed to
+                # find the definition
+                objInfered = node.func.last_child().infered()[0]
+                if type(objInfered) == logilab.astng.node_classes.Dict:
+                    issueFound = True
+        except:
+            return
+        if issueFound:
+            self.add_message('W9602', node=node)
 
 
     def checkPrintStatement(self, node):
