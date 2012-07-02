@@ -12,4 +12,4 @@ a = 1 + 2  #  A coment begins with two whitespace.
 # doesn't need to have capitalization on second line.
 
 # Here's some code samples:
-# x = x + 1
+#  x = x + 1
