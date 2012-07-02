@@ -35,6 +35,7 @@ class CommentChecker(BaseChecker):
         if not node.file_stream:
             # failed to open the module
             return
+        isFirstLineOfComment = True
         lines = node.file_stream.readlines()
         for linenum, line in enumerate(lines):
             matchedComment = COMMENT_RGX.search(STRING_RGX.sub('', line))
@@ -42,8 +43,12 @@ class CommentChecker(BaseChecker):
                 # check for W9401
                 comment = matchedComment.group()
                 if comment.startswith("#  ") or not comment.startswith("# "):
-                    self.add_message('W9401', line= linenum + 1)
+                    self.add_message('W9401', line=linenum + 1)
                 # check for W9402
-                firstLetter = comment.lstrip("#").lstrip()[0]
-                if firstLetter.isalpha() and not firstLetter.isupper():
-                    self.add_message('W9402', line= linenum + 1)
+                if isFirstLineOfComment:
+                    firstLetter = comment.lstrip("#").lstrip()[0]
+                    if firstLetter.isalpha() and not firstLetter.isupper():
+                        self.add_message('W9402', line=linenum + 1)
+                isFirstLineOfComment = False
+            else:
+                isFirstLineOfComment = True

@@ -6,4 +6,10 @@ a = 1 + 2  #  A coment begins with two whitespace.
 
 # a comment begins with a lowercase letter.
 
-# A good comment example.
+# Good comment examples.
+
+# A sentence that spans multiple lines
+# doesn't need to have capitalization on second line.
+
+# Here's some code samples:
+# x = x + 1
