@@ -26,6 +26,8 @@ class Python3Checker(BaseChecker):
      'W9602': ('dict.has_key() has been removed in python 3, '
                'use the in operator instead',
                'Checking has_key issue for python 3.'),
+     'W9603': ('The built-in function apply is removed in python 3',
+               'Checking apply issue for python 3.'),
     }
     options = ()
     linesOfCurrentModule = None
@@ -55,6 +57,21 @@ class Python3Checker(BaseChecker):
         @parm node: current node of checking
         """
         self.checkHasKeyIssue(node)
+        self.checkApplyIssue(node)
+
+
+    def checkApplyIssue(self, node):
+        """
+        Check for apply issue in python 3(W9603).
+
+        @parm node: current node of checking
+        """
+        try:
+            if (node.func.name == "apply" and
+                type(node.func) == logilab.astng.node_classes.Name):
+                self.add_message('W9603', node=node)
+        except:
+            pass
 
 
     def checkHasKeyIssue(self, node):
