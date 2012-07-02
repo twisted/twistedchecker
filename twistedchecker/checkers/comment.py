@@ -40,15 +40,16 @@ class CommentChecker(BaseChecker):
         for linenum, line in enumerate(lines):
             matchedComment = COMMENT_RGX.search(STRING_RGX.sub('', line))
             if matchedComment:
-                # check for W9401
-                comment = matchedComment.group()
-                if comment.startswith("#  ") or not comment.startswith("# "):
-                    self.add_message('W9401', line=linenum + 1)
-                # check for W9402
                 if isFirstLineOfComment:
+                    # check for W9401
+                    comment = matchedComment.group()
+                    if (comment.startswith("#  ") or
+                        not comment.startswith("# ")):
+                        self.add_message('W9401', line=linenum + 1)
+                    # check for W9402
                     firstLetter = comment.lstrip("#").lstrip()[0]
                     if firstLetter.isalpha() and not firstLetter.isupper():
                         self.add_message('W9402', line=linenum + 1)
-                isFirstLineOfComment = False
+                    isFirstLineOfComment = False
             else:
                 isFirstLineOfComment = True
