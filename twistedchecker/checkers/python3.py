@@ -28,6 +28,8 @@ class Python3Checker(BaseChecker):
                'Checking has_key issue for python 3.'),
      'W9603': ('The built-in function apply is removed in python 3',
                'Checking apply issue for python 3.'),
+     'W9604': ('except exc, var is no longer supported in python 3',
+               'Checking exception issue for python 3.'),
     }
     options = ()
     linesOfCurrentModule = None
@@ -58,6 +60,36 @@ class Python3Checker(BaseChecker):
         """
         self.checkHasKeyIssue(node)
         self.checkApplyIssue(node)
+
+
+    def visit_tryexcept(self, node):
+        """
+        Be invoked when visiting a try...except node.
+
+        @parm node: current node of checking
+        """
+        self.checkExceptionIssue(node)
+
+
+    def checkExceptionIssue(self, node):
+        """
+        Check for exception issue in python 3(W9604).
+
+        @parm node: current node of checking
+        """
+        linenoBegin = node.fromlineno - 1
+        linenoEnd = node.tolineno - 1
+        if (not self.linesOfCurrentModule or
+            linenoEnd >= len(self.linesOfCurrentModule)):
+            # in the case, the code is not from a module exists
+            return
+        codeStatement = "\n".join(
+                [line.strip()
+                 for line in \
+                 self.linesOfCurrentModule[linenoBegin: linenoEnd + 1]])
+        regexDeprecated = "except\s+\w+\s*,\s*\w+\:"
+        if re.search(regexDeprecated, codeStatement):
+            self.add_message('W9604', node=node)
 
 
     def checkApplyIssue(self, node):
