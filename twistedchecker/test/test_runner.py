@@ -1,6 +1,7 @@
 import sys
 import os
 import StringIO
+import operator
 
 from twisted.trial import unittest
 
@@ -66,6 +67,33 @@ class RunnerTestCase(unittest.TestCase):
         else:
             for msgid in messages:
                 runner.linter.disable(msgid)
+
+
+    def _loadAllowedMessages(self):
+        """
+        Load allowed messages from test files.
+        """
+        pathTests = os.path.join(twistedchecker.abspath, "functionaltests")
+        testfiles = reduce(operator.add,
+                           [map(lambda f: os.path.join(pathDir, f), files)
+                            for pathDir, _, files in os.walk(pathTests)])
+        messagesAllowed = set()
+        for testfile in testfiles:
+            firstline = open(testfile).readline().strip()
+            if (firstline.startswith("#") and "enable" in firstline
+                                          and ":" in firstline):
+                messages = firstline.split(":")[1].strip().split(",")
+                messagesAllowed.update(messages)
+        return messagesAllowed
+
+
+    def test_allMessagesAreRegistered(self):
+        """
+        A test to assume all tests are registered to reporter.
+        """
+        messagesFromTests = self._loadAllowedMessages()
+        messagesFromReporter = Runner().linter.reporter.messagesAllowed
+        self.assertEqual(messagesFromTests, messagesFromReporter)
 
 
     def test_run(self):

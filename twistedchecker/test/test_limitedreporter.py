@@ -14,21 +14,6 @@ class LimitedReporterTestCase(unittest.TestCase):
     Test for twistedchecker.reporter.limited.LimitedReporter.
     """
 
-    def test_loadAllowedMessages(self):
-        """
-        Test for _loadAllowedMessages method.
-        Make sure some messages are loaded
-        and all of them should begin be tokens in 5 letters.
-        """
-        reporter = LimitedReporter()
-        reporter._loadAllowedMessages()
-        # assert some messages are loaded
-        self.assertTrue(reporter.messagesAllowed)
-        # assert they are 5 letter tokens
-        for msgid in reporter.messagesAllowed:
-            self.assertEqual(len(msgid), 5)
-
-
     def test_reporter(self):
         """
         Test for LimitedReporter.

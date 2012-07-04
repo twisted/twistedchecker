@@ -16,6 +16,10 @@ class Runner():
     # Customized checkers.
     checkers = ("header.HeaderChecker",
                 "modulename.ModuleNameChecker")
+    allowedMessagesFromPylint = ("C0111",
+                                 "C0301",
+                                 "W0311",
+                                 "W0312")
 
     def __init__(self):
         """
@@ -31,11 +35,11 @@ class Runner():
         # now we can load file config and command line, plugins (which can
         # provide options) have been registered.
         self.linter.load_config_file()
-        self.registerCheckers()
+        allowedMessages = self.registerCheckers()
         # set default output stream to stderr
         self.setOutput(sys.stderr)
         # set default reporter to limited reporter
-        self.setReporter(LimitedReporter())
+        self.setReporter(LimitedReporter(allowedMessages))
 
 
     def setOutput(self, stream):
@@ -67,14 +71,20 @@ class Runner():
     def registerCheckers(self):
         """
         Register all checkers of TwistedChecker to C{PyLinter}.
+
+        @return: a list of allowed messages
         """
+        allowedMessages = list(self.allowedMessagesFromPylint)
         for strChecker in self.checkers:
             modname, classname = strChecker.split(".")
             strModule = "twistedchecker.checkers.%s" % modname
             checker = getattr(__import__(strModule,
                                         fromlist=["twistedchecker.checkers"]),
                              classname)
-            self.linter.register_checker(checker(self.linter))
+            instanceChecker = checker(self.linter)
+            allowedMessages += instanceChecker.msgs.keys()
+            self.linter.register_checker(instanceChecker)
+        return set(allowedMessages)
 
 
     def run(self, args):
