@@ -1,0 +1,17 @@
+Twisted Coding Standard Checker
+
+This is a project of Google Summer of Code 2012.
+
+
+Dependencies
+==========
+
+  To run twistedchecker, it requires pylint 0.25.1 and pep8.py (>=1.0.0).
+
+Unit Tests
+==========
+
+
+  To test twistedchecker, run:
+
+   % trial twistedchecker
