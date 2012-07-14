@@ -27,7 +27,7 @@ class FormattingOperationChecker(StringFormatChecker):
 
     def visit_binop(self, node):
         """
-        Be Called if a binary operation is found.
+        Called when if a binary operation is found.
         Only check for string formatting operations.
 
         @param node: currently checking node
@@ -36,7 +36,8 @@ class FormattingOperationChecker(StringFormatChecker):
             return
         pattern = node.left.as_string()
         valueString = node.right.as_string()
-        # make sure this statement does not use mapping values
+        # If the pattern has things like %(foo)s,
+        # then the values can't be a tuple, so don't check for it.
         if "%(" not in pattern:
             tupleUsed = valueString.startswith('(')
             if not tupleUsed:
