@@ -31,7 +31,11 @@ class PEP8Checker(BaseChecker):
                'Top-level functions should be separated '
                'with 3 blank lines.'),
      'W9014': ('Too many blank lines, found %s',
-               'Used when too many blank lines found.'),
+               'Used when too many blank lines are found.'),
+     'W9015': ('Too many blank lines, expected %s',
+               'Used when too many blank lines are found.'),
+     'W9016': ('Too many blank lines after docstring, found %s',
+               'Used when too many blank lines after docstring are found.'),
     }
     __implements__ = IASTNGChecker
     name = 'pep8'
@@ -44,6 +48,8 @@ class PEP8Checker(BaseChecker):
         'E301': ('W9012', r'expected 2 blank lines, found (\d+)'),
         'E302': ('W9013', r'expected 3 blank lines, found (\d+)'),
         'E303': ('W9014', r'too many blank lines \((\d+)\)'),
+        'E3032': ('W9015', r'too many blank lines, expected \((\d+)\)'),
+        'E305': ('W9016', r'too many blank lines after docstring \((\d+)\)'),
     }
 
     def __init__(self, linter):
@@ -142,13 +148,15 @@ def modified_blank_lines(logical_line, blank_lines, indent_level, line_number,
     max_blank_lines = max(blank_lines, blank_lines_before_comment)
     previous_is_comment = DOCSTRING_REGEX.match(previous_logical)
 
-    # no blank lines after a decorator
-    if previous_logical.startswith('@'):
-        if max_blank_lines:
-            return 0, "E304 blank lines found after function decorator"
+    # Check blank lines after a decorator,
+    # but this checking is removed because no this requirement in
+    # Twisted Coding Standard.
+    # if previous_logical.startswith('@'):
+    #     if max_blank_lines:
+    #         return 0, "E304 blank lines found after function decorator"
 
     # should not have more than 3 blank lines
-    elif max_blank_lines > 3 or (indent_level and max_blank_lines > 2):
+    if max_blank_lines > 3 or (indent_level and max_blank_lines > 2):
         return 0, "E303 too many blank lines (%d)" % max_blank_lines
 
     elif isClassDefDecorator(logical_line):
@@ -176,4 +184,4 @@ def modified_blank_lines(logical_line, blank_lines, indent_level, line_number,
             return 0, "E302 expected 3 blank lines, found %d" % max_blank_lines
 
     elif max_blank_lines > 1 and indent_level:
-        return 0, "E303 too many blank lines, expected (%d)" % max_blank_lines
+        return 0, "E3032 too many blank lines, expected (%d)" % max_blank_lines

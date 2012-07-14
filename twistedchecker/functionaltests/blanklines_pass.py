@@ -1,4 +1,4 @@
-# enable: W9012,W9013,W9014
+# enable: W9012,W9013,W9014,W9015,W9016
 
 # Top-level classes should be separated with 3 blank lines
 class a:
@@ -28,3 +28,13 @@ def d():
 
 
 
+def foo():
+    """
+    There should be one blank line or less between
+    a docstring and a function definition.
+    """
+    def bar():
+        pass
+    # No more than one blank line between two statements.
+
+    a = 1
