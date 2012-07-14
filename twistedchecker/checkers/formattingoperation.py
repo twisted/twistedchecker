@@ -14,7 +14,7 @@ from pylint.checkers.string_format import StringFormatChecker
 class FormattingOperationChecker(StringFormatChecker):
     """
     When string formatting operations are used like formatString % values,
-    we sould always use a tuple for non-mapping values.
+    we should always use a tuple for non-mapping values.
     """
     msgs = {
      'W9501': ('String formatting operations should always use a tuple'
