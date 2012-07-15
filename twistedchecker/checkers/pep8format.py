@@ -70,7 +70,7 @@ class PEP8Checker(BaseChecker):
      'W9010': ('Trailing whitespace found in the end of line',
                'Used when a line contains a trailing space.'),
      'W9011': ('Blank line contains whitespace',
-               'Used when found a line contains whitespace.')
+               'Used when found a line contains whitespaces.')
     }
     __implements__ = IASTNGChecker
     name = 'pep8'
