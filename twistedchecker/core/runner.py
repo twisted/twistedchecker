@@ -85,29 +85,49 @@ class Runner():
             allowedMessages += instanceChecker.msgs.keys()
             self.linter.register_checker(instanceChecker)
 
-        self.unregisterUselessPylintCheckers(allowedMessages)
+        self.restrictCheckers(allowedMessages)
         return set(allowedMessages)
 
 
-    def unregisterUselessPylintCheckers(self, allowedMessages):
+    def unregisterChecker(self, checker):
+        """
+        Remove a checker from the list of registered checkers.
+
+        @param checker: the checker to remove
+        """
+        self.linter._checkers[checker.name].remove(checker)
+        if checker in self.linter._reports:
+            del self.linter._reports[checker]
+        if checker in self.linter.options_providers:
+            self.linter.options_providers.remove(checker)
+
+
+    def findUselessCheckers(self, allowedMessages):
+        """
+        Find checkers which generate no allowed messages.
+
+        @param allowedMessages: allowed messages
+        @return: useless checkers, remove them from pylint
+        """
+        uselessCheckers = []
+        for checkerName in self.linter._checkers:
+            for checker in list(self.linter._checkers[checkerName]):
+                messagesOfChecker = set(checker.msgs)
+                if not messagesOfChecker.intersection(allowedMessages):
+                    uselessCheckers.append(checker)
+        return uselessCheckers
+
+
+    def restrictCheckers(self, allowedMessages):
         """
         Unregister useless checkers to speed up twistedchecker.
 
         @param allowedMessages: output messages allowed in twistedchecker
         """
-        for checkerName in self.linter._checkers:
-            checkersPendingUnregister = []
-            for checker in self.linter._checkers[checkerName]:
-                messagesOfChecker = set(checker.msgs.keys())
-                if not messagesOfChecker.intersection(allowedMessages):
-                    checkersPendingUnregister.append(checker)
-            # Unregister useless checkers
-            for checker in checkersPendingUnregister:
-                self.linter._checkers[checkerName].remove(checker)
-                if checker in self.linter._reports:
-                    del self.linter._reports[checker]
-                if checker in self.linter.options_providers:
-                    self.linter.options_providers.remove(checker)
+        uselessCheckers = self.findUselessCheckers(allowedMessages)
+        # Unregister these checkers
+        for checker in uselessCheckers:
+            self.unregisterChecker(checker)
 
 
     def run(self, args):
