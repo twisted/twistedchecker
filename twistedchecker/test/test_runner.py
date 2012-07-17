@@ -1,13 +1,14 @@
 import sys
 import os
 import StringIO
+import operator
 
 from twisted.trial import unittest
 
 import twistedchecker
 from twistedchecker.core.runner import Runner
 from twistedchecker.reporters.test import TestReporter
-
+from twistedchecker.checkers.header import HeaderChecker
 
 class RunnerTestCase(unittest.TestCase):
     """
@@ -66,6 +67,93 @@ class RunnerTestCase(unittest.TestCase):
         else:
             for msgid in messages:
                 runner.linter.disable(msgid)
+
+
+    def _loadAllowedMessages(self):
+        """
+        Load allowed messages from test files.
+        """
+        pathTests = os.path.join(twistedchecker.abspath, "functionaltests")
+        testfiles = reduce(operator.add,
+                           [map(lambda f: os.path.join(pathDir, f), files)
+                            for pathDir, _, files in os.walk(pathTests)])
+        messagesAllowed = set()
+        for testfile in testfiles:
+            firstline = open(testfile).readline().strip()
+            if (firstline.startswith("#") and "enable" in firstline
+                                          and ":" in firstline):
+                messages = firstline.split(":")[1].strip().split(",")
+                messagesAllowed.update(messages)
+        return messagesAllowed
+
+
+    def test_findUselessCheckers(self):
+        """
+        Test for method findUselessCheckers
+        """
+        runner = Runner()
+        registeredCheckers = sum(runner.linter._checkers.values(), [])
+        # remove checkers other than header checker
+        headerCheckerList = filter(lambda ckr: type(ckr) == HeaderChecker,
+                                   registeredCheckers)
+        self.assertTrue(headerCheckerList)
+        headerChecker = headerCheckerList[0]
+        uselessCheckers = runner.findUselessCheckers(
+                            headerChecker.msgs.keys()[:1])
+        self.assertEqual(len(uselessCheckers) + 1, len(registeredCheckers))
+        self.assertTrue(headerChecker not in uselessCheckers)
+
+
+    def test_unregisterChecker(self):
+        """
+        Test for method unregisterChecker.
+
+        Remove HeaderChecker from registered,
+        and make sure it was removed.
+        """
+        runner = Runner()
+        registeredCheckers = sum(runner.linter._checkers.values(), [])
+        # Make sure an instance of HeaderChecker in registered checkers
+        headerCheckerList = filter(lambda ckr: type(ckr) == HeaderChecker,
+                                   registeredCheckers)
+        self.assertTrue(headerCheckerList)
+        headerChecker = headerCheckerList[0]
+        # Make sure it in option providers
+        self.assertTrue(headerChecker in runner.linter.options_providers)
+        runner.unregisterChecker(headerChecker)
+        # Make sure the instance of HeaderChecker was removed
+        registeredCheckers = sum(runner.linter._checkers.values(), [])
+        self.assertFalse(headerChecker in registeredCheckers)
+        # Could not check reports because HeaderChecker is not be
+        # recorded in that list
+        # Make sure it was removed from option providers
+        self.assertFalse(headerChecker in runner.linter.options_providers)
+
+
+    def test_restrictCheckers(self):
+        """
+        Test for method restrictCheckers.
+
+        Manually set allowed messages,
+        then check for the result of registered checkers
+        after run this method.
+        """
+        runner = Runner()
+        runner.restrictCheckers(HeaderChecker.msgs.keys()[:1])
+        # After run it, only HeaderChecker should be left in
+        # registered checkers
+        registeredCheckers = sum(runner.linter._checkers.values(), [])
+        self.assertEqual(len(registeredCheckers), 1)
+        self.assertEqual(type(registeredCheckers[0]), HeaderChecker)
+
+
+    def test_allMessagesAreRegistered(self):
+        """
+        A test to assume all tests are registered to reporter.
+        """
+        messagesFromTests = self._loadAllowedMessages()
+        messagesFromReporter = Runner().linter.reporter.messagesAllowed
+        self.assertEqual(messagesFromTests, messagesFromReporter)
 
 
     def test_run(self):
