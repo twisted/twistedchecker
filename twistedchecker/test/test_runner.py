@@ -8,7 +8,7 @@ from twisted.trial import unittest
 import twistedchecker
 from twistedchecker.core.runner import Runner
 from twistedchecker.reporters.test import TestReporter
-
+from twistedchecker.checkers.header import HeaderChecker
 
 class RunnerTestCase(unittest.TestCase):
     """
@@ -85,6 +85,24 @@ class RunnerTestCase(unittest.TestCase):
                 messages = firstline.split(":")[1].strip().split(",")
                 messagesAllowed.update(messages)
         return messagesAllowed
+
+
+    def test_unregisterUselessPylintCheckers(self):
+        """
+        Test for method unregisterUselessPylintCheckers.
+
+        Manually set allowed messages,
+        then check for the result of registered checkers
+        after run this method.
+        """
+        runner = Runner()
+        runner.unregisterUselessPylintCheckers(["W9001"])
+        # After run it, only HeaderChecker should be left in
+        # registered checkers
+        registeredCheckers = (
+            reduce(operator.add, runner.linter._checkers.values()))
+        self.assertEqual(len(registeredCheckers), 1)
+        self.assertEqual(type(registeredCheckers[0]), HeaderChecker)
 
 
     def test_allMessagesAreRegistered(self):

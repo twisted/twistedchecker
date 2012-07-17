@@ -84,7 +84,30 @@ class Runner():
             instanceChecker = checker(self.linter)
             allowedMessages += instanceChecker.msgs.keys()
             self.linter.register_checker(instanceChecker)
+
+        self.unregisterUselessPylintCheckers(allowedMessages)
         return set(allowedMessages)
+
+
+    def unregisterUselessPylintCheckers(self, allowedMessages):
+        """
+        Unregister useless checkers to speed up twistedchecker.
+
+        @param allowedMessages: output messages allowed in twistedchecker
+        """
+        for checkerName in self.linter._checkers:
+            checkersPendingUnregister = []
+            for checker in self.linter._checkers[checkerName]:
+                messagesOfChecker = set(checker.msgs.keys())
+                if not messagesOfChecker.intersection(allowedMessages):
+                    checkersPendingUnregister.append(checker)
+            # Unregister useless checkers
+            for checker in checkersPendingUnregister:
+                self.linter._checkers[checkerName].remove(checker)
+                if checker in self.linter._reports:
+                    del self.linter._reports[checker]
+                if checker in self.linter.options_providers:
+                    self.linter.options_providers.remove(checker)
 
 
     def run(self, args):
