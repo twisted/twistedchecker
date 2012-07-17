@@ -17,7 +17,7 @@ class Runner():
     checkers = ("header.HeaderChecker",
                 "docstring.DocstringChecker",
                 "formattingoperation.FormattingOperationChecker",
-                )
+                "comment.CommentChecker")
 
     def __init__(self):
         """
