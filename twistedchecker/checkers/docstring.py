@@ -19,7 +19,7 @@ class DocstringChecker(PylintDocStringChecker):
     msgs = {
      'W9201': ('The opening/closing of docstring should be on a line '
                'by themselves',
-               'Check the opening/closing of a docstrng.'),
+               'Check the opening/closing of a docstring.'),
      'W9202': ('Missing epytext markup @param for argument "%s"',
                'Check the epytext markup @param.'),
      'W9203': ('Missing epytext markup @type for argument "%s"',
@@ -34,7 +34,7 @@ class DocstringChecker(PylintDocStringChecker):
                'Check the blank line before epytext markups.'),
     }
     __implements__ = IASTNGChecker
-    name = 'docstrng'
+    name = 'docstring'
     options = ()
 
 
@@ -65,8 +65,8 @@ class DocstringChecker(PylintDocStringChecker):
         @return: line number
         """
         docstringStriped = node.as_string().strip()
-        linenoDocstring = node.lineno + docstringStriped \
-                            .count("\n", 0, docstringStriped.index('"""'))
+        linenoDocstring = (node.lineno + docstringStriped
+                           .count("\n", 0, docstringStriped.index('"""')))
         if node_type == "module":
             # module starts from line 0
             linenoDocstring += 1
@@ -95,7 +95,7 @@ class DocstringChecker(PylintDocStringChecker):
 
     def _checkDocstringFormat(self, node_type, node, linenoDocstring):
         """
-        Check opening/closing of docstrng.
+        Check opening/closing of docstring.
 
         @param node_type: type of node
         @param node: current node of pylint
@@ -103,18 +103,18 @@ class DocstringChecker(PylintDocStringChecker):
         """
         # check the opening/closing of docstring
         docstringStripedSpaces = node.doc.strip(" ")
-        if not docstringStripedSpaces.startswith("\n") or \
-            not docstringStripedSpaces.endswith("\n"):
+        if (not docstringStripedSpaces.startswith("\n")
+            or not docstringStripedSpaces.endswith("\n")):
             self.add_message('W9201', line=linenoDocstring, node=node)
         else:
-        # check indentation
+            # check indentation
             indentDocstring = node.col_offset and node.col_offset or 0
             indentDocstring += len(re.findall(r'\n( *)"""',
                                               node.as_string())[0])
             linesDocstring = node.doc.lstrip("\n").split("\n")
             for nline, lineDocstring in enumerate(linesDocstring):
-                if nline < len(linesDocstring) - 1 and \
-                    not lineDocstring.strip():
+                if (nline < len(linesDocstring) - 1
+                    and not lineDocstring.strip()):
                     # its a blank line
                     continue
                 if indentDocstring != self._getLineIndent(lineDocstring):
@@ -127,7 +127,7 @@ class DocstringChecker(PylintDocStringChecker):
 
     def _checkEpytext(self, node_type, node, linenoDocstring):
         """
-        Check epytext of docstrng.
+        Check epytext of docstring.
 
         @param node_type: type of node
         @param node: current node of pylint
@@ -166,8 +166,8 @@ class DocstringChecker(PylintDocStringChecker):
         @param linenoDocstring: linenumber of docstring
         """
         # check whether there is a blank line before epytext markups
-        patternEpytext = r"\n *@(param|type|return|returns|rtype)" \
-                         r"\s*[a-zA-Z0-9_]*\s*\:"
+        patternEpytext = (r"\n *@(param|type|return|returns|rtype)"
+                          r"\s*[a-zA-Z0-9_]*\s*\:")
         matchedEpytext = re.search(patternEpytext, node.doc)
         if matchedEpytext:
             # this docstring have epytext markups
