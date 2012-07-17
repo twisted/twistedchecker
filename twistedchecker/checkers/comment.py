@@ -13,6 +13,7 @@ from pylint.checkers.format import STRING_RGX, COMMENT_RGX
 class CommentChecker(BaseChecker):
     """
     A checker for checking comment issues.
+
     A good comment should begin with one whiespace and
     with first letter capitalized.
     """
@@ -33,7 +34,7 @@ class CommentChecker(BaseChecker):
         @param node: node of current module
         """
         if not node.file_stream:
-            # failed to open the module
+            # Failed to open the module
             return
         isFirstLineOfComment = True
         lines = node.file_stream.readlines()
@@ -41,12 +42,12 @@ class CommentChecker(BaseChecker):
             matchedComment = COMMENT_RGX.search(STRING_RGX.sub('', line))
             if matchedComment:
                 if isFirstLineOfComment:
-                    # check for W9401
+                    # Check for W9401
                     comment = matchedComment.group()
                     if (comment.startswith("#  ") or
                         not comment.startswith("# ")):
                         self.add_message('W9401', line=linenum + 1)
-                    # check for W9402
+                    # Check for W9402
                     firstLetter = comment.lstrip("#").lstrip()[0]
                     if firstLetter.isalpha() and not firstLetter.isupper():
                         self.add_message('W9402', line=linenum + 1)
