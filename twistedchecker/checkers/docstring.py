@@ -5,12 +5,12 @@ from logilab import astng
 from logilab.common.ureports import Table
 from logilab.astng import are_exclusive
 from logilab.astng import node_classes
+from logilab.astng import scoped_nodes
 
 from pylint.interfaces import IASTNGChecker
 from pylint.reporters import diff_string
 from pylint.checkers.base import DocStringChecker as PylintDocStringChecker
 from pylint.checkers.base import NO_REQUIRED_DOC_RGX
-
 
 class DocstringChecker(PylintDocStringChecker):
     """
@@ -32,6 +32,12 @@ class DocstringChecker(PylintDocStringChecker):
                'Check indentations of docstring.'),
      'W9207': ('Missing a blank line before epytext markups',
                'Check the blank line before epytext markups.'),
+     'W9208': ('Missing docstring',
+               'Used when a module, function, class or method '
+               'has no docstring.'),
+     'W9209': ('Empty docstring',
+               'Used when a module, function, class or method '
+               'has an empty docstring.'),
     }
     __implements__ = IASTNGChecker
     name = 'docstring'
@@ -68,7 +74,7 @@ class DocstringChecker(PylintDocStringChecker):
         linenoDocstring = (node.lineno + docstringStriped
                            .count("\n", 0, docstringStriped.index('"""')))
         if node_type == "module":
-            # module starts from line 0
+            # Module starts from line 0.
             linenoDocstring += 1
         return linenoDocstring
 
@@ -83,14 +89,46 @@ class DocstringChecker(PylintDocStringChecker):
         @param node: current node of pylint
         """
         docstring = node.doc
-        if not docstring:
-            # the node do not have a docstring
+        if docstring is None:
+            # The node does not have a docstring.
+            # But do not check things inside a function or method.
+            if type(node.parent) != scoped_nodes.Function:
+                self.add_message('W9208', node=node)
             return
-        # get line number of docstring
+        elif not docstring.strip():
+            # Empty docstring.
+            self.add_message('W9209', node=node)
+            return
+        # Get line number of docstring.
         linenoDocstring = self._getDocstringLineno(node_type, node)
         self._checkDocstringFormat(node_type, node, linenoDocstring)
         self._checkEpytext(node_type, node, linenoDocstring)
         self._checkBlankLineBeforeEpytext(node_type, node, linenoDocstring)
+
+
+    def _checkIdenationIssue(self, node, node_type, linenoDocstring):
+        """
+        Check whether a docstring have consistent indentations.
+
+        @param node: the node currently checks by pylint
+        @param node_type: type of given node
+        @param linenoDocstring: line number the docstring begins
+        """
+        indentDocstring = node.col_offset and node.col_offset or 0
+        indentDocstring += len(re.findall(r'\n( *)"""',
+                                          node.as_string())[0])
+        linesDocstring = node.doc.lstrip("\n").split("\n")
+        for nline, lineDocstring in enumerate(linesDocstring):
+            if (nline < len(linesDocstring) - 1
+                and not lineDocstring.strip()):
+                # It's a blank line.
+                continue
+            if indentDocstring != self._getLineIndent(lineDocstring):
+                if node_type == "module":
+                    lineno = linenoDocstring
+                else:
+                    lineno = linenoDocstring + nline + 1
+                self.add_message('W9206', line=lineno, node=node)
 
 
     def _checkDocstringFormat(self, node_type, node, linenoDocstring):
@@ -101,28 +139,32 @@ class DocstringChecker(PylintDocStringChecker):
         @param node: current node of pylint
         @param linenoDocstring: linenumber of docstring
         """
-        # check the opening/closing of docstring
-        docstringStripedSpaces = node.doc.strip(" ")
-        if (not docstringStripedSpaces.startswith("\n")
-            or not docstringStripedSpaces.endswith("\n")):
+        # Check the opening/closing of docstring.
+        docstringStrippedSpaces = node.doc.strip(" ")
+        if (not docstringStrippedSpaces.startswith("\n")
+            or not docstringStrippedSpaces.endswith("\n")):
+            # If the docstring is in one line, then do not check indentations.
             self.add_message('W9201', line=linenoDocstring, node=node)
         else:
-            # check indentation
-            indentDocstring = node.col_offset and node.col_offset or 0
-            indentDocstring += len(re.findall(r'\n( *)"""',
-                                              node.as_string())[0])
-            linesDocstring = node.doc.lstrip("\n").split("\n")
-            for nline, lineDocstring in enumerate(linesDocstring):
-                if (nline < len(linesDocstring) - 1
-                    and not lineDocstring.strip()):
-                    # its a blank line
-                    continue
-                if indentDocstring != self._getLineIndent(lineDocstring):
-                    if node_type == "module":
-                        lineno = linenoDocstring
-                    else:
-                        lineno = linenoDocstring + nline + 1
-                    self.add_message('W9206', line=lineno, node=node)
+            # If the docstring's opening and closing quotes are on separate
+            # lines, then we check its indentation.
+            # Generating warnings about indentation when the quotes aren't
+            # done right only clutters the output.
+            self._checkIdenationIssue(node, node_type, linenoDocstring)
+
+
+    def _hasReturnValue(self, node):
+        """
+        Determine whether the given method or function has a return statement.
+
+        @param node: the node currently checks
+        """
+        returnFound = False
+        for subnode in node.body:
+            if type(subnode) == node_classes.Return:
+                returnFound = True
+                break
+        return returnFound
 
 
     def _checkEpytext(self, node_type, node, linenoDocstring):
@@ -133,28 +175,27 @@ class DocstringChecker(PylintDocStringChecker):
         @param node: current node of pylint
         @param linenoDocstring: linenumber of docstring
         """
-        # check epytext markups
-        if node_type in ["function", "method"]:
-            # check for arguments
-            for argname in node.argnames():
-                if argname == 'self':
-                    # argument self should not have a epytext markup
-                    continue
-                if not re.search(r"@param\s+%s\s*:" % argname, node.doc):
-                    self.add_message('W9202', line=linenoDocstring, node=node)
-                if not re.search(r"@type\s+%s\s*:" % argname, node.doc):
-                    self.add_message('W9203', line=linenoDocstring, node=node)
-            # check for return value
-            returnFound = False
-            for subnode in node.body:
-                if type(subnode) == node_classes.Return:
-                    returnFound = True
-                    break
-            if returnFound:
-                if not re.search(r"@return[s]{0,1}\s*:", node.doc):
-                    self.add_message('W9204', line=linenoDocstring, node=node)
-                if not re.search(r"@rtype\s*:", node.doc):
-                    self.add_message('W9205', line=linenoDocstring, node=node)
+        if node_type not in ['function', 'method']:
+            return
+        # Check for arguments.
+        # If current node is method,
+        # then first argument could not have a epytext markup.
+        # The first argument usally named 'self'.
+        argnames = (node.argnames()[1:] if node_type == 'method'
+                    else node.argnames())
+        for argname in argnames:
+            if not re.search(r"@param\s+%s\s*:" % argname, node.doc):
+                self.add_message('W9202', line=linenoDocstring,
+                                 node=node, args=argname)
+            if not re.search(r"@type\s+%s\s*:" % argname, node.doc):
+                self.add_message('W9203', line=linenoDocstring,
+                                 node=node, args=argname)
+        # Check for return value.
+        if self._hasReturnValue(node):
+            if not re.search(r"@return[s]{0,1}\s*:", node.doc):
+                self.add_message('W9204', line=linenoDocstring, node=node)
+            if not re.search(r"@rtype\s*:", node.doc):
+                self.add_message('W9205', line=linenoDocstring, node=node)
 
 
     def _checkBlankLineBeforeEpytext(self, node_type, node, linenoDocstring):
@@ -165,13 +206,13 @@ class DocstringChecker(PylintDocStringChecker):
         @param node: current node of pylint
         @param linenoDocstring: linenumber of docstring
         """
-        # check whether there is a blank line before epytext markups
+        # Check whether there is a blank line before epytext markups.
         patternEpytext = (r"\n *@(param|type|return|returns|rtype)"
                           r"\s*[a-zA-Z0-9_]*\s*\:")
         matchedEpytext = re.search(patternEpytext, node.doc)
         if matchedEpytext:
-            # this docstring have epytext markups
-            # then check the blank line
+            # This docstring have epytext markups,
+            # then check the blank line before them.
             posEpytext = matchedEpytext.start() + 1
             if not re.search(r"\n\s*\n\s*$", node.doc[:posEpytext]):
                 self.add_message('W9207', line=linenoDocstring, node=node)

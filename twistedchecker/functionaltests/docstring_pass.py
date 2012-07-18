@@ -46,3 +46,12 @@ class foo:
         @rtype: C{int}
         """
         return a
+
+
+    def e(self):
+        """
+        A method contains a function k().
+        No warning should be generated
+        """
+        def k():
+            pass
