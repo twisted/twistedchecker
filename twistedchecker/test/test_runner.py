@@ -81,34 +81,46 @@ class RunnerTestCase(unittest.TestCase):
                         msg="failed to call pylint")
 
 
+    def listAllTestModules(self):
+        """
+        Get all functional test modules.
+        """
+        testmodules = []
+        pathTestModules = os.path.join(twistedchecker.abspath,
+                                       "functionaltests")
+        for root, dirs, files in os.walk(pathTestModules):
+            for testfile in files:
+                if testfile.endswith(".py") and testfile != "__init__.py":
+                    pathFile = os.path.join(twistedchecker.abspath,
+                                            root, testfile)
+                    pathRelative = os.path.relpath(pathFile,
+                                                   twistedchecker.abspath)
+                    modulename = "twistedchecker." + \
+                                 pathRelative.strip(".py").replace(os.sep, ".")
+                    testmodules.append((pathFile, modulename))
+        return testmodules
+
+
     def test_functions(self):
         """
         This will automatically test some functional test files
         controlled by C{RunnerTestCase.configFunctionalTest}.
         """
         print >> sys.stderr, "\n\t----------------"
-        pathInputTestFiles = os.path.join(twistedchecker.abspath,
-                                          "functionaltests")
-        testfiles = [file for file in os.listdir(pathInputTestFiles)
-                     if file.endswith(".py") and file != "__init__.py"]
-        for testfile in testfiles:
-            pathTestFile = os.path.join(twistedchecker.abspath,
-                              "functionaltests", testfile)
-            resultfile = testfile.replace(".py", ".result")
-            pathResultFile = os.path.join(twistedchecker.abspath,
-                               "functionaltests", resultfile)
+        testmodules = self.listAllTestModules()
+        for pathTestFile, modulename in testmodules:
+            pathResultFile = pathTestFile.replace(".py", ".result")
             self.assertTrue(os.path.exists(pathTestFile),
-                       msg="could not find testfile: %s" % testfile)
+                       msg="could not find testfile:\n%s" % pathTestFile)
             self.assertTrue(os.path.exists(pathResultFile),
-                       msg="could not find resultfile: %s" % resultfile)
+                       msg="could not find resultfile:\n%s" % pathResultFile)
             self.clearOutputStream()
             runner = Runner()
             runner.setOutput(self.outputStream)
             # set the reporter to C{twistedchecker.reporters.test.TestReporter}
             runner.setReporter(TestReporter())
             self._limitMessages(pathTestFile, runner)
-            runner.run(["twistedchecker.functionaltests.%s" % \
-                        testfile.replace(".py", "")])
+            runner.run([modulename])
             # check the results
             if self.debug:
                 print >> sys.stderr, self.outputStream.getvalue()
@@ -116,6 +128,6 @@ class RunnerTestCase(unittest.TestCase):
             outputResult = self._removeSpaces(self.outputStream.getvalue())
             self.assertEqual(outputResult, predictResult,
                  "Incorrect result of %s, should be:\n---\n%s\n---" % \
-                 (testfile, predictResult))
-            print >> sys.stderr, "\tchecked test file: %s\n" % testfile
+                 (modulename, predictResult))
+            print >> sys.stderr, "\t%s\n" % modulename
         print >> sys.stderr, "\t----------------\n"
