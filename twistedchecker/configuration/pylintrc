@@ -72,6 +72,9 @@ class-rgx=([A-Z][a-zA-Z0-9]+)$
 # FooBar, Foo, FOO, foo_bar
 variable-rgx=([a-z_][a-zA-Z0-9]*)$
 
+# Argument names are same to variable names.
+argument-rgx=([a-z_][a-zA-Z0-9]*)$
+
 
 [SIMILARITIES]
 
