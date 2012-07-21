@@ -2,17 +2,17 @@
 
 # Function names should be same as method names
 
-def FooBar(self):
+def FooBar():
     pass
 
 
-def Foo(self):
+def Foo():
     pass
 
 
-def FOOBAR(self):
+def FOOBAR():
     pass
 
 
-def fooBar_of_baz(self):
+def fooBar_of_baz():
     pass
