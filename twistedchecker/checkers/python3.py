@@ -45,22 +45,34 @@ class Python3Checker(BaseChecker):
         self.checkPrintStatement(node)
 
 
-    def checkPrintStatement(self, node):
+    def _getRawCodesInOneLine(self, node):
         """
-        Check for print statement in python 3(W9601).
+        Get raw codes for given node, and put them into one line.
 
-        @parm node: current node of checking
+        @param node: node to check
         """
         linenoBegin = node.fromlineno - 1
         linenoEnd = node.tolineno - 1
         if (not self.linesOfCurrentModule or
             linenoEnd >= len(self.linesOfCurrentModule)):
             # in the case, the code is not from a module exists
-            return
+            return None
         codeStatement = " ".join(
                 [line.strip()
                  for line in \
                  self.linesOfCurrentModule[linenoBegin: linenoEnd + 1]])
+        return codeStatement
+
+
+    def checkPrintStatement(self, node):
+        """
+        Check for print statement in python 3(W9601).
+
+        @parm node: current node of checking
+        """
+        codeStatement = self._getRawCodesInOneLine(node)
+        if not codeStatement:
+            return
         # check for parens
         # replace all child nodes(especially tuples) with X
         codeStatement = codeStatement.replace(" ", "")

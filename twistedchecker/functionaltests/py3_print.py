@@ -24,3 +24,6 @@ print("The answer is", 2 * 2)
 print()
 
 #print("fatal error", file=sys.stderr)
+
+print(
+   "look it's an extra line")
