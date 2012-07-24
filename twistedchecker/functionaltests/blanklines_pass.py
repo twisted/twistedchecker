@@ -1,4 +1,4 @@
-# enable: W9012,W9013,W9014,W9015,W9016
+# enable: W9012,W9013,W9015,W9016
 
 # Top-level classes should be separated with 3 blank lines
 class a:

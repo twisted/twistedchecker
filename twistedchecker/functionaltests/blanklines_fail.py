@@ -1,4 +1,4 @@
-# enable: W9012,W9013,W9014,W9015,W9016
+# enable: W9012,W9013,W9015,W9016
 
 # Top-level classes separated with 2 blank lines,
 # should be 3

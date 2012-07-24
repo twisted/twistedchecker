@@ -64,6 +64,7 @@ class PEP8WarningRecorder(PEP8OriginalChecker):
             sys.stdout = stdoutBak
 
 
+
 class PEP8Checker(BaseChecker):
     """
     A checker for checking pep8 issues.
@@ -81,8 +82,6 @@ class PEP8Checker(BaseChecker):
      'W9013': ('Expected 3 blank lines, found %s',
                'Top-level functions should be separated '
                'with 3 blank lines.'),
-     'W9014': ('Too many blank lines, found %s',
-               'Used when too many blank lines are found.'),
      'W9015': ('Too many blank lines, expected %s',
                'Used when too many blank lines are found.'),
      'W9016': ('Too many blank lines after docstring, found %s',
@@ -98,8 +97,7 @@ class PEP8Checker(BaseChecker):
         'W293': ('W9011', ''),
         'E301': ('W9012', r'expected 2 blank lines, found (\d+)'),
         'E302': ('W9013', r'expected 3 blank lines, found (\d+)'),
-        'E303': ('W9014', r'too many blank lines \((\d+)\)'),
-        'E3032': ('W9015', r'too many blank lines, expected \((\d+)\)'),
+        'E303': ('W9015', r'too many blank lines, expected \((\d+)\)'),
         'E305': ('W9016', r'too many blank lines after docstring \((\d+)\)'),
     }
     warnings = None
@@ -204,11 +202,7 @@ def modified_blank_lines(logical_line, blank_lines, indent_level, line_number,
     #     if max_blank_lines:
     #         return 0, "E304 blank lines found after function decorator"
 
-    # should not have more than 3 blank lines
-    if max_blank_lines > 3 or (indent_level and max_blank_lines > 2):
-        return 0, "E303 too many blank lines (%d)" % max_blank_lines
-
-    elif isClassDefDecorator(logical_line):
+    if isClassDefDecorator(logical_line):
         if indent_level:
             # There should only be 1 line or less between docstrings and
             # the next function
@@ -233,4 +227,4 @@ def modified_blank_lines(logical_line, blank_lines, indent_level, line_number,
             return 0, "E302 expected 3 blank lines, found %d" % max_blank_lines
 
     elif max_blank_lines > 1 and indent_level:
-        return 0, "E3032 too many blank lines, expected (%d)" % max_blank_lines
+        return 0, "E303 too many blank lines, expected (%d)" % max_blank_lines
