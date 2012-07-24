@@ -159,7 +159,7 @@ def modified_blank_lines(logical_line, blank_lines, indent_level, line_number,
                 previous_logical, previous_indent_level,
                 blank_lines_before_comment):
     """
-    This function is copied from a modified pep8 checker fot Twisted.
+    This function is copied from a modified pep8 checker for Twisted.
     See https://github.com/cyli/TwistySublime/blob/master/twisted_pep8.py
     Twisted Coding Standard:
 
