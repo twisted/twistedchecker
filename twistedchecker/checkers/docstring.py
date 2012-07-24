@@ -106,7 +106,7 @@ class DocstringChecker(PylintDocStringChecker):
         self._checkBlankLineBeforeEpytext(node_type, node, linenoDocstring)
 
 
-    def _checkIdenationIssue(self, node, node_type, linenoDocstring):
+    def _checkIndentationIssue(self, node, node_type, linenoDocstring):
         """
         Check whether a docstring have consistent indentations.
 
@@ -150,7 +150,7 @@ class DocstringChecker(PylintDocStringChecker):
             # lines, then we check its indentation.
             # Generating warnings about indentation when the quotes aren't
             # done right only clutters the output.
-            self._checkIdenationIssue(node, node_type, linenoDocstring)
+            self._checkIndentationIssue(node, node_type, linenoDocstring)
 
 
     def _hasReturnValue(self, node):
@@ -180,7 +180,7 @@ class DocstringChecker(PylintDocStringChecker):
         # Check for arguments.
         # If current node is method,
         # then first argument could not have a epytext markup.
-        # The first argument usally named 'self'.
+        # The first argument usually named 'self'.
         argnames = (node.argnames()[1:] if node_type == 'method'
                     else node.argnames())
         for argname in argnames:
