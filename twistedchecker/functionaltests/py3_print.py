@@ -27,3 +27,5 @@ print()
 
 print(
    "look it's an extra line")
+
+print (1)
