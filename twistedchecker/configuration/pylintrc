@@ -55,7 +55,7 @@ module-rgx=(([a-z_][a-z0-9_]*))$
 
 method-rgx=((([a-z_])|([a-z]+_[a-z]))[a-zA-Z0-9]+)$|(__[a-z]+__)$
 
-# Function name should be same to method name.
+# Function names should be same as method names.
 
 function-rgx=((([a-z_])|([a-z]+_[a-z]))[a-zA-Z0-9]+)$|(__[a-z]+__)$
 
