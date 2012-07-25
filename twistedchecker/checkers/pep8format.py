@@ -15,9 +15,8 @@ from pep8 import Checker as PEP8OriginalChecker
 
 class PEP8WarningRecorder(PEP8OriginalChecker):
     """
-    A subclass of pep8 checker and will record warnings.
+    A subclass of pep8's checker that records warnings.
     """
-    warnings = None
 
     def __init__(self, file):
         """
@@ -34,7 +33,7 @@ class PEP8WarningRecorder(PEP8OriginalChecker):
     def report_error(self, lineNumber, offset, text, check):
         """
         A function to override report_error in pep8.
-        And record output warings.
+        And record output warnings.
 
         @param lineNumber: line number
         @param offset: column offset
