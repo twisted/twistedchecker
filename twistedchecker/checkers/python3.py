@@ -7,6 +7,7 @@ import re
 from logilab import astng
 
 import logilab.astng.node_classes
+from logilab.astng.exceptions import ASTNGError
 
 from pylint.interfaces import IASTNGChecker
 from pylint.checkers import BaseChecker
@@ -50,7 +51,7 @@ class Python3Checker(BaseChecker):
 
     def visit_callfunc(self, node):
         """
-        Be invoked when visiting a print statement.
+        Be invoked when visiting a function node.
 
         @parm node: current node of checking
         """
@@ -77,7 +78,7 @@ class Python3Checker(BaseChecker):
             # now get the object which is called
             # it should be the first child of the method node
             objCalled = func.get_children().next()
-            if type(objCalled) == logilab.astng.node_classes.Dict:
+            if isinstance(objCalled, logilab.astng.node_classes.Dict):
                 # in this case, the statement should like
                 # {}.has_key()
                 issueFound = True
@@ -87,10 +88,13 @@ class Python3Checker(BaseChecker):
                 # if an error is generated here, it means ast failed to
                 # find the definition
                 objInfered = node.func.last_child().infered()[0]
-                if type(objInfered) == logilab.astng.node_classes.Dict:
+                if isinstance(objInfered, logilab.astng.node_classes.Dict):
                     issueFound = True
-        except:
+        except AttributeError:
             return
+        except ASTNGError:
+            # ignore errors from astng
+            pass
         if issueFound:
             self.add_message('W9602', node=node)
 
