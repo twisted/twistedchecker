@@ -96,7 +96,7 @@ class Python3Checker(BaseChecker):
                 objInferedList = nodeArgument.infered()
             except ASTNGError:
                 # may be the name is unresolvable,
-                # or defination is unreachable
+                # or definition is unreachable
                 return
             if not objInferedList:
                 # no infered node is found
