@@ -35,7 +35,7 @@ class Python3Checker(BaseChecker):
         """
         Save lines of the module currently checking.
 
-        @parm node: current node of checking
+        @param node: current node of checking
         """
         self.linesOfCurrentModule = node.file_stream.readlines()
 
@@ -44,7 +44,7 @@ class Python3Checker(BaseChecker):
         """
         Be invoked when visiting a print statement.
 
-        @parm node: current node of checking
+        @v node: current node of checking
         """
         self.checkPrintStatement(node)
 
@@ -53,7 +53,7 @@ class Python3Checker(BaseChecker):
         """
         Be invoked when visiting a function node.
 
-        @parm node: current node of checking
+        @param node: current node of checking
         """
         self.checkHasKeyIssue(node)
 
@@ -62,7 +62,7 @@ class Python3Checker(BaseChecker):
         """
         Check for has_key issue in python 3(W9602).
 
-        @parm node: current node of checking
+        @param node: current node of checking
         """
         issueFound = False
         # get the function
@@ -113,7 +113,7 @@ class Python3Checker(BaseChecker):
         """
         Check for print statement in python 3(W9601).
 
-        @parm node: current node of checking
+        @param node: current node of checking
         """
         linenoBegin = node.fromlineno - 1
         linenoEnd = node.tolineno - 1
