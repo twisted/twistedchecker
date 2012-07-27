@@ -5,7 +5,7 @@ import os
 from pylint.lint import PyLinter
 
 import twistedchecker
-
+from twistedchecker.reporters.limited import LimitedReporter
 
 class Runner():
     """
@@ -16,6 +16,11 @@ class Runner():
     # Customized checkers.
     checkers = ("header.HeaderChecker",
                 "modulename.ModuleNameChecker")
+    allowedMessagesFromPylint = ("C0111",
+                                 "C0103",
+                                 "C0301",
+                                 "W0311",
+                                 "W0312")
 
     def __init__(self):
         """
@@ -31,9 +36,11 @@ class Runner():
         # now we can load file config and command line, plugins (which can
         # provide options) have been registered.
         self.linter.load_config_file()
-        self.registerCheckers()
+        allowedMessages = self.registerCheckers()
         # set default output stream to stderr
         self.setOutput(sys.stderr)
+        # set default reporter to limited reporter
+        self.setReporter(LimitedReporter(allowedMessages))
 
 
     def setOutput(self, stream):
@@ -65,6 +72,8 @@ class Runner():
     def registerCheckers(self):
         """
         Register all checkers of TwistedChecker to C{PyLinter}.
+
+        @return: a list of allowed messages
         """
         # add checkers for python 3
         cfgfile = self.linter.cfgfile_parser
@@ -72,13 +81,60 @@ class Runner():
             cfgfile.getboolean("TWISTEDCHECKER", "check-python3")):
             self.checkers += ("python3.Python3Checker",)
         # register checkers
+        allowedMessages = list(self.allowedMessagesFromPylint)
         for strChecker in self.checkers:
             modname, classname = strChecker.split(".")
             strModule = "twistedchecker.checkers.%s" % modname
             checker = getattr(__import__(strModule,
                                         fromlist=["twistedchecker.checkers"]),
                              classname)
-            self.linter.register_checker(checker(self.linter))
+            instanceChecker = checker(self.linter)
+            allowedMessages += instanceChecker.msgs.keys()
+            self.linter.register_checker(instanceChecker)
+
+        self.restrictCheckers(allowedMessages)
+        return set(allowedMessages)
+
+
+    def unregisterChecker(self, checker):
+        """
+        Remove a checker from the list of registered checkers.
+
+        @param checker: the checker to remove
+        """
+        self.linter._checkers[checker.name].remove(checker)
+        if checker in self.linter._reports:
+            del self.linter._reports[checker]
+        if checker in self.linter.options_providers:
+            self.linter.options_providers.remove(checker)
+
+
+    def findUselessCheckers(self, allowedMessages):
+        """
+        Find checkers which generate no allowed messages.
+
+        @param allowedMessages: allowed messages
+        @return: useless checkers, remove them from pylint
+        """
+        uselessCheckers = []
+        for checkerName in self.linter._checkers:
+            for checker in list(self.linter._checkers[checkerName]):
+                messagesOfChecker = set(checker.msgs)
+                if not messagesOfChecker.intersection(allowedMessages):
+                    uselessCheckers.append(checker)
+        return uselessCheckers
+
+
+    def restrictCheckers(self, allowedMessages):
+        """
+        Unregister useless checkers to speed up twistedchecker.
+
+        @param allowedMessages: output messages allowed in twistedchecker
+        """
+        uselessCheckers = self.findUselessCheckers(allowedMessages)
+        # Unregister these checkers
+        for checker in uselessCheckers:
+            self.unregisterChecker(checker)
 
 
     def run(self, args):
