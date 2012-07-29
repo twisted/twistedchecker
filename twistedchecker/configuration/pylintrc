@@ -67,7 +67,7 @@ attr-rgx=((([a-z_])|([a-z]+_[a-z]))[a-zA-Z0-9]+)$
 
 # Classes are to be named in mixed case, with the first letter capitalized,
 # each word separated by having its first letter capitalized.
-class-rgx=([A-Z][a-zA-Z0-9]+)$
+class-rgx=(_{0,1})([A-Z][a-zA-Z0-9]+)$
 
 # Regular expression which should only match correct variable names
 # good variable names:
