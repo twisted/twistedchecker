@@ -1,4 +1,4 @@
-# enable: C0111
+# enable: W9208
 
 # Modules in Twisted should contain docstring.
 
