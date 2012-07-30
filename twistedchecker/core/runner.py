@@ -6,6 +6,7 @@ from pylint.lint import PyLinter
 
 import twistedchecker
 from twistedchecker.reporters.limited import LimitedReporter
+from twistedchecker.core.diff import DiffController
 
 class Runner():
     """
@@ -21,12 +22,13 @@ class Runner():
                                  "C0301",
                                  "W0311",
                                  "W0312")
-
+    diffOption = None
+    
     def __init__(self):
         """
         Initialize C{PyLinter} object, and load configuration file.
         """
-        self.linter = PyLinter(())
+        self.linter = PyLinter(self._makeOptions())
         # register standard checkers.
         self.linter.load_default_plugins()
         # read configuration.
@@ -41,6 +43,45 @@ class Runner():
         self.setOutput(sys.stderr)
         # set default reporter to limited reporter
         self.setReporter(LimitedReporter(allowedMessages))
+
+
+    def _makeOptions(self):
+        """
+        Return options for twistedchecker.
+        """
+        return (
+            ("diff",
+             {"action" : "callback", "callback": self._optionCallbackDiff,
+              "help" : "Show only new warnings for svn branch or patch."}
+            ),
+            ("diff-compare",
+             {"action": "callback", "callback": self._optionCallbackDiffComp,
+              "type": "string",
+              "metavar": "<trunk|lastbuild|revision number>",
+              "help": "Set comparing branch for diff option."}
+            ),
+          )
+
+
+    def _optionCallbackDiff(self, *args):
+        """
+        Be called when the option "--diff" is used.
+        """
+        if not self.diffOption:
+            # Defaultly, compare warnings to trunk.
+            self.diffOption = "trunk"
+
+
+    def _optionCallbackDiffComp(self, obj, opt, val, parser):
+        """
+        Be called when the option "--diff" is used.
+
+        @param obj: option object
+        @param opt: option name
+        @param val: option value
+        @param parser: option parser
+        """
+        self.diffOption = val
 
 
     def setOutput(self, stream):
@@ -149,6 +190,13 @@ class Runner():
             raise
         if not args:
             self.displayHelp()
+
+        # check for diff option.
+        if self.diffOption:
+            diffController = DiffController(self.diffOption,
+                                            sys.argv[1:], args)
+            #diffController.show()
+            sys.exit()
         # insert current working directory to the python path to have a correct
         # behaviour.
         sys.path.insert(0, os.getcwd())

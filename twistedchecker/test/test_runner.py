@@ -153,6 +153,7 @@ class RunnerTestCase(unittest.TestCase):
         """
         messagesFromTests = self._loadAllowedMessages()
         messagesFromReporter = Runner().linter.reporter.messagesAllowed
+        import pdb;sys.stdout = sys.stderr;pdb.set_trace()
         self.assertEqual(messagesFromTests, messagesFromReporter)
 
 
