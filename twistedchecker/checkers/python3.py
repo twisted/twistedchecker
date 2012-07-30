@@ -64,7 +64,7 @@ class Python3Checker(BaseChecker):
         """
         Check for apply issue in python 3(W9603).
 
-        @parm node: current node of checking
+        @param node: current node of checking
         """
         try:
             if (node.func.name == "apply" and
