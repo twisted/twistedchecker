@@ -28,7 +28,8 @@ class Python3Checker(BaseChecker):
                'Checking has_key issue for python 3.'),
      'W9603': ('The built-in function apply is removed in python 3',
                'Checking apply issue for python 3.'),
-     'W9604': ('except exc, var is no longer supported in python 3',
+     'W9604': ("Please use 'except Exception as e:',"
+               "rather than 'except Exception, e:'",
                'Checking exception issue for python 3.'),
     }
     options = ()
@@ -87,7 +88,7 @@ class Python3Checker(BaseChecker):
                 [line.strip()
                  for line in \
                  self.linesOfCurrentModule[linenoBegin: linenoEnd + 1]])
-        regexDeprecated = "except\s+\w+\s*,\s*\w+\:"
+        regexDeprecated = r"except\s+(\(.+\)|\w+)\s*,\s*\w+\:"
         if re.search(regexDeprecated, codeStatement):
             self.add_message('W9604', node=node)
 
