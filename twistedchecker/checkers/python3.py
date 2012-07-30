@@ -32,7 +32,7 @@ class Python3Checker(BaseChecker):
         """
         Save lines of the module currently checking.
 
-        @parm node: current node of checking
+        @param node: current node of checking
         """
         self.warningsOfCurrentModule = set([])
 
@@ -41,7 +41,7 @@ class Python3Checker(BaseChecker):
         """
         Be invoked when visiting a print statement.
 
-        @parm node: current node of checking
+        @param node: current node of checking
         """
         if self.warningsOfCurrentModule == None:
             return
