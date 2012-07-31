@@ -1,4 +1,4 @@
-# enable: C0111
+# enable: W9208
 
 """
 Docstring of this module.

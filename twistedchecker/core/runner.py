@@ -17,9 +17,12 @@ class Runner():
     linter = None
     # Customized checkers.
     checkers = ("header.HeaderChecker",
-                "modulename.ModuleNameChecker")
+                "modulename.ModuleNameChecker",
+                "pep8format.PEP8Checker",
+                "docstring.DocstringChecker",
+                "formattingoperation.FormattingOperationChecker",
+                "comment.CommentChecker")
     allowedMessagesFromPylint = ("F0001",
-                                 "C0111",
                                  "C0103",
                                  "C0301",
                                  "W0311",
