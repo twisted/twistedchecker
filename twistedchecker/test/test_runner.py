@@ -4,11 +4,13 @@ import StringIO
 import operator
 
 from twisted.trial import unittest
+from twisted.python.filepath import FilePath
 
 import twistedchecker
 from twistedchecker.core.runner import Runner
 from twistedchecker.reporters.test import TestReporter
 from twistedchecker.checkers.header import HeaderChecker
+
 
 class RunnerTestCase(unittest.TestCase):
     """
@@ -77,7 +79,7 @@ class RunnerTestCase(unittest.TestCase):
         testfiles = reduce(operator.add,
                            [map(lambda f: os.path.join(pathDir, f), files)
                             for pathDir, _, files in os.walk(pathTests)])
-        messagesAllowed = set()
+        messagesAllowed = set(Runner.allowedMessagesFromPylint)
         for testfile in testfiles:
             firstline = open(testfile).readline().strip()
             if (firstline.startswith("#") and "enable" in firstline
@@ -153,7 +155,6 @@ class RunnerTestCase(unittest.TestCase):
         """
         messagesFromTests = self._loadAllowedMessages()
         messagesFromReporter = Runner().linter.reporter.messagesAllowed
-        import pdb;sys.stdout = sys.stderr;pdb.set_trace()
         self.assertEqual(messagesFromTests, messagesFromReporter)
 
 
@@ -220,3 +221,67 @@ class RunnerTestCase(unittest.TestCase):
                  (modulename, predictResult))
             print >> sys.stderr, "\t%s\n" % modulename
         print >> sys.stderr, "\t----------------\n"
+
+
+    def test_computeWarnings(self):
+        """
+        Test for twistedchecker.core.runner.Runner.computeWarnings.
+        """
+        textWarnings = """
+************* Module foo
+W9001:  1,0: Missing copyright header
+************* Module bar
+W9002:  1,0: Missing a reference to test module in header
+C0111:  10,0: Missing docstring
+        """.strip()
+
+        warningsCorrect = {
+            "foo": {"W9001:  1,0: Missing copyright header", },
+            "bar": {"W9002:  1,0: Missing a reference "
+                    "to test module in header",
+                    "C0111:  10,0: Missing docstring"
+                   }
+        }
+
+        warnings = Runner().computeWarnings(textWarnings)
+        self.assertEqual(warnings, warningsCorrect)
+
+
+    def test_generateDiff(self):
+        """
+        Test for twistedchecker.core.runner.Runner.generateDiff.
+        """
+        tempDir = FilePath(self.mktemp())
+        tempDir.createDirectory()
+        comparingResult = tempDir.child('comparing-result-for-test.tmp')
+        comparingResult.setContent("""
+************* Module foo
+W9001:  1,0: Missing copyright header
+************* Module bar
+W9002:  1,0: Missing a reference to test module in header
+C0111:  10,0: Missing docstring
+        """.strip())
+
+        result = """
+************* Module foo
+W9001:  1,0: Missing copyright header
+C0301: 10,0: Line too long
+************* Module bar
+W9002:  1,0: Missing a reference to test module in header
+C0111:  10,0: Missing docstring
+************* Module baz
+W9001:  1,0: Missing copyright header
+        """.strip()
+
+        diffCorrect = """
+************* Module foo
+C0301: 10,0: Line too long
+************* Module baz
+W9001:  1,0: Missing copyright header
+        """.strip()
+
+        # Make sure generated diff is correct.
+        runner = Runner()
+        runner.diffOption = comparingResult.path
+        diff = runner.generateDiff(result)
+        self.assertEqual(diff, diffCorrect)

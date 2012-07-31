@@ -1,12 +1,13 @@
 # -*- test-case-name: twistedchecker.test.test_runner -*-
 import sys
 import os
+import StringIO
+import re
 
 from pylint.lint import PyLinter
 
 import twistedchecker
 from twistedchecker.reporters.limited import LimitedReporter
-from twistedchecker.core.diff import DiffController
 
 class Runner():
     """
@@ -17,13 +18,17 @@ class Runner():
     # Customized checkers.
     checkers = ("header.HeaderChecker",
                 "modulename.ModuleNameChecker")
-    allowedMessagesFromPylint = ("C0111",
+    allowedMessagesFromPylint = ("F0001",
+                                 "C0111",
                                  "C0103",
                                  "C0301",
                                  "W0311",
                                  "W0312")
     diffOption = None
-    
+    errorResultNotExist = "Error: Result file '%s' does not exist."
+    prefixModuleName = "************* Module "
+    regexLineStart = "^[WCEFR]\d{4}\:"
+
     def __init__(self):
         """
         Initialize C{PyLinter} object, and load configuration file.
@@ -40,7 +45,7 @@ class Runner():
         self.linter.load_config_file()
         allowedMessages = self.registerCheckers()
         # set default output stream to stderr
-        self.setOutput(sys.stderr)
+        self.setOutput(sys.stdout)
         # set default reporter to limited reporter
         self.setReporter(LimitedReporter(allowedMessages))
 
@@ -51,28 +56,16 @@ class Runner():
         """
         return (
             ("diff",
-             {"action" : "callback", "callback": self._optionCallbackDiff,
-              "help" : "Show only new warnings for svn branch or patch."}
-            ),
-            ("diff-compare",
-             {"action": "callback", "callback": self._optionCallbackDiffComp,
+             {"action": "callback", "callback": self._optionCallbackDiff,
               "type": "string",
-              "metavar": "<trunk|lastbuild|revision number>",
-              "help": "Set comparing branch for diff option."}
+              "metavar": "<result-file>",
+              "help": "Set comparing result file to automatically "
+                      "generate a diff."}
             ),
           )
 
 
-    def _optionCallbackDiff(self, *args):
-        """
-        Be called when the option "--diff" is used.
-        """
-        if not self.diffOption:
-            # Defaultly, compare warnings to trunk.
-            self.diffOption = "trunk"
-
-
-    def _optionCallbackDiffComp(self, obj, opt, val, parser):
+    def _optionCallbackDiff(self, obj, opt, val, parser):
         """
         Be called when the option "--diff" is used.
 
@@ -81,6 +74,11 @@ class Runner():
         @param val: option value
         @param parser: option parser
         """
+        # check if given value is a existing file
+        if not os.path.exists(val):
+            print >> sys.stderr, self.errorResultNotExist % val
+            sys.exit()
+
         self.diffOption = val
 
 
@@ -190,14 +188,90 @@ class Runner():
             raise
         if not args:
             self.displayHelp()
-
         # check for diff option.
         if self.diffOption:
-            diffController = DiffController(self.diffOption,
-                                            sys.argv[1:], args)
-            #diffController.show()
-            sys.exit()
+            self.prepareDiff()
         # insert current working directory to the python path to have a correct
         # behaviour.
         sys.path.insert(0, os.getcwd())
         self.linter.check(args)
+        # show diff of warnings if diff option on.
+        if self.diffOption:
+            self.showDiffResults()
+
+
+    def prepareDiff(self):
+        """
+        Prepare to run the checker and get diff results.
+        """
+        self.streamForDiff = StringIO.StringIO()
+        self.linter.reporter.set_output(self.streamForDiff)
+
+
+    def showDiffResults(self):
+        """
+        Show results when diff option on.
+        """
+        result = self.streamForDiff.getvalue()
+        resultDiff = self.generateDiff(result)
+        print >> self.outputStream, resultDiff
+
+
+    def generateDiff(self, result):
+        """
+        Generate diff between checking results and the given comparing
+        results.
+
+        @param result: a list of warnings in string
+        @return: diff in string
+        """
+        currentErrors = self.computeWarnings(result)
+        previousErrors = self.computeWarnings(open(self.diffOption).read())
+        newErrors = {}
+
+        for modulename in currentErrors:
+            errors = (
+                currentErrors[modulename] -
+                previousErrors.get(modulename, set()))
+            if errors:
+                newErrors[modulename] = errors
+
+        allNewErrors = []
+        if newErrors:
+            for modulename in newErrors:
+                allNewErrors.append(self.prefixModuleName + modulename)
+                allNewErrors.extend(newErrors[modulename])
+
+        return "\n".join(allNewErrors)
+
+
+    def computeWarnings(self, result):
+        """
+        Transform result in string to a dict.
+
+        @param result: a list of warnings in string
+        @return: a dict of warnings
+        """
+        warnings = {}
+        currentModule = None
+        warningsCurrentModule = []
+        for line in StringIO.StringIO(result):
+            # Mostly get rid of the trailing \n
+            line = line.strip("\n")
+            if line.startswith(self.prefixModuleName):
+                # Save results for previous module
+                if currentModule:
+                    warnings[currentModule] = set(warningsCurrentModule)
+                # Initial results for current module
+                moduleName = line.replace(self.prefixModuleName, "")
+                currentModule = moduleName
+                warningsCurrentModule = []
+            elif re.search(self.regexLineStart, line):
+                warningsCurrentModule.append(line)
+            else:
+                if warningsCurrentModule:
+                    warningsCurrentModule[-1] += "\n" + line
+        # Save warnings for last module
+        if currentModule:
+            warnings[currentModule] = set(warningsCurrentModule)
+        return warnings
