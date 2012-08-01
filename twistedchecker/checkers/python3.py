@@ -31,6 +31,7 @@ class Python3Checker(BaseChecker):
     }
     options = ()
     linesOfCurrentModule = None
+    importedNames = None
 
     def visit_module(self, node):
         """
@@ -39,6 +40,7 @@ class Python3Checker(BaseChecker):
         @parm node: current node of checking
         """
         self.linesOfCurrentModule = node.file_stream.readlines()
+        self.importedNames = []
 
 
     def visit_print(self, node):
@@ -60,6 +62,30 @@ class Python3Checker(BaseChecker):
         self.checkApplyIssue(node)
 
 
+    def visit_from(self, node):
+        """
+        Save imported names.
+
+        @param node: current node of checking
+        """
+        for namePair in node.names:
+            nameOriginal, nameAlias = namePair
+            importedName = nameAlias or nameOriginal
+            self.importedNames.append(importedName)
+
+
+    def visit_import(self, node):
+        """
+        Save imported names.
+
+        @param node: current node of checking
+        """
+        for namePair in node.names:
+            nameOriginal, nameAlias = namePair
+            importedName = nameAlias or nameOriginal
+            self.importedNames.append(importedName)
+
+
     def checkApplyIssue(self, node):
         """
         Check for apply issue in python 3(W9603).
@@ -68,8 +94,9 @@ class Python3Checker(BaseChecker):
         """
         try:
             if (node.func.name == "apply" and
-                type(node.func) == logilab.astng.node_classes.Name):
-                self.add_message('W9603', node=node)
+                type(node.func) == logilab.astng.node_classes.Name and
+                "apply" not in self.importedNames):
+                    self.add_message('W9603', node=node)
         except:
             pass
 

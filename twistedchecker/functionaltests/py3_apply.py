@@ -26,5 +26,11 @@ class Bar:
 
 baz = Bar()
 
-# no warning should be generated
+# No warning should be generated
 baz.apply(1, 2)
+
+# Should not warn if the apply function is imported from somewhere else
+
+from os.path import exists as apply
+
+apply("foo")
