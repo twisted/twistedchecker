@@ -223,9 +223,9 @@ class RunnerTestCase(unittest.TestCase):
         print >> sys.stderr, "\t----------------\n"
 
 
-    def test_computeWarnings(self):
+    def test_parseWarnings(self):
         """
-        Test for twistedchecker.core.runner.Runner.computeWarnings.
+        Test for twistedchecker.core.runner.Runner.parseWarnings.
         """
         textWarnings = """
 ************* Module foo
@@ -243,45 +243,65 @@ C0111:  10,0: Missing docstring
                    }
         }
 
-        warnings = Runner().computeWarnings(textWarnings)
+        warnings = Runner().parseWarnings(textWarnings)
         self.assertEqual(warnings, warningsCorrect)
+
+
+    def test_formatWarnings(self):
+        """
+        Test for twistedchecker.core.runner.Runner.formatWarnings.
+        """
+        warnings = {
+            "foo": {"W9001:  1,0: Missing copyright header", },
+            "bar": {"W9002:  1,0: Missing a reference "
+                    "to test module in header",
+                    "C0111:  10,0: Missing docstring"
+                   }
+        }
+
+        resultCorrect = """
+************* Module foo
+W9001:  1,0: Missing copyright header
+************* Module bar
+W9002:  1,0: Missing a reference to test module in header
+C0111:  10,0: Missing docstring
+        """.strip()
+
+        result = Runner().formatWarnings(warnings)
+        self.assertEqual(result, resultCorrect)
 
 
     def test_generateDiff(self):
         """
         Test for twistedchecker.core.runner.Runner.generateDiff.
         """
-        tempDir = FilePath(self.mktemp())
-        tempDir.createDirectory()
-        oldResult = tempDir.child('comparing-result-for-test.tmp')
-        oldResult.setContent("""
-************* Module foo
-W9001:  1,0: Missing copyright header
-************* Module bar
-W9002:  1,0: Missing a reference to test module in header
-C0111:  10,0: Missing docstring
-        """.strip())
+        oldWarnings = {
+            "foo": {"W9001:  1,0: Missing copyright header"},
+            "bar": {
+                "W9002:  1,0: Missing a reference to test module in header",
+                "C0111:  10,0: Missing docstring"
+            }
+        }
 
-        newResult = """
-************* Module foo
-W9001:  1,0: Missing copyright header
-C0301: 10,0: Line too long
-************* Module bar
-W9002:  1,0: Missing a reference to test module in header
-C0111:  10,0: Missing docstring
-************* Module baz
-W9001:  1,0: Missing copyright header
-        """.strip()
+        newWarnings = {
+            "foo": {
+                "W9001:  1,0: Missing copyright header",
+                "C0301: 10,0: Line too long"
+            },
+            "bar": {
+                "W9002:  1,0: Missing a reference to test module in header",
+                "C0111:  10,0: Missing docstring"
+            },
+            "baz": {
+                "W9001:  1,0: Missing copyright header"
+            }
+        }
 
-        diffCorrect = """
-************* Module foo
-C0301: 10,0: Line too long
-************* Module baz
-W9001:  1,0: Missing copyright header
-        """.strip()
+        diffCorrect = {
+            "foo": {"C0301: 10,0: Line too long"},
+            "baz": {"W9001:  1,0: Missing copyright header"}
+        }
 
         # Make sure generated diff is correct.
-        runner = Runner()
-        runner.diffOption = oldResult.path
-        diff = runner.generateDiff(newResult)
+        diff = Runner().generateDiff(oldWarnings, newWarnings)
         self.assertEqual(diff, diffCorrect)

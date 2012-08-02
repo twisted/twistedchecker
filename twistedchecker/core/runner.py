@@ -215,42 +215,40 @@ class Runner():
         """
         Show results when diff option on.
         """
-        result = self.streamForDiff.getvalue()
-        resultDiff = self.generateDiff(result)
-        self.outputStream.write(resultDiff + "\n")
+        oldResult = open(self.diffOption).read()
+        oldWarnings = self.computeWarnings(oldResult)
+
+        newResult = self.streamForDiff.getvalue()
+        newWarnings = self.computeWarnings(newResult)
+
+        diffWarnings = self.generateDiff(oldResult, newResult)
+        diffResult = self.formatWarnings(diffWarnings)
+        self.outputStream.write(diffResult + "\n")
 
 
-    def generateDiff(self, result):
+    def generateDiff(self, oldWarnings, newWarnings):
         """
-        Generate diff between checking results and the given comparing
-        results.
+        Generate diff between given two lists of warnings.
 
-        @param result: a list of warnings in string
-        @return: diff in string
+        @param oldWarnings: parsed old warnings
+        @param newWarnings: parsed new warnings
+        @return: a dict object of diff
         """
-        currentErrors = self.computeWarnings(result)
-        previousErrors = self.computeWarnings(open(self.diffOption).read())
-        newErrors = {}
+        diffWarnings = {}
 
-        for modulename in currentErrors:
-            errors = (
-                currentErrors[modulename] -
-                previousErrors.get(modulename, set()))
-            if errors:
-                newErrors[modulename] = errors
+        for modulename in newWarnings:
+            diffInModule = (
+                newWarnings[modulename] -
+                oldWarnings.get(modulename, set()))
+            if diffInModule:
+                diffWarnings[modulename] = diffInModule
 
-        allNewErrors = []
-        if newErrors:
-            for modulename in newErrors:
-                allNewErrors.append(self.prefixModuleName + modulename)
-                allNewErrors.extend(newErrors[modulename])
-
-        return "\n".join(allNewErrors)
+        return diffWarnings
 
 
-    def computeWarnings(self, result):
+    def parseWarnings(self, result):
         """
-        Transform result in string to a dict.
+        Transform result in string to a dict object.
 
         @param result: a list of warnings in string
         @return: a dict of warnings
@@ -276,3 +274,18 @@ class Runner():
         if currentModule:
             warnings[currentModule] = set(warningsCurrentModule)
         return warnings
+
+
+    def formatWarnings(self, warnings):
+        """
+        Format warnings to a list of results.
+
+        @param warnings: a dict of warnings produced by parseWarnings
+        @return: a list of warnings in string
+        """
+        lines = []
+        for modulename in warnings:
+            lines.append(self.prefixModuleName + modulename)
+            lines.extend(warnings[modulename])
+
+        return "\n".join(lines)
