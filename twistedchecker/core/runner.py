@@ -28,7 +28,7 @@ class Runner():
                                  "W0311",
                                  "W0312")
     diffOption = None
-    errorResultNotExist = "Error: Result file '%s' does not exist."
+    errorResultNotExist = "Error: Result file '%s' does not exist.\n"
     prefixModuleName = "************* Module "
     regexLineStart = "^[WCEFR]\d{4}\:"
 
@@ -47,7 +47,7 @@ class Runner():
         # provide options) have been registered.
         self.linter.load_config_file()
         allowedMessages = self.registerCheckers()
-        # set default output stream to stderr
+        # set default output stream to stdout
         self.setOutput(sys.stdout)
         # set default reporter to limited reporter
         self.setReporter(LimitedReporter(allowedMessages))
@@ -79,7 +79,7 @@ class Runner():
         """
         # check if given value is a existing file
         if not os.path.exists(val):
-            print >> sys.stderr, self.errorResultNotExist % val
+            sys.stderr.write(self.errorResultNotExist % val)
             sys.exit()
 
         self.diffOption = val
@@ -217,7 +217,7 @@ class Runner():
         """
         result = self.streamForDiff.getvalue()
         resultDiff = self.generateDiff(result)
-        print >> self.outputStream, resultDiff
+        self.outputStream.write(resultDiff + "\n")
 
 
     def generateDiff(self, result):
@@ -258,9 +258,7 @@ class Runner():
         warnings = {}
         currentModule = None
         warningsCurrentModule = []
-        for line in StringIO.StringIO(result):
-            # Mostly get rid of the trailing \n
-            line = line.strip("\n")
+        for line in result.splitlines():
             if line.startswith(self.prefixModuleName):
                 # Save results for previous module
                 if currentModule:

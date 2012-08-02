@@ -253,8 +253,8 @@ C0111:  10,0: Missing docstring
         """
         tempDir = FilePath(self.mktemp())
         tempDir.createDirectory()
-        comparingResult = tempDir.child('comparing-result-for-test.tmp')
-        comparingResult.setContent("""
+        oldResult = tempDir.child('comparing-result-for-test.tmp')
+        oldResult.setContent("""
 ************* Module foo
 W9001:  1,0: Missing copyright header
 ************* Module bar
@@ -262,7 +262,7 @@ W9002:  1,0: Missing a reference to test module in header
 C0111:  10,0: Missing docstring
         """.strip())
 
-        result = """
+        newResult = """
 ************* Module foo
 W9001:  1,0: Missing copyright header
 C0301: 10,0: Line too long
@@ -282,6 +282,6 @@ W9001:  1,0: Missing copyright header
 
         # Make sure generated diff is correct.
         runner = Runner()
-        runner.diffOption = comparingResult.path
-        diff = runner.generateDiff(result)
+        runner.diffOption = oldResult.path
+        diff = runner.generateDiff(newResult)
         self.assertEqual(diff, diffCorrect)
