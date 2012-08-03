@@ -224,6 +224,8 @@ class Runner():
         diffWarnings = self.generateDiff(oldResult, newResult)
         diffResult = self.formatWarnings(diffWarnings)
         self.outputStream.write(diffResult + "\n")
+        exitCode = 1 if diffWarnings else 0
+        sys.exit(exitCode)
 
 
     def generateDiff(self, oldWarnings, newWarnings):
