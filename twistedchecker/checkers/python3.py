@@ -66,19 +66,25 @@ class Python3Checker(BaseChecker):
 
         @param node: current node of checking
         """
-        try:
-            if (node.func.name != "apply" or
-                type(node.func) != logilab.astng.node_classes.Name):
-                return
-            inferedList = node.func.infered()
-            if not inferedList:
-                return
-            inferedNode = inferedList[0]
-            if inferedNode.parent.name == "__builtin__":
-                self.add_message('W9603', node=node)
-
-        except AttributeError:
+        if not hasattr(node, "func"):
             return
+        if not hasattr(node.func, "name"):
+            return
+        if (node.func.name != "apply" or
+            type(node.func) != logilab.astng.node_classes.Name):
+            return
+        if not hasattr(node, "infered"):
+            return
+        inferedList = node.func.infered()
+        if not inferedList:
+            return
+        inferedNode = inferedList[0]
+        if not hasattr(inferedNode, "parent"):
+            return
+        if not hasattr(inferedNode.parent, "name"):
+            return
+        if inferedNode.parent.name == "__builtin__":
+            self.add_message('W9603', node=node)
 
 
     def checkHasKeyIssue(self, node):
