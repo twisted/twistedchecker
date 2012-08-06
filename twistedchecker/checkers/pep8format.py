@@ -85,6 +85,29 @@ class PEP8Checker(BaseChecker):
                'Used when too many blank lines are found.'),
      'W9016': ('Too many blank lines after docstring, found %s',
                'Used when too many blank lines after docstring are found.'),
+     # general pep8 warnings
+     'W9017': ('Blank line at end of file',
+               'More than one blank line found at end of file(W391 in pep8).'),
+     'W9018': ('No newline at end of file',
+               'No blank line is found at end of file(W292 in pep8).'),
+     'W9019': ("Whitespace after '%s'",
+               'Redundant whitespace found after a symbol(E201 in pep8).'),
+     'W9020': ("Whitespace before '%s'",
+               'Redundant whitespace found before a symbol(E202 in pep8).'),
+     'W9021': ("Missing whitespace after '%s'",
+               "Expect a whitespace after a symbol(E231 in pep8)."),
+     'W9022': ("Multiple spaces after operator",
+               "Found multiple spaces after an operator(E222 in pep8)."),
+     'W9023': ("Multiple spaces before operator",
+               "Found multiple spaces before an operator(E221 in pep8)."),
+     'W9024': ("Missing whitespace around operator",
+               "No space found around an operator(E225 in pep8)."),
+     'W9025': ("No spaces should be around keyword / parameter equals",
+               "Spaces found around keyword or parameter equals"
+               "(E251 in pep8)."),
+     'W9026': ("At least two spaces before inline comment",
+               "Found less than two spaces before inline comment"
+               "(E261 in pep8)."),
     }
     __implements__ = IASTNGChecker
     name = 'pep8'
@@ -98,6 +121,18 @@ class PEP8Checker(BaseChecker):
         'E302': ('W9013', r'expected 3 blank lines, found (\d+)'),
         'E303': ('W9015', r'too many blank lines, expected \((\d+)\)'),
         'E305': ('W9016', r'too many blank lines after docstring \((\d+)\)'),
+        'W391': ('W9017', ''),
+        'W292': ('W9018', ''),
+        'E201': ('W9019', r"whitespace after '%s'"),
+        'E202': ('W9020', r"whitespace before '%s'"),
+        'E203': ('W9020', r"whitespace before '%s'"),
+        'E211': ('W9020', r"whitespace before '%s'"),
+        'E231': ('W9021', r"missing whitespace after '%s'"),
+        'E222': ('W9022', ''),
+        'E221': ('W9023', ''),
+        'E225': ('W9024', ''),
+        'E251': ('W9025', ''),
+        'E261': ('W9026', ''),
     }
     warnings = None
     pep8Checker = None
