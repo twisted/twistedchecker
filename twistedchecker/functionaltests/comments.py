@@ -13,3 +13,6 @@ a = 1 + 2  #  A coment begins with two whitespace.
 
 # Here's some code samples:
 #  x = x + 1
+
+# Make sure no error occur when checking an empty comment
+#  
