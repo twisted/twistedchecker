@@ -87,26 +87,26 @@ class PEP8Checker(BaseChecker):
                'Used when too many blank lines after docstring are found.'),
      # general pep8 warnings
      'W9017': ('Blank line at end of file',
-               'More than one blank line found at end of file(W391 in pep8).'),
+               'More than one blank line found at end of file (W391 in pep8).'),
      'W9018': ('No newline at end of file',
-               'No blank line is found at end of file(W292 in pep8).'),
+               'No blank line is found at end of file (W292 in pep8).'),
      'W9019': ("Whitespace after '%s'",
-               'Redundant whitespace found after a symbol(E201 in pep8).'),
+               'Redundant whitespace found after a symbol (E201 in pep8).'),
      'W9020': ("Whitespace before '%s'",
-               'Redundant whitespace found before a symbol(E202 in pep8).'),
+               'Redundant whitespace found before a symbol (E202 in pep8).'),
      'W9021': ("Missing whitespace after '%s'",
-               "Expect a whitespace after a symbol(E231 in pep8)."),
+               "Expect a whitespace after a symbol (E231 in pep8)."),
      'W9022': ("Multiple spaces after operator",
-               "Found multiple spaces after an operator(E222 in pep8)."),
+               "Found multiple spaces after an operator (E222 in pep8)."),
      'W9023': ("Multiple spaces before operator",
-               "Found multiple spaces before an operator(E221 in pep8)."),
+               "Found multiple spaces before an operator (E221 in pep8)."),
      'W9024': ("Missing whitespace around operator",
-               "No space found around an operator(E225 in pep8)."),
+               "No space found around an operator (E225 in pep8)."),
      'W9025': ("No spaces should be around keyword / parameter equals",
-               "Spaces found around keyword or parameter equals"
+               "Spaces found around keyword or parameter equals "
                "(E251 in pep8)."),
      'W9026': ("At least two spaces before inline comment",
-               "Found less than two spaces before inline comment"
+               "Found less than two spaces before inline comment "
                "(E261 in pep8)."),
     }
     __implements__ = IASTNGChecker
