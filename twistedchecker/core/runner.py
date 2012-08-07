@@ -108,7 +108,8 @@ class Runner():
         """
         Output help message of twistedchecker.
         """
-        self.outputStream.write("""---\nHELP INFOMATION\n""")
+        self.outputStream.write(self.linter.help())
+        sys.exit(32)
 
 
     def registerCheckers(self):
