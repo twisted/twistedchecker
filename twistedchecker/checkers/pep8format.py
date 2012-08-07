@@ -109,6 +109,8 @@ class PEP8Checker(BaseChecker):
                "Found less than two spaces before inline comment "
                "(E261 in pep8)."),
     }
+    lowestStandardPEP8MsgId = 'W9017'
+    pep8Enabled = None
     __implements__ = IASTNGChecker
     name = 'pep8'
     # map pep8 messages to messages in pylint.
@@ -145,6 +147,7 @@ class PEP8Checker(BaseChecker):
         """
         BaseChecker.__init__(self, linter)
         pep8.blank_lines = modified_blank_lines
+        self.pep8Enabled = self.linter.option_value("pep8")
 
 
     def visit_module(self, node):
@@ -178,6 +181,10 @@ class PEP8Checker(BaseChecker):
             linenum, offset, msgidInPEP8, text = warning
             if msgidInPEP8 in self.mapPEP8Messages:
                 msgid, patternArguments = self.mapPEP8Messages[msgidInPEP8]
+                if (not self.pep8Enabled and
+                    msgid >= self.lowestStandardPEP8MsgId):
+                    continue
+
                 arguments = []
                 if patternArguments:
                     matchResult = re.search(patternArguments, text)

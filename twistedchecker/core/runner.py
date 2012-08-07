@@ -65,6 +65,11 @@ class Runner():
               "help": "Set comparing result file to automatically "
                       "generate a diff."}
             ),
+            ('pep8',
+             {'type': 'yn', 'metavar': '<y_or_n>',
+              'default': False,
+              'help': 'Show pep8 warnings.'}
+            ),
           )
 
 
