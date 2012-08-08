@@ -48,9 +48,12 @@ class CommentChecker(BaseChecker):
                         not comment.startswith("# ")):
                         self.add_message('W9401', line=linenum + 1)
                     # Check for W9402
-                    firstLetter = comment.lstrip("#").lstrip()[0]
-                    if firstLetter.isalpha() and not firstLetter.isupper():
-                        self.add_message('W9402', line=linenum + 1)
+                    strippedComment = comment.lstrip("#").lstrip()
+                    if strippedComment:
+                        firstLetter = strippedComment[0]
+                        if (firstLetter.isalpha() and
+                            not firstLetter.isupper()):
+                            self.add_message('W9402', line=linenum + 1)
                     isFirstLineOfComment = False
             else:
                 isFirstLineOfComment = True
