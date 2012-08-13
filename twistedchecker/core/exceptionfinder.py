@@ -19,9 +19,6 @@ class PatternFinder(ast.NodeVisitor):
         """
         super(PatternFinder, self).generic_visit(nodeCall)
         # Capture assignment like 'f = getattr(...)'.
-        # if not isinstance(node.value, ast.Call):
-        #     return
-        # nodeCall = node.value
         if hasattr(nodeCall.func, "func"):
             # In this case, the statement should be
             # 'f = getattr(...)()'.
