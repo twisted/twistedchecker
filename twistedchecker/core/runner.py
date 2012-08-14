@@ -118,6 +118,12 @@ class Runner():
 
         @return: a list of allowed messages
         """
+        # add checkers for python 3
+        cfgfile = self.linter.cfgfile_parser
+        if (cfgfile.has_option("TWISTEDCHECKER", "check-python3") and
+            cfgfile.getboolean("TWISTEDCHECKER", "check-python3")):
+            self.checkers += ("python3.Python3Checker",)
+        # register checkers
         allowedMessages = list(self.allowedMessagesFromPylint)
         for strChecker in self.checkers:
             modname, classname = strChecker.split(".")
