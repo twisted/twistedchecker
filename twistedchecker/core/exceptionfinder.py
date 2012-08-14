@@ -13,7 +13,7 @@ class PatternFinder(ast.NodeVisitor):
 
     def visit_Call(self, nodeCall):
         """
-        Be invoked when visiting a node of assignment.
+        Be invoked when visiting a node of function call.
 
         @param node: currently visiting node
         """
