@@ -30,9 +30,13 @@ class Python3Checker(BaseChecker):
                'Checking has_key issue for python 3.'),
      'W9603': ('The built-in function apply is removed in python 3',
                'Checking apply issue for python 3.'),
+     'W9604': ("Please use 'except Exception as e:',"
+               "rather than 'except Exception, e:'",
+               'Checking exception issue for python 3.'),
     }
     options = ()
     warningsOfCurrentModule = None
+    linesOfCurrentModule = None
 
     def visit_module(self, node):
         """
@@ -41,6 +45,7 @@ class Python3Checker(BaseChecker):
         @param node: current node of checking
         """
         self.warningsOfCurrentModule = set([])
+        self.linesOfCurrentModule = node.file_stream.readlines()
 
 
     def visit_print(self, node):
@@ -65,6 +70,46 @@ class Python3Checker(BaseChecker):
         """
         self.checkHasKeyIssue(node)
         self.checkApplyIssue(node)
+
+
+    def visit_tryexcept(self, node):
+        """
+        Be invoked when visiting a try...except node.
+
+        @param node: current node of checking
+        """
+        self.checkExceptionIssue(node)
+
+
+    def _getRawCodesInOneLine(self, node):
+        """
+        Get raw codes for given node, and put them into one line.
+
+        @param node: node to check
+        """
+        linenoBegin = node.fromlineno - 1
+        linenoEnd = node.tolineno - 1
+        if (not self.linesOfCurrentModule or
+            linenoEnd >= len(self.linesOfCurrentModule)):
+            # in the case, the code is not from a module exists
+            return None
+        codeStatement = " ".join(
+             [line.strip()
+              for line in \
+              self.linesOfCurrentModule[linenoBegin: linenoEnd + 1]])
+        return codeStatement
+
+
+    def checkExceptionIssue(self, node):
+        """
+        Check for exception issue in python 3(W9604).
+
+        @param node: current node of checking
+        """
+        codeStatement = self._getRawCodesInOneLine(node)
+        regexDeprecated = r"except\s+(\(.+\)|\w+)\s*,\s*\w+\:"
+        if re.search(regexDeprecated, codeStatement):
+            self.add_message('W9604', node=node)
 
 
     def checkApplyIssue(self, node):
@@ -106,7 +151,7 @@ class Python3Checker(BaseChecker):
         # get attribute name, if the node does not have 'attrname',
         # means that the node is a function call,
         # we should filter these usages and capture dict.has_key
-        if not hasattr(func,"attrname"):
+        if not hasattr(func, "attrname"):
             return
         attrname = func.attrname
         # check whether this method is has_key
