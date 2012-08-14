@@ -28,6 +28,8 @@ class Python3Checker(BaseChecker):
      'W9602': ('dict.has_key() has been removed in python 3, '
                'use the in operator instead',
                'Checking has_key issue for python 3.'),
+     'W9603': ('The built-in function apply is removed in python 3',
+               'Checking apply issue for python 3.'),
     }
     options = ()
     warningsOfCurrentModule = None
@@ -62,6 +64,34 @@ class Python3Checker(BaseChecker):
         @param node: current node of checking
         """
         self.checkHasKeyIssue(node)
+        self.checkApplyIssue(node)
+
+
+    def checkApplyIssue(self, node):
+        """
+        Check for apply issue in python 3(W9603).
+
+        @param node: current node of checking
+        """
+        if not hasattr(node, "func"):
+            return
+        if not hasattr(node.func, "name"):
+            return
+        if (node.func.name != "apply" or
+            type(node.func) != logilab.astng.node_classes.Name):
+            return
+        if not hasattr(node, "infered"):
+            return
+        inferedList = node.func.infered()
+        if not inferedList:
+            return
+        inferedNode = inferedList[0]
+        if not hasattr(inferedNode, "parent"):
+            return
+        if not hasattr(inferedNode.parent, "name"):
+            return
+        if inferedNode.parent.name == "__builtin__":
+            self.add_message('W9603', node=node)
 
 
     def checkHasKeyIssue(self, node):
