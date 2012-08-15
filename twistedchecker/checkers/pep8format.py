@@ -109,7 +109,7 @@ class PEP8Checker(BaseChecker):
                "Found less than two spaces before inline comment "
                "(E261 in pep8)."),
     }
-    lowestStandardPEP8MsgId = 'W9017'
+    standardPEP8Messages = ['W%d' % id for id in range(9017,9027)]
     pep8Enabled = None
     __implements__ = IASTNGChecker
     name = 'pep8'
@@ -182,7 +182,7 @@ class PEP8Checker(BaseChecker):
             if msgidInPEP8 in self.mapPEP8Messages:
                 msgid, patternArguments = self.mapPEP8Messages[msgidInPEP8]
                 if (not self.pep8Enabled and
-                    msgid >= self.lowestStandardPEP8MsgId):
+                    msgid in self.standardPEP8Messages):
                     continue
 
                 arguments = []
