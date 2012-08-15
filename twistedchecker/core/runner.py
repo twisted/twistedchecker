@@ -47,10 +47,17 @@ class Runner():
         # provide options) have been registered.
         self.linter.load_config_file()
         allowedMessages = self.registerCheckers()
+        # disable messages
+        disabledMessages = set(self.linter
+                           .cfgfile_parser.get("TWISTEDCHECKER", "disable")
+                           .replace(" ", "").split(","))
+        map(self.linter.disable, disabledMessages)
+        allowedMessages -= disabledMessages
         # set default output stream to stdout
         self.setOutput(sys.stdout)
         # set default reporter to limited reporter
         self.setReporter(LimitedReporter(allowedMessages))
+        
 
 
     def _makeOptions(self):
