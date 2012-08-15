@@ -1,6 +1,7 @@
 import sys
 import StringIO
 import re
+import inspect
 
 from logilab import astng
 from logilab.common.ureports import Table
@@ -27,11 +28,12 @@ class PEP8WarningRecorder(PEP8OriginalChecker):
         """
         pep8.options = pep8.process_options([file])[0]
         PEP8OriginalChecker.__init__(self, file)
+        self.report_error = self.errorRecorder
         self.warnings = []
         self.run()
 
 
-    def report_error(self, lineNumber, offset, text, check):
+    def errorRecorder(self, lineNumber, offset, text, check):
         """
         A function to override report_error in pep8.
         And record output warnings.
@@ -41,12 +43,15 @@ class PEP8WarningRecorder(PEP8OriginalChecker):
         @param text: warning message
         @param check: check object in pep8
         """
-        try:
-            code = text.split(" ")[0]
-            self.warnings.append((self.line_offset + lineNumber,
-                                  offset + 1, code, text))
-        except:
-            pass
+        code = text.split(" ")[0]
+        if hasattr(self, 'report'):
+            lineOffset = self.report.line_offset
+        else:
+            # old pep8.py
+            lineOffset = self.line_offset
+
+        self.warnings.append((lineOffset + lineNumber,
+                              offset + 1, code, text))
 
 
     def run(self):
@@ -109,7 +114,12 @@ class PEP8Checker(BaseChecker):
         @param linter: current C{PyLinter} object.
         """
         BaseChecker.__init__(self, linter)
-        pep8.blank_lines = modified_blank_lines
+        argumentsBlankLines = inspect.getargspec(pep8.blank_lines).args
+        if 'blank_lines_before_comment' in argumentsBlankLines:
+            # using old pep8.py
+            pep8.blank_lines = modifiedBlankLinesForOldPEP8
+        else:
+            pep8.blank_lines = modifiedBlankLines
 
 
     def visit_module(self, node):
@@ -152,9 +162,10 @@ class PEP8Checker(BaseChecker):
 
 
 
-def modified_blank_lines(logical_line, blank_lines, indent_level, line_number,
-                previous_logical, previous_indent_level,
-                blank_lines_before_comment):
+def checkBlankLinesForPEP8(logical_line, blank_lines,
+                                 indent_level, line_number,
+                                 previous_logical, previous_indent_level,
+                                 blank_lines_before_comment):
     """
     This function is copied from a modified pep8 checker for Twisted.
     See https://github.com/cyli/TwistySublime/blob/master/twisted_pep8.py
@@ -181,7 +192,6 @@ def modified_blank_lines(logical_line, blank_lines, indent_level, line_number,
     E305: "comment"\n\n\ndef a():\n    pass
     E306: variable="value"\ndef a():   pass
     """
-
     def isClassDefDecorator(thing):
         return (thing.startswith('def ') or
                 thing.startswith('class ') or
@@ -223,7 +233,51 @@ def modified_blank_lines(logical_line, blank_lines, indent_level, line_number,
         # top level, there should be 3 blank lines between class/function
         # definitions (but not necessarily after varable declarations)
         elif previous_indent_level and max_blank_lines != 3:
-            return 0, "E302 expected 3 blank lines, found %d" % max_blank_lines
+            return (0,
+                "E302 expected 3 blank lines, found %d" % max_blank_lines)
 
     elif max_blank_lines > 1 and indent_level:
         return 0, "E303 too many blank lines, expected (%d)" % max_blank_lines
+
+
+
+def modifiedBlankLinesForOldPEP8(logical_line, blank_lines,
+                                 indent_level, line_number,
+                                 previous_logical, previous_indent_level,
+                                 blank_lines_before_comment):
+    """
+    This function is same as modifiedBlankLines,
+    but supports old version of pep8.py.
+    """
+    return checkBlankLinesForPEP8(logical_line, blank_lines,
+                                 indent_level, line_number,
+                                 previous_logical, previous_indent_level,
+                                 blank_lines_before_comment)
+
+
+
+def modifiedBlankLines(logical_line, blank_lines, indent_level, line_number,
+                       previous_logical, previous_indent_level):
+    """
+    A function for checking blank lines as a replacement for that in pep8.py.
+
+    Okay: def a():\n    pass\n\n\n\ndef b():\n    pass
+    Okay: class A():\n    pass\n\n\n\nclass B():\n    pass
+    Okay: def a():\n    pass\n\n\n# Foo\n# Bar\n\ndef b():\n    pass
+
+    E301: class Foo:\n    b = 0\n    def bar():\n        pass
+    E302: def a():\n    pass\n\ndef b(n):\n    pass
+    E303: def a():\n    pass\n\n\n\ndef b(n):\n    pass
+    E303: def a():\n\n\n\n    pass
+    E304: @decorator\n\ndef a():\n    pass
+    E305: "comment"\n\n\ndef a():\n    pass
+    E306: variable="value"\ndef a():   pass
+    """
+    result = checkBlankLinesForPEP8(logical_line, blank_lines,
+                                 indent_level, line_number,
+                                 previous_logical, previous_indent_level,
+                                 0)
+    if result:
+        yield result
+    else:
+        return
