@@ -45,10 +45,10 @@ class PatternFinder(ast.NodeVisitor):
                 (pattern.count("%s") == 1 and pattern.endswith("_%s"))):
             return
         pattern = pattern.replace("%s", "")
-        if pattern[:1].islower():
-            self.patternsFunc.add(pattern)
-        else:
+        if pattern[:1].isalpha() and not pattern[:1].islower():
             self.patternsClass.add(pattern)
+        else:
+            self.patternsFunc.add(pattern)
 
 
 
