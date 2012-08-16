@@ -20,3 +20,11 @@ class foo:
 
     def get_testMethod(self):
         pass
+
+
+    def _FOOBAR(self):
+        pass
+
+
+    def test_SOME_THING(self):
+        pass

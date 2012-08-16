@@ -20,3 +20,11 @@ def _fooBar():
 
 def get_fooBar():
     pass
+
+
+def _SOME_THING():
+    pass
+
+
+def test_SOME_THING():
+    pass
