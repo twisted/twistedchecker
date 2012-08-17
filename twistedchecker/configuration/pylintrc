@@ -100,3 +100,6 @@ argument-rgx=.*$
 
 [TWISTEDCHECKER]
 check-python3 = yes
+
+# Disable consistent indentation constraint for docstring
+disable = W9206

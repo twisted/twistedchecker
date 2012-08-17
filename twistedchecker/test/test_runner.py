@@ -153,9 +153,14 @@ class RunnerTestCase(unittest.TestCase):
         """
         A test to assume all tests are registered to reporter.
         """
+        linter = Runner().linter
         messagesFromTests = self._loadAllowedMessages()
-        messagesFromReporter = Runner().linter.reporter.messagesAllowed
-        self.assertEqual(messagesFromTests, messagesFromReporter)
+        messagesFromReporter = linter.reporter.messagesAllowed
+        messagesDisabled = set(linter
+                           .cfgfile_parser.get("TWISTEDCHECKER", "disable")
+                           .replace(" ", "").split(","))
+        self.assertEqual(messagesFromTests - messagesDisabled,
+                         messagesFromReporter)
 
 
     def test_run(self):
