@@ -51,7 +51,7 @@ class Runner():
         disabledMessages = set(self.linter
                            .cfgfile_parser.get("TWISTEDCHECKER", "disable")
                            .replace(" ", "").split(","))
-        if disabledMessages[0]:
+        if disabledMessages != {""}:
             map(self.linter.disable, disabledMessages)
             allowedMessages -= disabledMessages
         # set default output stream to stdout
