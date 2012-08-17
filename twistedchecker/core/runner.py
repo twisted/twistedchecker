@@ -4,10 +4,13 @@ import os
 import StringIO
 import re
 
+from pylint.checkers.base import NameChecker
 from pylint.lint import PyLinter
+from logilab.common.modutils import file_from_modpath
 
 import twistedchecker
 from twistedchecker.reporters.limited import LimitedReporter
+from twistedchecker.core.exceptionfinder import findAllExceptions
 
 class Runner():
     """
@@ -188,6 +191,93 @@ class Runner():
             self.unregisterChecker(checker)
 
 
+    def getCheckerByName(self, checkerType):
+        """
+        Get checker by given name.
+
+        @checkerType: type of the checker
+        """
+        for checker in sum(self.linter._checkers.values(), []):
+            if isinstance(checker, checkerType):
+                return checker
+        return None
+
+
+    def allowPatternsForNameChecking(self, patternsFunc, patternsClass):
+        """
+        Allow name exceptions by given patterns.
+
+        @param patternsFunc: patterns of special function names
+        @param patternsClass: patterns of special class names
+        """
+        cfgParser = self.linter.cfgfile_parser
+        nameChecker = self.getCheckerByName(NameChecker)
+        if not nameChecker:
+            return
+        if patternsFunc:
+            regexFuncAdd = "|((%s).+)$" % "|".join(patternsFunc)
+        else:
+            regexFuncAdd = ""
+        if patternsClass:
+            regexClassAdd = "|((%s).+)$" % "|".join(patternsClass)
+        else:
+            regexClassAdd = ""
+        # Modify regex for function, method and class name.
+        regexMethod = cfgParser.get("BASIC", "method-rgx") + regexFuncAdd
+        regexFunction = cfgParser.get("BASIC", "function-rgx") + regexFuncAdd
+        regexClass = cfgParser.get("BASIC", "class-rgx") + regexClassAdd
+        # Save to config parser.
+        cfgParser.set("BASIC", "method-rgx", regexMethod)
+        cfgParser.set("BASIC", "function-rgx", regexFunction)
+        cfgParser.set("BASIC", "class-rgx", regexClass)
+        # Save to name checker.
+        nameChecker.config.method_rgx = re.compile(regexMethod)
+        nameChecker.config.function_rgx = re.compile(regexFunction)
+        nameChecker.config.class_rgx = re.compile(regexClass)
+
+
+    def getPathList(self, filesOrModules):
+        """
+        Transform a list of modules to path.
+
+        @param filesOrModules: a list of modules (may be foo/bar.py or
+        foo.bar)
+        """
+        pathList = []
+        for fileOrMod in filesOrModules:
+            if not os.path.exists(fileOrMod):
+                # May be given module is not not a path,
+                # then transform it to a path.
+                try:
+                    filepath = file_from_modpath(fileOrMod.split('.'))
+                except (ImportError, SyntaxError) as ex:
+                    # Could not load this module.
+                    continue
+                if not os.path.exists(filepath):
+                    # Could not find this module in file system.
+                    continue
+                if os.path.basename(filepath) == "__init__.py":
+                    filepath = os.path.dirname(filepath)
+            else:
+                filepath = fileOrMod
+            pathList.append(filepath)
+        return pathList
+
+
+    def setNameExceptions(self, filesOrModules):
+        """
+        Find name exceptions in codes and allow them to be ignored
+        in checking.
+
+        @param filesOrModules: a list of modules (may be foo/bar.py or
+        foo.bar)
+        """
+        pathList = self.getPathList(filesOrModules)
+        for path in pathList:
+            patternsFunc, patternsClass = findAllExceptions(path)
+            self.allowPatternsForNameChecking(patternsFunc, patternsClass)
+
+
     def run(self, args):
         """
         Setup the environment, and run pylint.
@@ -212,6 +302,9 @@ class Runner():
         # insert current working directory to the python path to have a correct
         # behaviour.
         sys.path.insert(0, os.getcwd())
+        # set exceptions for name checking.
+        self.setNameExceptions(args)
+        # check codes.
         self.linter.check(args)
         # show diff of warnings if diff option on.
         if self.diffOption:

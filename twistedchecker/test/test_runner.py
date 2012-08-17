@@ -11,6 +11,9 @@ from twistedchecker.core.runner import Runner
 from twistedchecker.reporters.test import TestReporter
 from twistedchecker.checkers.header import HeaderChecker
 
+from twistedchecker.test.test_exceptionfinder import (createTestFiles as
+                                    createTestFilesForFindingExceptions)
+
 
 class RunnerTestCase(unittest.TestCase):
     """
@@ -310,3 +313,47 @@ C0111:  10,0: Missing docstring
         # Make sure generated diff is correct.
         diff = Runner().generateDiff(oldWarnings, newWarnings)
         self.assertEqual(diff, diffCorrect)
+
+
+    def test_getPathList(self):
+        """
+        Test for twistedchecker.core.runner.Runner.getPathList.
+        """
+        workingDir = os.getcwd()
+        pathTwistedchecker = os.path.dirname(twistedchecker.__path__[0])
+        inputList = [os.path.join("twistedchecker","functionaltests"),
+                     "twistedchecker.core.util"]
+        correctPaths = [os.path.join("twistedchecker","functionaltests"),
+                        os.path.join("twistedchecker","core","util.py")]
+        os.chdir(pathTwistedchecker)
+        result = Runner().getPathList(inputList)
+        # transform them to relative path.
+        result = [os.path.relpath(path) for path in result]
+        os.chdir(workingDir)
+
+        self.assertEqual(result, correctPaths)
+
+
+    def test_setNameExceptions(self):
+        """
+        Test for twistedchecker.core.runner.Runner.setNameExceptions.
+        """
+        pathTestFiles = createTestFilesForFindingExceptions(self.mktemp())
+        self.clearOutputStream()
+        runner = Runner()
+        runner.setOutput(self.outputStream)
+        # Set the reporter to C{twistedchecker.reporters.test.TestReporter}.
+        runner.setReporter(TestReporter())
+        # Limit messages.
+        runner.linter.disable_noerror_messages()
+        runner.linter.enable("C0103")
+
+        workingDir = os.getcwd()
+        os.chdir(os.path.dirname(pathTestFiles))
+        moduleName = os.path.basename(pathTestFiles)
+        runner.run([moduleName])
+        os.chdir(workingDir)
+        
+        predictResult = "11:C0103\n14:C0103\n15:C0103"
+        outputResult = self._removeSpaces(self.outputStream.getvalue())
+        self.assertEqual(outputResult, predictResult)
