@@ -53,11 +53,11 @@ module-rgx=(([a-z_][a-z0-9_]*))$
 # bad examples:
 # TestMethod, Test, TESTMETHOD, testMethod_of_foo
 
-method-rgx=((([a-z_])|([a-z]+_[a-z]))[a-zA-Z0-9]+)$|(__[a-z]+__)$
+method-rgx=((([a-z])|([a-z]+_[a-z]))[a-zA-Z0-9]+)$|(__[a-z]+__)$|(\_.+)$|(test\_.+)$
 
 # Function names should be same as method names.
 
-function-rgx=((([a-z_])|([a-z]+_[a-z]))[a-zA-Z0-9]+)$|(__[a-z]+__)$
+function-rgx=((([a-z])|([a-z]+_[a-z]))[a-zA-Z0-9]+)$|(__[a-z]+__)$|(\_.+)$|(test\_.+)$
 
 # Regular expression which should only match correct instance attribute names
 # Attribute names should be in mixed case, with the first letter lower case,
