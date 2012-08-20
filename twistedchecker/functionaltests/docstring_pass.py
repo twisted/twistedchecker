@@ -55,3 +55,10 @@ class foo:
         """
         def k():
             pass
+
+
+    def f(self):
+        """
+        A method returns nothing.
+        """
+        return

@@ -161,7 +161,7 @@ class DocstringChecker(PylintDocStringChecker):
         """
         returnFound = False
         for subnode in node.body:
-            if type(subnode) == node_classes.Return:
+            if type(subnode) == node_classes.Return and subnode.value:
                 returnFound = True
                 break
         return returnFound
