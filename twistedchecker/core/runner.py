@@ -18,6 +18,7 @@ class Runner():
     """
     outputStream = None
     linter = None
+    allowOptions = None
     # Customized checkers.
     checkers = ("header.HeaderChecker",
                 "modulename.ModuleNameChecker",
@@ -39,6 +40,7 @@ class Runner():
         """
         Initialize C{PyLinter} object, and load configuration file.
         """
+        self.allowOptions = True
         self.linter = PyLinter(self._makeOptions())
         # register standard checkers.
         self.linter.load_default_plugins()
@@ -61,7 +63,6 @@ class Runner():
         self.setOutput(sys.stdout)
         # set default reporter to limited reporter
         self.setReporter(LimitedReporter(allowedMessages))
-        
 
 
     def _makeOptions(self):
@@ -80,6 +81,11 @@ class Runner():
              {'type': 'yn', 'metavar': '<y_or_n>',
               'default': False,
               'help': 'Show pep8 warnings.'}
+            ),
+            ('strict-epydoc',
+             {'type': 'yn', 'metavar': '<y_or_n>',
+              'default': False,
+              'help': "Check '@type' and '@rtype' in epydoc."}
             ),
           )
 
@@ -301,6 +307,9 @@ class Runner():
             raise
         if not args:
             self.displayHelp()
+        # Check for 'strict-epydoc' option.
+        if self.allowOptions and not self.linter.option_value("strict-epydoc"):
+            map(self.linter.disable, ["W9203", "W9205"])
         # check for diff option.
         if self.diffOption:
             self.prepareDiff()

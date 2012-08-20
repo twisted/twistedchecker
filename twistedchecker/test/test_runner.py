@@ -228,6 +228,7 @@ class RunnerTestCase(unittest.TestCase):
                        msg="could not find resultfile:\n%s" % pathResultFile)
             self.clearOutputStream()
             runner = Runner()
+            runner.allowOptions = False
             runner.setOutput(self.outputStream)
             # set the reporter to C{twistedchecker.reporters.test.TestReporter}
             runner.setReporter(TestReporter())
