@@ -92,6 +92,20 @@ class RunnerTestCase(unittest.TestCase):
         return messagesAllowed
 
 
+    def _getChecker(self, runner, checkerName):
+        """
+        Get a specified checker from a Runner object.
+
+        @param runner: an instance of Runner
+        @param checkerName: the name of a checker
+        @return: a checker object
+        """
+        for checker in runner.linter.get_checkers():
+            if hasattr(checker, "name") and checker.name == checkerName:
+                return checker
+        return None
+
+
     def test_findUselessCheckers(self):
         """
         Test for method findUselessCheckers
@@ -218,6 +232,10 @@ class RunnerTestCase(unittest.TestCase):
             # set the reporter to C{twistedchecker.reporters.test.TestReporter}
             runner.setReporter(TestReporter())
             self._limitMessages(pathTestFile, runner)
+            # enable pep8 checking
+            pep8Checker = self._getChecker(runner, "pep8")
+            if pep8Checker:
+                pep8Checker.pep8Enabled = True
             runner.run([modulename])
             # check the results
             if self.debug:
