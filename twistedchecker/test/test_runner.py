@@ -298,6 +298,13 @@ C0111:  10,0: Missing docstring
         self.assertEqual(result, resultCorrect)
 
 
+    def test_fetchResultFromBuildbot(self):
+        """
+        Test for twistedchecker.core.runner.Runner.fetchResultFromBuildbot.
+        """
+        self.assertTrue(Runner().fetchResultFromBuildbot())
+
+
     def test_generateDiff(self):
         """
         Test for twistedchecker.core.runner.Runner.generateDiff.

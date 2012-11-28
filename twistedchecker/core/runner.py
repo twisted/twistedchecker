@@ -3,6 +3,7 @@ import sys
 import os
 import StringIO
 import re
+import urllib2
 
 from pylint.checkers.base import NameChecker
 from pylint.lint import PyLinter
@@ -35,6 +36,10 @@ class Runner():
     errorResultNotExist = "Error: Result file '%s' does not exist.\n"
     prefixModuleName = "************* Module "
     regexLineStart = "^[WCEFR]\d{4}\:"
+    urlBuildbot = "http://buildbot.twistedmatrix.com/builders/twistedchecker"
+    urlBuildbotResult = ("http://buildbot.twistedmatrix.com/builders/"
+                         "twistedchecker/builds/%s/steps/run-twistedchecker/"
+                         "logs/twistedchecker%%20errors/text")
 
     def __init__(self):
         """
@@ -100,7 +105,7 @@ class Runner():
         @param parser: option parser
         """
         # check if given value is a existing file
-        if not os.path.exists(val):
+        if val != "buildbot" and not os.path.exists(val):
             sys.stderr.write(self.errorResultNotExist % val)
             sys.exit()
 
@@ -333,17 +338,37 @@ class Runner():
         self.linter.reporter.set_output(self.streamForDiff)
 
 
+    def fetchResultFromBuildbot(self):
+        """
+        Fetch latest result from buildbot.
+        If could not access the result then print warning and exit with 2.
+        """
+        sourceSummary = urllib2.urlopen(self.urlBuildbot, timeout=30).read()
+        buildIDs = re.findall(r".+?success.+?#(\d+?).+?", sourceSummary)
+        if not buildIDs:
+            self.outputStream.write("Error: no success result found"
+                                    " in buildbot.\n")
+            sys.exit(2)
+        latestBuildID = buildIDs[0]
+        resultText = urllib2.urlopen(self.urlBuildbotResult % latestBuildID,
+                                     timeout=30).read()
+        return resultText
+
+
     def showDiffResults(self):
         """
         Show results when diff option on.
         """
-        oldResult = open(self.diffOption).read()
-        oldWarnings = self.computeWarnings(oldResult)
+        if self.diffOption == "buildbot":
+            oldResult = self.fetchResultFromBuildbot()
+        else:
+            oldResult = open(self.diffOption).read()
+        oldWarnings = self.parseWarnings(oldResult)
 
         newResult = self.streamForDiff.getvalue()
-        newWarnings = self.computeWarnings(newResult)
+        newWarnings = self.parseWarnings(newResult)
 
-        diffWarnings = self.generateDiff(oldResult, newResult)
+        diffWarnings = self.generateDiff(oldWarnings, newWarnings)
         diffResult = self.formatWarnings(diffWarnings)
         self.outputStream.write(diffResult + "\n")
         exitCode = 1 if diffWarnings else 0
