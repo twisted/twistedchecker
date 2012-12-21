@@ -343,10 +343,12 @@ class Runner():
         Fetch latest result from buildbot.
         If could not access the result then print warning and exit with 2.
         """
+        sys.stderr.write("Fetching recent result from buildbot ...\n"
+                         "*************\n")
         sourceSummary = urllib2.urlopen(self.urlBuildbot, timeout=30).read()
         buildIDs = re.findall(r".+?success.+?#(\d+?).+?", sourceSummary)
         if not buildIDs:
-            self.outputStream.write("Error: no success result found"
+            sys.stderr.write("Error: no success result found"
                                     " in buildbot.\n")
             sys.exit(2)
         latestBuildID = buildIDs[0]
@@ -369,10 +371,16 @@ class Runner():
         newWarnings = self.parseWarnings(newResult)
 
         diffWarnings = self.generateDiff(oldWarnings, newWarnings)
-        diffResult = self.formatWarnings(diffWarnings)
-        self.outputStream.write(diffResult + "\n")
-        exitCode = 1 if diffWarnings else 0
+        if diffWarnings:
+            diffResult = self.formatWarnings(diffWarnings)
+            self.outputStream.write(diffResult + "\n")
+            exitCode = 1
+        else:
+            self.outputStream.write("No new warnings found\n")
+            exitCode = 0
         sys.exit(exitCode)
+        
+        
 
 
     def generateDiff(self, oldWarnings, newWarnings):
