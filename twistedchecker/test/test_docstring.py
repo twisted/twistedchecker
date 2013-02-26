@@ -1,8 +1,4 @@
-import sys
-import os
-import StringIO
-
-from logilab.astng import MANAGER, nodes, ASTNGBuildingException
+from logilab.astng import MANAGER, nodes
 
 from twisted.trial import unittest
 
@@ -39,6 +35,8 @@ class AstngTestClass(object):
         for method in node.methods():
             methods[method.name] = method
         self.methods = methods
+
+
 
 class DocstringTestCase(unittest.TestCase):
     """
