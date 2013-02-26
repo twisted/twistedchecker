@@ -118,6 +118,7 @@ class DocstringChecker(PylintDocStringChecker):
         @param node: The node to inspect
         @type node: L{logilab.astng.scoped_nodes.Function}
         """
+#        import pdb;pdb.set_trace()
         if node.type == 'method' and node.parent.decorators:
             # check for 'implementer' class decorators
             for n in node.parent.decorators.nodes:
