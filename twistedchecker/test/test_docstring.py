@@ -1,4 +1,5 @@
 import os
+import sys
 
 from logilab.astng import MANAGER, nodes
 
@@ -58,6 +59,18 @@ class DocstringTestCase(unittest.TestCase):
     """
     Test for twistedchecker.checkers.docstring
     """
+
+    def setUp(self):
+        self.originalPath = sys.path[:]
+        self.originalModules = sys.modules.copy()
+        sys.path.append(os.path.dirname(__file__))
+
+
+    def tearDown(self):
+        sys.modules.clear()
+        sys.modules.update(self.originalModules)
+        sys.path[:] = self.originalPath
+
 
     def test_missingModuleDocstring(self):
         """
