@@ -88,49 +88,60 @@ class DocstringChecker(PylintDocStringChecker):
         @param node_type: type of node
         @param node: current node of pylint
         """
-#        import pdb;pdb.set_trace()
         docstring = node.doc
+
         if docstring is None:
             # The node does not have a docstring.
-            # But do not check things inside a function or method.
-            if type(node.parent) != scoped_nodes.Function:
-                show_missing_docstring_warning = True
-                if node.type == 'method':
-                    # check for 'implementer' class decorators
-                    for n in node.parent.decorators.nodes:
-                        # n.as_string()
-                        # 'implementer(interfaces.IResolver)'
-                        m = re.match('implementer\(([^\)]+)\)', n.as_string())
-                        if m:
-                            interface_import_path = m.group(1)
-                            # just get 'interfaces'
-                            interface_from_parts = interface_import_path.split('.')
-                            # find the import statement eg
-                            # from twisted.internet import interfaces
-                            from_source = node.root().locals[interface_from_parts[0]][0].modname
-                            # now build the full path eg
-                            # [twisted, internet, interfaces, IResolver]
-                            full_path = from_source.split('.') + interface_from_parts
-                            # import the module bit (everything but the last part)
-                            x = __import__('.'.join(full_path[:-1]))
-                            for p in full_path[1:]:
-                                x = getattr(x, p)
-                            if node.name in x:
-                                show_missing_docstring_warning = False
-                                break
-
-                if show_missing_docstring_warning:
-                    self.add_message('W9208', node=node)
+            # But that's ok if this is part of a documented interface.
+            # or if this is a nested function or method.
+            if (not self._docStringInherited(node)
+                and type(node.parent) is not scoped_nodes.Function):
+                self.add_message('W9208', node=node)
             return
+
         elif not docstring.strip():
             # Empty docstring.
             self.add_message('W9209', node=node)
             return
+
         # Get line number of docstring.
         linenoDocstring = self._getDocstringLineno(node_type, node)
         self._checkDocstringFormat(node_type, node, linenoDocstring)
         self._checkEpytext(node_type, node, linenoDocstring)
         self._checkBlankLineBeforeEpytext(node_type, node, linenoDocstring)
+
+
+    def _docStringInherited(self, node):
+        """
+        Check whether a node is part of a documented interface implementation.
+
+        @param node: The node to inspect
+        @type node: L{logilab.astng.scoped_nodes.Function}
+        """
+        if node.type == 'method':
+            # check for 'implementer' class decorators
+            for n in node.parent.decorators.nodes:
+                # n.as_string()
+                # 'implementer(interfaces.IResolver)'
+                m = re.match('implementer\(([^\)]+)\)', n.as_string())
+                if m:
+                    interface_import_path = m.group(1)
+                    # just get 'interfaces'
+                    interface_from_parts = interface_import_path.split('.')
+                    # find the import statement eg
+                    # from twisted.internet import interfaces
+                    from_source = node.root().locals[interface_from_parts[0]][0].modname
+                    # now build the full path eg
+                    # [twisted, internet, interfaces, IResolver]
+                    full_path = from_source.split('.') + interface_from_parts
+                    # import the module bit (everything but the last part)
+                    imp = __import__('.'.join(full_path[:-1]))
+                    for p in full_path[1:]:
+                        imp = getattr(imp, p)
+                    import pdb;pdb.set_trace()
+                    if node.name in imp:
+                        return True
+        return False
 
 
     def _checkIndentationIssue(self, node, node_type, linenoDocstring):
