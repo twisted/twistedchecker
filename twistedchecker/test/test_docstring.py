@@ -33,8 +33,14 @@ class AstngTestClass(object):
 
         methods = {}
         for method in node.methods():
-            methods[method.name] = method
+            methods[method.name] = AstngTestMethod(method)
         self.methods = methods
+
+
+
+class AstngTestMethod(object):
+    def __init__(self, node):
+        self.node = node
 
 
 
@@ -51,25 +57,43 @@ class DocstringTestCase(unittest.TestCase):
 
         modname = 'twistedchecker.functionaltests.docstring_pass'
 
-        self.module = AstngTestModule(filepath, modname)
+        self.testmodule = AstngTestModule(filepath, modname)
+
+
+    def test_missingModuleDocstring(self):
+        """
+        L{DocstringChecker} issues a warning for empty or missing
+        module docstrings.
+        """
+        linter = FakeLinter()
+        checker = DocstringChecker(linter=linter)
+        checker._check_docstring('module', self.testmodule.node)
+        self.assertEquals(len(linter.messages), 1)
+
+
+    def test_missingClassDocstring(self):
+        """
+        L{DocstringChecker} issues a warning for empty or missing
+        class docstrings.
+        """
+        linter = FakeLinter()
+        checker = DocstringChecker(linter=linter)
+        checker._check_docstring('class', self.testmodule.classes['FooImplementation'].node)
+        self.assertEquals(len(linter.messages), 1)
 
 
     def test_allowInheritedDocstring(self):
         """
-        docstrings can be omitted if the method is contributing to a
+        Docstrings can be omitted if the method is contributing to a
         documented interface.
         """
-        testclass = self.module.classes['FooImplementation']
-        testmethod = testclass.methods['test_allowInheritedDocstring']
+        testclass = self.testmodule.classes['FooImplementation']
+        testmethod = testclass.methods['test_allowInheritedDocstring'].node
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
         checker._check_docstring('method', testmethod)
         self.assertEquals(len(linter.messages), 0)
 
-
-    def test_missingModuleDocstring(self):
-
-        pass
 
     def test_getLineIndent(self):
         """
