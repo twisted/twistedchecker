@@ -1,14 +1,10 @@
-import sys
 import re
 
 from logilab import astng
-from logilab.common.ureports import Table
-from logilab.astng import are_exclusive
 from logilab.astng import node_classes
 from logilab.astng import scoped_nodes
 
 from pylint.interfaces import IASTNGChecker
-from pylint.reporters import diff_string
 from pylint.checkers.base import DocStringChecker as PylintDocStringChecker
 from pylint.checkers.base import NO_REQUIRED_DOC_RGX
 
@@ -118,7 +114,7 @@ class DocstringChecker(PylintDocStringChecker):
         @param node: The node to inspect
         @type node: L{logilab.astng.scoped_nodes.Function}
         """
-#        import pdb;pdb.set_trace()
+        import pdb;pdb.set_trace()
         if node.type == 'method' and node.parent.decorators:
             # check for 'implementer' class decorators
             for n in node.parent.decorators.nodes:
