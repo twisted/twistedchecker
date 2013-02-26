@@ -127,10 +127,11 @@ class DocstringChecker(PylintDocStringChecker):
                 m = re.match('implementer\(([^\)]+)\)', n.as_string())
                 if m:
                     # could be interfaces.IResolver or simply IResolver
-                    interface_reference = m.group(1)
-
-                    if node.name in self._getInterface(node, interface_reference):
-                        return True
+                    interface_references = m.group(1).split(',')
+                    for interface_reference in interface_references:
+                        if node.name in self._getInterface(
+                            node, interface_reference.strip()):
+                            return True
 
         return False
 
