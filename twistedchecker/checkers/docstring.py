@@ -137,12 +137,20 @@ class DocstringChecker(PylintDocStringChecker):
 
                     # Handle imported interfaces
                     # In this case the target interface is imported
-                    if isinstance(interface_node, astng.nodes.From):
-                        # now build the full path eg
+                    if isinstance(interface_node,
+                                  (astng.nodes.From, astng.nodes.Import)):
+                        # now build the full path e.g.
                         # [twisted, internet, interfaces, IResolver]
-                        interface_reference_absolute = (
-                            interface_node.modname.split('.')
-                            + interface_reference_parts)
+                        if isinstance(interface_node, astng.nodes.Import):
+#                            import pdb;pdb.set_trace()
+                            interface_reference_absolute = interface_reference_parts
+                        elif isinstance(interface_node, astng.nodes.From):
+                            interface_reference_absolute = (
+                                interface_node.modname.split('.')
+                                + interface_reference_parts)
+                        else:
+                            raise AssertionError(
+                                'Unexpected interface_node class %r' % (interface_node,))
                         # import the module bit (everything but the last part)
                         interface = __import__('.'.join(
                                 interface_reference_absolute[:-1]))
@@ -155,7 +163,7 @@ class DocstringChecker(PylintDocStringChecker):
                     elif isinstance(interface_node, astng.nodes.Class):
                         interface = interface_node
                     else:
-                        raise Exception('Unexpected interface node class %r' % (interface_node,))
+                        raise AssertionError('Unexpected interface node class %r' % (interface_node,))
 
                     if node.name in interface:
                         return True
