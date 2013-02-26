@@ -125,22 +125,40 @@ class DocstringChecker(PylintDocStringChecker):
                 # 'implementer(interfaces.IResolver)'
                 m = re.match('implementer\(([^\)]+)\)', n.as_string())
                 if m:
-                    interface_import_path = m.group(1)
-                    # just get 'interfaces'
-                    interface_from_parts = interface_import_path.split('.')
-                    # find the import statement eg
-                    # from twisted.internet import interfaces
-                    from_source = node.root().locals[interface_from_parts[0]][0].modname
-                    # now build the full path eg
-                    # [twisted, internet, interfaces, IResolver]
-                    full_path = from_source.split('.') + interface_from_parts
-                    # import the module bit (everything but the last part)
-                    imp = __import__('.'.join(full_path[:-1]))
-                    for p in full_path[1:]:
-                        imp = getattr(imp, p)
-                    import pdb;pdb.set_trace()
-                    if node.name in imp:
+                    # could be interfaces.IResolver or simply IResolver
+                    interface_reference = m.group(1)
+                    # if it contains . then it must have been imported
+                    # and we need to get the first part of the
+                    # reference
+                    interface_reference_parts = interface_reference.split('.')
+                    interface_node = (
+                        node.root().locals[interface_reference_parts[0]][0])
+
+                    # Handle imported interfaces
+                    # In this case the target interface is imported
+                    if isinstance(interface_node, astng.nodes.From):
+                        # now build the full path eg
+                        # [twisted, internet, interfaces, IResolver]
+                        interface_reference_absolute = (
+                            interface_node.modname.split('.')
+                            + interface_reference_parts)
+                        # import the module bit (everything but the last part)
+                        interface = __import__('.'.join(
+                                interface_reference_absolute[:-1]))
+                        for p in interface_reference_absolute[1:]:
+                            interface = getattr(interface, p)
+
+                    # Handle locally defined interfaces In this case
+                    # the interface is an astng Class instance which happens
+                    # to be iterable, just like a zope.interface
+                    elif isinstance(interface_node, astng.nodes.Class):
+                        interface = interface_node
+                    else:
+                        raise Exception('Unexpected interface node class %r' % (interface_node,))
+
+                    if node.name in interface:
                         return True
+
         return False
 
 

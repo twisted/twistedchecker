@@ -62,3 +62,17 @@ class foo:
         A method returns nothing.
         """
         return
+
+
+class IFoo(object):
+    def test_allowInheritedDocstring():
+        """
+        An interface method docstring.
+        """
+        pass
+
+
+@implementer(IFoo)
+class FooImplementation(object):
+    def test_allowInheritedDocstring(self):
+        pass
