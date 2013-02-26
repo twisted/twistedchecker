@@ -152,8 +152,11 @@ class DocstringChecker(PylintDocStringChecker):
                             raise AssertionError(
                                 'Unexpected interface_node class %r' % (interface_node,))
                         # import the module bit (everything but the last part)
-                        interface = __import__('.'.join(
-                                interface_reference_absolute[:-1]))
+                        try:
+                            interface = __import__('.'.join(
+                                    interface_reference_absolute[:-1]))
+                        except ImportError:
+                            import pdb; pdb.set_trace()
                         for p in interface_reference_absolute[1:]:
                             interface = getattr(interface, p)
 

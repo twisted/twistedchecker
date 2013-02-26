@@ -1,8 +1,9 @@
 # A module where all the docstrings are missing
 
-from zope.interface import implementer
+from zope.interface import implementer, Interface
 
 import example_interfaces
+from example_interfaces.foo import IFoo2
 
 
 
@@ -17,7 +18,7 @@ class Foo(object):
 
 
 
-class IFoo(object):
+class IFoo(Interface):
     def bar():
         pass
 
@@ -30,7 +31,14 @@ class FooImplementation(object):
 
 
 
-@implementer(example_interfaces.IFoo)
+@implementer(example_interfaces.foo.IFoo)
 class FooImplementationExternal(object):
+    def bar(self):
+        pass
+
+
+
+@implementer(IFoo2)
+class FooImplementationExternal2(object):
     def bar(self):
         pass
