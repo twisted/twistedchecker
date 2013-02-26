@@ -182,6 +182,23 @@ class DocstringTestCase(unittest.TestCase):
         self.assertEquals(len(linter.messages), 0)
 
 
+    def test_allowInheritedDocstringExternal3(self):
+        """
+        Docstrings can be omitted if the method is contributing to a
+        documented interface. Here the class implements multiple
+        interfaces.
+        """
+        testmodule = AstngTestModule(
+            'example_docstrings_missing.py',
+            'example_docstrings_missing')
+        testclass = testmodule.classes['FooImplementationExternal3']
+        testmethod = testclass.methods['bar'].node
+        linter = FakeLinter()
+        checker = DocstringChecker(linter=linter)
+        checker._check_docstring('method', testmethod)
+        self.assertEquals(len(linter.messages), 0)
+
+
     def test_getLineIndent(self):
         """
         Test of twistedchecker.checkers.docstring._getLineIndent.
