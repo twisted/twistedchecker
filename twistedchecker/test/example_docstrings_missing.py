@@ -2,6 +2,13 @@
 
 from zope.interface import implementer
 
+import example_interfaces
+
+
+
+def bar():
+    pass
+
 
 
 class Foo(object):
@@ -15,7 +22,15 @@ class IFoo(object):
         pass
 
 
+
 @implementer(IFoo)
 class FooImplementation(object):
+    def bar(self):
+        pass
+
+
+
+@implementer(example_interfaces.IFoo)
+class FooImplementationExternal(object):
     def bar(self):
         pass

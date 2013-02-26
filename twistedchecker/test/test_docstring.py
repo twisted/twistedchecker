@@ -23,10 +23,16 @@ class AstngTestModule(object):
         astng = MANAGER.astng_from_file(
             os.path.join(testdir, filepath), modname, source=True)
         self.node = astng
+
         classes = {}
+        functions = {}
         for child in astng.get_children():
             if isinstance(child, nodes.Class):
                 classes[child.name] = AstngTestClass(child)
+            if isinstance(child, nodes.Function):
+                functions[child.name] = AstngTestFunction(child)
+
+        self.functions = functions
         self.classes = classes
 
 
@@ -37,12 +43,12 @@ class AstngTestClass(object):
 
         methods = {}
         for method in node.methods():
-            methods[method.name] = AstngTestMethod(method)
+            methods[method.name] = AstngTestFunction(method)
         self.methods = methods
 
 
 
-class AstngTestMethod(object):
+class AstngTestFunction(object):
     def __init__(self, node):
         self.node = node
 
@@ -64,6 +70,21 @@ class DocstringTestCase(unittest.TestCase):
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
         checker._check_docstring('module', testmodule.node)
+        self.assertEquals(len(linter.messages), 1)
+
+
+    def test_missingFunctionDocstring(self):
+        """
+        L{DocstringChecker} issues a warning for empty or missing
+        function docstrings.
+        """
+        testmodule = AstngTestModule(
+            'example_docstrings_missing.py',
+            'example_docstrings_missing')
+        testfunc = testmodule.functions['bar']
+        linter = FakeLinter()
+        checker = DocstringChecker(linter=linter)
+        checker._check_docstring('function', testfunc.node)
         self.assertEquals(len(linter.messages), 1)
 
 
