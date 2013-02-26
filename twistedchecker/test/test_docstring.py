@@ -1,3 +1,5 @@
+import os
+
 from logilab.astng import MANAGER, nodes
 
 from twisted.trial import unittest
@@ -17,7 +19,9 @@ class FakeLinter(object):
 
 class AstngTestModule(object):
     def __init__(self, filepath, modname):
-        astng = MANAGER.astng_from_file(filepath, modname, source=True)
+        testdir = os.path.dirname(__file__)
+        astng = MANAGER.astng_from_file(
+            os.path.join(testdir, filepath), modname, source=True)
         self.node = astng
         classes = {}
         for child in astng.get_children():
@@ -49,25 +53,17 @@ class DocstringTestCase(unittest.TestCase):
     Test for twistedchecker.checkers.docstring
     """
 
-    def setUp(self):
-        filepath = (
-            '/home/richard/projects/TwistedChecker'
-            '/branches/inherited-interface-documentation-1132540'
-            '/twistedchecker/functionaltests/docstring_pass.py')
-
-        modname = 'twistedchecker.functionaltests.docstring_pass'
-
-        self.testmodule = AstngTestModule(filepath, modname)
-
-
     def test_missingModuleDocstring(self):
         """
         L{DocstringChecker} issues a warning for empty or missing
         module docstrings.
         """
+        testmodule = AstngTestModule(
+            'example_docstrings_missing.py',
+            'example_docstrings_missing')
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
-        checker._check_docstring('module', self.testmodule.node)
+        checker._check_docstring('module', testmodule.node)
         self.assertEquals(len(linter.messages), 1)
 
 
@@ -76,9 +72,29 @@ class DocstringTestCase(unittest.TestCase):
         L{DocstringChecker} issues a warning for empty or missing
         class docstrings.
         """
+        testmodule = AstngTestModule(
+            'example_docstrings_missing.py',
+            'example_docstrings_missing')
+        testclass = testmodule.classes['Foo']
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
-        checker._check_docstring('class', self.testmodule.classes['FooImplementation'].node)
+        checker._check_docstring('class', testclass.node)
+        self.assertEquals(len(linter.messages), 1)
+
+
+    def test_missingMethodDocstring(self):
+        """
+        L{DocstringChecker} issues a warning for empty or missing
+        method docstrings.
+        """
+        testmodule = AstngTestModule(
+            'example_docstrings_missing.py',
+            'example_docstrings_missing')
+        testclass = testmodule.classes['Foo']
+        testmethod = testclass.methods['bar']
+        linter = FakeLinter()
+        checker = DocstringChecker(linter=linter)
+        checker._check_docstring('method', testmethod.node)
         self.assertEquals(len(linter.messages), 1)
 
 
@@ -87,8 +103,11 @@ class DocstringTestCase(unittest.TestCase):
         Docstrings can be omitted if the method is contributing to a
         documented interface.
         """
-        testclass = self.testmodule.classes['FooImplementation']
-        testmethod = testclass.methods['test_allowInheritedDocstring'].node
+        testmodule = AstngTestModule(
+            'example_docstrings_missing.py',
+            'example_docstrings_missing')
+        testclass = testmodule.classes['FooImplementation']
+        testmethod = testclass.methods['bar'].node
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
         checker._check_docstring('method', testmethod)

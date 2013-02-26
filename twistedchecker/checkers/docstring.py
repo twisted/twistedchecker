@@ -89,7 +89,7 @@ class DocstringChecker(PylintDocStringChecker):
         @param node: current node of pylint
         """
         docstring = node.doc
-        import pdb;pdb.set_trace()
+#        import pdb;pdb.set_trace()
         if docstring is None:
             # The node does not have a docstring.
             # But that's ok if this is part of a documented interface.
