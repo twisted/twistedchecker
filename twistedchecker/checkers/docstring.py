@@ -88,12 +88,39 @@ class DocstringChecker(PylintDocStringChecker):
         @param node_type: type of node
         @param node: current node of pylint
         """
+#        import pdb;pdb.set_trace()
         docstring = node.doc
         if docstring is None:
             # The node does not have a docstring.
             # But do not check things inside a function or method.
             if type(node.parent) != scoped_nodes.Function:
-                self.add_message('W9208', node=node)
+                show_missing_docstring_warning = True
+                if node.type == 'method':
+                    # check for 'implementer' class decorators
+                    for n in node.parent.decorators.nodes:
+                        # n.as_string()
+                        # 'implementer(interfaces.IResolver)'
+                        m = re.match('implementer\(([^\)]+)\)', n.as_string())
+                        if m:
+                            interface_import_path = m.group(1)
+                            # just get 'interfaces'
+                            interface_from_parts = interface_import_path.split('.')
+                            # find the import statement eg
+                            # from twisted.internet import interfaces
+                            from_source = node.root().locals[interface_from_parts[0]][0].modname
+                            # now build the full path eg
+                            # [twisted, internet, interfaces, IResolver]
+                            full_path = from_source.split('.') + interface_from_parts
+                            # import the module bit (everything but the last part)
+                            x = __import__('.'.join(full_path[:-1]))
+                            for p in full_path[1:]:
+                                x = getattr(x, p)
+                            if node.name in x:
+                                show_missing_docstring_warning = False
+                                break
+
+                if show_missing_docstring_warning:
+                    self.add_message('W9208', node=node)
             return
         elif not docstring.strip():
             # Empty docstring.
