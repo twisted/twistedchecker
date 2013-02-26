@@ -128,50 +128,54 @@ class DocstringChecker(PylintDocStringChecker):
                 if m:
                     # could be interfaces.IResolver or simply IResolver
                     interface_reference = m.group(1)
-                    # if it contains . then it must have been imported
-                    # and we need to get the first part of the
-                    # reference
-                    interface_reference_parts = interface_reference.split('.')
-                    interface_node = (
-                        node.root().locals[interface_reference_parts[0]][0])
 
-                    # Handle imported interfaces
-                    # In this case the target interface is imported
-                    if isinstance(interface_node,
-                                  (astng.nodes.From, astng.nodes.Import)):
-                        # now build the full path e.g.
-                        # [twisted, internet, interfaces, IResolver]
-                        if isinstance(interface_node, astng.nodes.Import):
-#                            import pdb;pdb.set_trace()
-                            interface_reference_absolute = interface_reference_parts
-                        elif isinstance(interface_node, astng.nodes.From):
-                            interface_reference_absolute = (
-                                interface_node.modname.split('.')
-                                + interface_reference_parts)
-                        else:
-                            raise AssertionError(
-                                'Unexpected interface_node class %r' % (interface_node,))
-                        # import the module bit (everything but the last part)
-                        try:
-                            interface = __import__('.'.join(
-                                    interface_reference_absolute[:-1]))
-                        except ImportError:
-                            import pdb; pdb.set_trace()
-                        for p in interface_reference_absolute[1:]:
-                            interface = getattr(interface, p)
-
-                    # Handle locally defined interfaces In this case
-                    # the interface is an astng Class instance which happens
-                    # to be iterable, just like a zope.interface
-                    elif isinstance(interface_node, astng.nodes.Class):
-                        interface = interface_node
-                    else:
-                        raise AssertionError('Unexpected interface node class %r' % (interface_node,))
-
-                    if node.name in interface:
+                    if node.name in self._getInterface(node, interface_reference):
                         return True
 
         return False
+
+
+    def _getInterface(self, node, interface_reference):
+        # if it contains . then it must have been imported
+        # and we need to get the first part of the
+        # reference
+        interface_reference_parts = interface_reference.split('.')
+        interface_node = (
+            node.root().locals[interface_reference_parts[0]][0])
+
+        # Handle imported interfaces
+        # In this case the target interface is imported
+        if isinstance(interface_node,
+                      (astng.nodes.From, astng.nodes.Import)):
+            # now build the full path e.g.
+            # [twisted, internet, interfaces, IResolver]
+            if isinstance(interface_node, astng.nodes.Import):
+                interface_reference_absolute = interface_reference_parts
+            elif isinstance(interface_node, astng.nodes.From):
+                interface_reference_absolute = (
+                    interface_node.modname.split('.')
+                    + interface_reference_parts)
+            else:
+                raise AssertionError(
+                    'Unexpected interface_node class %r' % (interface_node,))
+            # import the module bit (everything but the last part)
+            try:
+                interface = __import__('.'.join(
+                        interface_reference_absolute[:-1]))
+            except ImportError:
+#                import pdb; pdb.set_trace()
+                raise
+            for p in interface_reference_absolute[1:]:
+                interface = getattr(interface, p)
+
+        # Handle locally defined interfaces In this case
+        # the interface is an astng Class instance which happens
+        # to be iterable, just like a zope.interface
+        elif isinstance(interface_node, astng.nodes.Class):
+            interface = interface_node
+        else:
+            raise AssertionError('Unexpected interface node class %r' % (interface_node,))
+        return  interface
 
 
     def _checkIndentationIssue(self, node, node_type, linenoDocstring):
