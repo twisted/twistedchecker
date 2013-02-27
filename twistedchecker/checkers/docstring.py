@@ -150,24 +150,21 @@ class DocstringChecker(PylintDocStringChecker):
         """
         interface_reference_parts = interface_reference.split('.')
         interface_name = interface_reference_parts[-1]
-        interface_node = (
+        interface_import_node = (
             node.root().locals[interface_reference_parts[0]][0])
 
         # Handle imported interfaces
-        if isinstance(interface_node,
+        if isinstance(interface_import_node,
                       (astng.nodes.From, astng.nodes.Import)):
             # Now build the full path as a list. Handled differently
             # depending on whether the interface was imported using an
             # import or a from .. import statement.
-            if isinstance(interface_node, astng.nodes.Import):
+            if isinstance(interface_import_node, astng.nodes.Import):
                 interface_reference_absolute = interface_reference_parts
-            elif isinstance(interface_node, astng.nodes.From):
+            elif isinstance(interface_import_node, astng.nodes.From):
                 interface_reference_absolute = (
-                    interface_node.modname.split('.')
+                    interface_import_node.modname.split('.')
                     + interface_reference_parts)
-            else:
-                raise AssertionError(
-                    'Unexpected interface_node class %r' % (interface_node,))
 
             # Load the module as astng (everything but the last part)
             module_node = node.root().import_module(
@@ -179,14 +176,19 @@ class DocstringChecker(PylintDocStringChecker):
                 raise AssertionError('Interface %r not in module %r' % (interface_name, module_node))
 
         # Handle locally defined interfaces.
-        elif isinstance(interface_node, astng.nodes.Class):
-            interface = interface_node
+        elif isinstance(interface_import_node, astng.nodes.Class):
+            interface = interface_import_node
+        else:
+            raise AssertionError(
+                'Unexpected interface_import_node type. '
+                'Must be one of astng.nodes.{Class, Import or From}. '
+                'interface_import_node: %r.' % (interface_import_node,))
 
         assert isinstance(interface, nodes.Class), (
             'Unexpected interface type. '
-            'Interfaces should subclass nodes.Class. '
-            'Interface: %r, '
-            'Class: %r.' % (interface, interface.__class__))
+            'Must be a subclass nodes.Class. '
+            'interface_reference: %r, '
+            'interface: %r.' % (interface_reference, interface))
 
         return  interface
 
