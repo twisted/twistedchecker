@@ -32,20 +32,20 @@ class FooImplementation(object):
 
 
 @implementer(example_interfaces.foo.IFoo)
-class FooImplementationExternal(object):
+class FooImplementationExternalAbsoluteInterface(object):
     def bar(self):
         pass
 
 
 
 @implementer(IFoo2)
-class FooImplementationExternal2(object):
+class FooImplementationExternalRelativeInterface(object):
     def bar(self):
         pass
 
 
 
 @implementer(example_interfaces.foo.IFoo, IFoo2)
-class FooImplementationExternal3(object):
+class FooImplementationExternalMultipleInterface(object):
     def bar(self):
         pass

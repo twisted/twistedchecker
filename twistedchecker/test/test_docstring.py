@@ -1,7 +1,7 @@
 import os
 import sys
 
-from logilab.astng import MANAGER, nodes
+from logilab.astng import MANAGER
 
 from twisted.trial import unittest
 
@@ -12,6 +12,10 @@ astng = MANAGER.astng_from_module_name
 
 
 class FakeLinter(object):
+    """
+    A fake implementation of L{pylint.interfaces.ILinter} for
+    collecting lint messages during tests.
+    """
     def __init__(self):
         self.messages = []
 
@@ -26,12 +30,20 @@ class DocstringTestCase(unittest.TestCase):
     """
 
     def setUp(self):
+        """
+        Manipulate the Python import path so that the test module and
+        its test interface module can be imported.
+        """
         self.originalPath = sys.path[:]
         self.originalModules = sys.modules.copy()
         sys.path.append(os.path.dirname(__file__))
 
 
     def tearDown(self):
+        """
+        Return the import path and the imported modules to their
+        original state.
+        """
         sys.modules.clear()
         sys.modules.update(self.originalModules)
         sys.path[:] = self.originalPath
@@ -39,8 +51,8 @@ class DocstringTestCase(unittest.TestCase):
 
     def test_missingModuleDocstring(self):
         """
-        L{DocstringChecker} issues a warning for empty or missing
-        module docstrings.
+        L{DocstringChecker} issues a warning for missing module
+        docstrings.
         """
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
@@ -51,8 +63,8 @@ class DocstringTestCase(unittest.TestCase):
 
     def test_missingFunctionDocstring(self):
         """
-        L{DocstringChecker} issues a warning for empty or missing
-        function docstrings.
+        L{DocstringChecker} issues a warning for missing function
+        docstrings.
         """
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
@@ -63,8 +75,8 @@ class DocstringTestCase(unittest.TestCase):
 
     def test_missingClassDocstring(self):
         """
-        L{DocstringChecker} issues a warning for empty or missing
-        class docstrings.
+        L{DocstringChecker} issues a warning for missing class
+        docstrings.
         """
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
@@ -75,8 +87,8 @@ class DocstringTestCase(unittest.TestCase):
 
     def test_missingMethodDocstring(self):
         """
-        L{DocstringChecker} issues a warning for empty or missing
-        method docstrings.
+        L{DocstringChecker} issues a warning for missing method
+        docstrings.
         """
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
@@ -88,7 +100,8 @@ class DocstringTestCase(unittest.TestCase):
     def test_allowInheritedDocstring(self):
         """
         Docstrings can be omitted if the method is contributing to a
-        documented interface.
+        documented interface. In this case, the interface is defined
+        locally.
         """
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
@@ -98,36 +111,37 @@ class DocstringTestCase(unittest.TestCase):
         self.assertEquals(len(linter.messages), 0)
 
 
-    def test_allowInheritedDocstringExternal(self):
+    def test_allowInheritedDocstringExternalAbsoluteInterface(self):
         """
         Docstrings can be omitted if the method is contributing to a
         documented interface. In this case an interface that has been
-        imported from another module.
+        imported from another module and is referenced using its
+        absolute path.
         """
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
         checker._check_docstring(
             'method',
-            astng('example_docstrings_missing')['FooImplementationExternal']['bar'])
+            astng('example_docstrings_missing')['FooImplementationExternalAbsoluteInterface']['bar'])
         self.assertEquals(len(linter.messages), 0)
 
 
-    def test_allowInheritedDocstringExternal2(self):
+    def test_allowInheritedDocstringExternalRelativeInterface(self):
         """
         Docstrings can be omitted if the method is contributing to a
-        documented interface. In this case an interface that has been
-        imported from another module.
+        documented interface. In this case the interface is referenced
+        using a local relative import path.
         """
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
         checker._check_docstring(
             'method',
-            astng('example_docstrings_missing')['FooImplementationExternal2']['bar'])
+            astng('example_docstrings_missing')['FooImplementationExternalRelativeInterface']['bar'])
 
         self.assertEquals(len(linter.messages), 0)
 
 
-    def test_allowInheritedDocstringExternal3(self):
+    def test_allowInheritedDocstringExternalMultipleInterface(self):
         """
         Docstrings can be omitted if the method is contributing to a
         documented interface. Here the class implements multiple
@@ -137,7 +151,7 @@ class DocstringTestCase(unittest.TestCase):
         checker = DocstringChecker(linter=linter)
         checker._check_docstring(
             'method',
-            astng('example_docstrings_missing')['FooImplementationExternal3']['bar'])
+            astng('example_docstrings_missing')['FooImplementationExternalMultipleInterface']['bar'])
         self.assertEquals(len(linter.messages), 0)
 
 
