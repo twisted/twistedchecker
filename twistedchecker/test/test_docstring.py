@@ -8,6 +8,8 @@ from twisted.trial import unittest
 from twistedchecker.checkers.docstring import DocstringChecker
 
 
+astng = MANAGER.astng_from_module_name
+
 
 class FakeLinter(object):
     def __init__(self):
@@ -15,46 +17,6 @@ class FakeLinter(object):
 
     def add_message(self, *args, **kwargs):
         self.messages.append((args, kwargs))
-
-
-
-class AstngTestModule(object):
-    filepath = 'example_docstrings_missing.py'
-    modname = 'example_docstrings_missing'
-
-    def __init__(self):
-        testdir = os.path.dirname(__file__)
-        astng = MANAGER.astng_from_file(
-            os.path.join(testdir, self.filepath), self.modname, source=True)
-        self.node = astng
-
-        classes = {}
-        functions = {}
-        for child in astng.get_children():
-            if isinstance(child, nodes.Class):
-                classes[child.name] = AstngTestClass(child)
-            if isinstance(child, nodes.Function):
-                functions[child.name] = AstngTestFunction(child)
-
-        self.functions = functions
-        self.classes = classes
-
-
-
-class AstngTestClass(object):
-    def __init__(self, node):
-        self.node = node
-
-        methods = {}
-        for method in node.methods():
-            methods[method.name] = AstngTestFunction(method)
-        self.methods = methods
-
-
-
-class AstngTestFunction(object):
-    def __init__(self, node):
-        self.node = node
 
 
 
@@ -80,10 +42,10 @@ class DocstringTestCase(unittest.TestCase):
         L{DocstringChecker} issues a warning for empty or missing
         module docstrings.
         """
-        testmodule = AstngTestModule('example_docstrings_missing')
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
-        checker._check_docstring('module', testmodule.node)
+        checker._check_docstring(
+            'module', astng('example_docstrings_missing'))
         self.assertEquals(len(linter.messages), 1)
 
 
@@ -92,11 +54,10 @@ class DocstringTestCase(unittest.TestCase):
         L{DocstringChecker} issues a warning for empty or missing
         function docstrings.
         """
-        testmodule = AstngTestModule('example_docstrings_missing.bar')
-        testfunc = testmodule.functions['bar']
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
-        checker._check_docstring('function', testfunc.node)
+        checker._check_docstring(
+            'function', astng('example_docstrings_missing')['bar'])
         self.assertEquals(len(linter.messages), 1)
 
 
@@ -105,11 +66,10 @@ class DocstringTestCase(unittest.TestCase):
         L{DocstringChecker} issues a warning for empty or missing
         class docstrings.
         """
-        testmodule = AstngTestModule()
-        testclass = testmodule.classes['Foo']
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
-        checker._check_docstring('class', testclass.node)
+        checker._check_docstring(
+            'class', astng('example_docstrings_missing')['Foo'])
         self.assertEquals(len(linter.messages), 1)
 
 
@@ -118,12 +78,10 @@ class DocstringTestCase(unittest.TestCase):
         L{DocstringChecker} issues a warning for empty or missing
         method docstrings.
         """
-        testmodule = AstngTestModule()
-        testclass = testmodule.classes['Foo']
-        testmethod = testclass.methods['bar']
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
-        checker._check_docstring('method', testmethod.node)
+        checker._check_docstring(
+            'method', astng('example_docstrings_missing')['Foo']['bar'])
         self.assertEquals(len(linter.messages), 1)
 
 
@@ -132,12 +90,11 @@ class DocstringTestCase(unittest.TestCase):
         Docstrings can be omitted if the method is contributing to a
         documented interface.
         """
-        testmodule = AstngTestModule()
-        testclass = testmodule.classes['FooImplementation']
-        testmethod = testclass.methods['bar'].node
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
-        checker._check_docstring('method', testmethod)
+        checker._check_docstring(
+            'method',
+            astng('example_docstrings_missing')['FooImplementation']['bar'])
         self.assertEquals(len(linter.messages), 0)
 
 
@@ -147,12 +104,11 @@ class DocstringTestCase(unittest.TestCase):
         documented interface. In this case an interface that has been
         imported from another module.
         """
-        testmodule = AstngTestModule()
-        testclass = testmodule.classes['FooImplementationExternal']
-        testmethod = testclass.methods['bar'].node
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
-        checker._check_docstring('method', testmethod)
+        checker._check_docstring(
+            'method',
+            astng('example_docstrings_missing')['FooImplementationExternal']['bar'])
         self.assertEquals(len(linter.messages), 0)
 
 
@@ -162,12 +118,12 @@ class DocstringTestCase(unittest.TestCase):
         documented interface. In this case an interface that has been
         imported from another module.
         """
-        testmodule = AstngTestModule()
-        testclass = testmodule.classes['FooImplementationExternal2']
-        testmethod = testclass.methods['bar'].node
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
-        checker._check_docstring('method', testmethod)
+        checker._check_docstring(
+            'method',
+            astng('example_docstrings_missing')['FooImplementationExternal2']['bar'])
+
         self.assertEquals(len(linter.messages), 0)
 
 
@@ -177,12 +133,11 @@ class DocstringTestCase(unittest.TestCase):
         documented interface. Here the class implements multiple
         interfaces.
         """
-        testmodule = AstngTestModule()
-        testclass = testmodule.classes['FooImplementationExternal3']
-        testmethod = testclass.methods['bar'].node
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
-        checker._check_docstring('method', testmethod)
+        checker._check_docstring(
+            'method',
+            astng('example_docstrings_missing')['FooImplementationExternal3']['bar'])
         self.assertEquals(len(linter.messages), 0)
 
 
