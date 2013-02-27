@@ -155,6 +155,18 @@ class DocstringTestCase(unittest.TestCase):
         self.assertEquals(len(linter.messages), 0)
 
 
+    def test_emptyModuleDocstring(self):
+        """
+        L{DocstringChecker} issues a warning for empty module
+        docstrings.
+        """
+        linter = FakeLinter()
+        checker = DocstringChecker(linter=linter)
+        checker._check_docstring(
+            'module', astng('example_docstrings_empty'))
+        self.assertEquals(len(linter.messages), 1)
+
+
     def test_getLineIndent(self):
         """
         Test of twistedchecker.checkers.docstring._getLineIndent.
