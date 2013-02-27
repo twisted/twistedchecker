@@ -19,10 +19,13 @@ class FakeLinter(object):
 
 
 class AstngTestModule(object):
-    def __init__(self, filepath, modname):
+    filepath = 'example_docstrings_missing.py'
+    modname = 'example_docstrings_missing'
+
+    def __init__(self):
         testdir = os.path.dirname(__file__)
         astng = MANAGER.astng_from_file(
-            os.path.join(testdir, filepath), modname, source=True)
+            os.path.join(testdir, self.filepath), self.modname, source=True)
         self.node = astng
 
         classes = {}
@@ -77,9 +80,7 @@ class DocstringTestCase(unittest.TestCase):
         L{DocstringChecker} issues a warning for empty or missing
         module docstrings.
         """
-        testmodule = AstngTestModule(
-            'example_docstrings_missing.py',
-            'example_docstrings_missing')
+        testmodule = AstngTestModule()
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
         checker._check_docstring('module', testmodule.node)
@@ -91,9 +92,7 @@ class DocstringTestCase(unittest.TestCase):
         L{DocstringChecker} issues a warning for empty or missing
         function docstrings.
         """
-        testmodule = AstngTestModule(
-            'example_docstrings_missing.py',
-            'example_docstrings_missing')
+        testmodule = AstngTestModule()
         testfunc = testmodule.functions['bar']
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
@@ -106,9 +105,7 @@ class DocstringTestCase(unittest.TestCase):
         L{DocstringChecker} issues a warning for empty or missing
         class docstrings.
         """
-        testmodule = AstngTestModule(
-            'example_docstrings_missing.py',
-            'example_docstrings_missing')
+        testmodule = AstngTestModule()
         testclass = testmodule.classes['Foo']
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
@@ -121,9 +118,7 @@ class DocstringTestCase(unittest.TestCase):
         L{DocstringChecker} issues a warning for empty or missing
         method docstrings.
         """
-        testmodule = AstngTestModule(
-            'example_docstrings_missing.py',
-            'example_docstrings_missing')
+        testmodule = AstngTestModule()
         testclass = testmodule.classes['Foo']
         testmethod = testclass.methods['bar']
         linter = FakeLinter()
@@ -137,9 +132,7 @@ class DocstringTestCase(unittest.TestCase):
         Docstrings can be omitted if the method is contributing to a
         documented interface.
         """
-        testmodule = AstngTestModule(
-            'example_docstrings_missing.py',
-            'example_docstrings_missing')
+        testmodule = AstngTestModule()
         testclass = testmodule.classes['FooImplementation']
         testmethod = testclass.methods['bar'].node
         linter = FakeLinter()
@@ -154,9 +147,7 @@ class DocstringTestCase(unittest.TestCase):
         documented interface. In this case an interface that has been
         imported from another module.
         """
-        testmodule = AstngTestModule(
-            'example_docstrings_missing.py',
-            'example_docstrings_missing')
+        testmodule = AstngTestModule()
         testclass = testmodule.classes['FooImplementationExternal']
         testmethod = testclass.methods['bar'].node
         linter = FakeLinter()
@@ -171,9 +162,7 @@ class DocstringTestCase(unittest.TestCase):
         documented interface. In this case an interface that has been
         imported from another module.
         """
-        testmodule = AstngTestModule(
-            'example_docstrings_missing.py',
-            'example_docstrings_missing')
+        testmodule = AstngTestModule()
         testclass = testmodule.classes['FooImplementationExternal2']
         testmethod = testclass.methods['bar'].node
         linter = FakeLinter()
@@ -188,9 +177,7 @@ class DocstringTestCase(unittest.TestCase):
         documented interface. Here the class implements multiple
         interfaces.
         """
-        testmodule = AstngTestModule(
-            'example_docstrings_missing.py',
-            'example_docstrings_missing')
+        testmodule = AstngTestModule()
         testclass = testmodule.classes['FooImplementationExternal3']
         testmethod = testclass.methods['bar'].node
         linter = FakeLinter()
