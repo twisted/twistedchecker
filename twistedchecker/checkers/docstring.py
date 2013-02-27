@@ -86,7 +86,6 @@ class DocstringChecker(PylintDocStringChecker):
         @param node: current node of pylint
         """
         docstring = node.doc
-#        import pdb;pdb.set_trace()
         if docstring is None:
             # The node does not have a docstring.
             # But that's ok if this is part of a documented interface.
@@ -115,7 +114,6 @@ class DocstringChecker(PylintDocStringChecker):
         @param node: The node to inspect
         @type node: L{logilab.astng.scoped_nodes.Function}
         """
-#        import pdb;pdb.set_trace()
         if (isinstance(node, nodes.Function)
             and node.type == 'method'
             and node.parent.decorators):
@@ -141,6 +139,7 @@ class DocstringChecker(PylintDocStringChecker):
         # and we need to get the first part of the
         # reference
         interface_reference_parts = interface_reference.split('.')
+        interface_name = interface_reference_parts[-1]
         interface_node = (
             node.root().locals[interface_reference_parts[0]][0])
 
@@ -159,15 +158,18 @@ class DocstringChecker(PylintDocStringChecker):
             else:
                 raise AssertionError(
                     'Unexpected interface_node class %r' % (interface_node,))
-            # import the module bit (everything but the last part)
-            try:
-                interface = __import__('.'.join(
-                        interface_reference_absolute[:-1]))
-            except ImportError:
-#                import pdb; pdb.set_trace()
-                raise
-            for p in interface_reference_absolute[1:]:
-                interface = getattr(interface, p)
+
+            # load the module as astng (everything but the last part)
+            module_node = node.root().import_module(
+                '.'.join(interface_reference_absolute[:-1]))
+
+            for child in module_node.get_children():
+                if isinstance(child, nodes.Class):
+                    if child.name == interface_name:
+                        interface = child
+                        break
+            else:
+                raise AssertionError('Interface %r not in module %r' % (interface_name, module_node))
 
         # Handle locally defined interfaces In this case
         # the interface is an astng Class instance which happens
