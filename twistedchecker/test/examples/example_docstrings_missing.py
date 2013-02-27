@@ -2,8 +2,8 @@
 
 from zope.interface import implementer, Interface
 
-import example_interfaces
-from example_interfaces.foo import IFoo2
+import examples.example_interfaces
+from examples.example_interfaces import IFoo2
 
 
 
@@ -31,7 +31,7 @@ class FooImplementation(object):
 
 
 
-@implementer(example_interfaces.foo.IFoo)
+@implementer(examples.example_interfaces.IFoo)
 class FooImplementationExternalAbsoluteInterface(object):
     def bar(self):
         pass
@@ -45,7 +45,7 @@ class FooImplementationExternalRelativeInterface(object):
 
 
 
-@implementer(example_interfaces.foo.IFoo, IFoo2)
+@implementer(examples.example_interfaces.IFoo, IFoo2)
 class FooImplementationExternalMultipleInterface(object):
     def bar(self):
         pass

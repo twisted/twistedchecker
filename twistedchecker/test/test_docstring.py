@@ -8,7 +8,9 @@ from twisted.trial import unittest
 from twistedchecker.checkers.docstring import DocstringChecker
 
 
+# Shortened function name for convenience in tests.
 astng = MANAGER.astng_from_module_name
+
 
 
 class FakeLinter(object):
@@ -57,7 +59,7 @@ class DocstringTestCase(unittest.TestCase):
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
         checker._check_docstring(
-            'module', astng('example_docstrings_missing'))
+            'module', astng('examples.example_docstrings_missing'))
         self.assertEquals(len(linter.messages), 1)
 
 
@@ -69,7 +71,7 @@ class DocstringTestCase(unittest.TestCase):
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
         checker._check_docstring(
-            'function', astng('example_docstrings_missing')['bar'])
+            'function', astng('examples.example_docstrings_missing')['bar'])
         self.assertEquals(len(linter.messages), 1)
 
 
@@ -81,7 +83,7 @@ class DocstringTestCase(unittest.TestCase):
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
         checker._check_docstring(
-            'class', astng('example_docstrings_missing')['Foo'])
+            'class', astng('examples.example_docstrings_missing')['Foo'])
         self.assertEquals(len(linter.messages), 1)
 
 
@@ -93,7 +95,7 @@ class DocstringTestCase(unittest.TestCase):
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
         checker._check_docstring(
-            'method', astng('example_docstrings_missing')['Foo']['bar'])
+            'method', astng('examples.example_docstrings_missing')['Foo']['bar'])
         self.assertEquals(len(linter.messages), 1)
 
 
@@ -107,7 +109,7 @@ class DocstringTestCase(unittest.TestCase):
         checker = DocstringChecker(linter=linter)
         checker._check_docstring(
             'method',
-            astng('example_docstrings_missing')['FooImplementation']['bar'])
+            astng('examples.example_docstrings_missing')['FooImplementation']['bar'])
         self.assertEquals(len(linter.messages), 0)
 
 
@@ -122,7 +124,7 @@ class DocstringTestCase(unittest.TestCase):
         checker = DocstringChecker(linter=linter)
         checker._check_docstring(
             'method',
-            astng('example_docstrings_missing')['FooImplementationExternalAbsoluteInterface']['bar'])
+            astng('examples.example_docstrings_missing')['FooImplementationExternalAbsoluteInterface']['bar'])
         self.assertEquals(len(linter.messages), 0)
 
 
@@ -136,7 +138,7 @@ class DocstringTestCase(unittest.TestCase):
         checker = DocstringChecker(linter=linter)
         checker._check_docstring(
             'method',
-            astng('example_docstrings_missing')['FooImplementationExternalRelativeInterface']['bar'])
+            astng('examples.example_docstrings_missing')['FooImplementationExternalRelativeInterface']['bar'])
 
         self.assertEquals(len(linter.messages), 0)
 
@@ -151,7 +153,7 @@ class DocstringTestCase(unittest.TestCase):
         checker = DocstringChecker(linter=linter)
         checker._check_docstring(
             'method',
-            astng('example_docstrings_missing')['FooImplementationExternalMultipleInterface']['bar'])
+            astng('examples.example_docstrings_missing')['FooImplementationExternalMultipleInterface']['bar'])
         self.assertEquals(len(linter.messages), 0)
 
 
@@ -163,7 +165,7 @@ class DocstringTestCase(unittest.TestCase):
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
         checker._check_docstring(
-            'module', astng('example_docstrings_empty'))
+            'module', astng('examples.example_docstrings_empty'))
         self.assertEquals(len(linter.messages), 1)
 
 
