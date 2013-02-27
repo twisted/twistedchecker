@@ -184,9 +184,9 @@ class DocstringChecker(PylintDocStringChecker):
 
         assert isinstance(interface, nodes.Class), (
             'Unexpected interface type. '
-            'Interfaces should subclass nodes.Class '
+            'Interfaces should subclass nodes.Class. '
             'Interface: %r, '
-            'Class: %r' % (interface, interface.__class__))
+            'Class: %r.' % (interface, interface.__class__))
 
         return  interface
 
