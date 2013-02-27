@@ -80,7 +80,7 @@ class DocstringTestCase(unittest.TestCase):
         L{DocstringChecker} issues a warning for empty or missing
         module docstrings.
         """
-        testmodule = AstngTestModule()
+        testmodule = AstngTestModule('example_docstrings_missing')
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
         checker._check_docstring('module', testmodule.node)
@@ -92,7 +92,7 @@ class DocstringTestCase(unittest.TestCase):
         L{DocstringChecker} issues a warning for empty or missing
         function docstrings.
         """
-        testmodule = AstngTestModule()
+        testmodule = AstngTestModule('example_docstrings_missing.bar')
         testfunc = testmodule.functions['bar']
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
