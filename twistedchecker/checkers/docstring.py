@@ -173,19 +173,21 @@ class DocstringChecker(PylintDocStringChecker):
             module_node = node.root().import_module(
                 '.'.join(interface_reference_absolute[:-1]))
 
-            for child in module_node.get_children():
-                if isinstance(child, nodes.Class):
-                    if child.name == interface_name:
-                        interface = child
-                        break
-            else:
+            try:
+                interface = module_node[interface_name]
+            except KeyError:
                 raise AssertionError('Interface %r not in module %r' % (interface_name, module_node))
 
         # Handle locally defined interfaces.
         elif isinstance(interface_node, astng.nodes.Class):
             interface = interface_node
-        else:
-            raise AssertionError('Unexpected interface node class %r' % (interface_node,))
+
+        assert isinstance(interface, nodes.Class), (
+            'Unexpected interface type. '
+            'Interfaces should subclass nodes.Class '
+            'Interface: %r, '
+            'Class: %r' % (interface, interface.__class__))
+
         return  interface
 
 
