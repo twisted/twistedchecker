@@ -129,26 +129,36 @@ class DocstringChecker(PylintDocStringChecker):
                     for interface_reference in interface_references:
                         if node.name in self._getInterface(
                             node, interface_reference.strip()):
+
                             return True
 
         return False
 
 
     def _getInterface(self, node, interface_reference):
-        # if it contains . then it must have been imported
-        # and we need to get the first part of the
-        # reference
+        """
+        Load an C{astng} representation of the given interface class.
+
+        @param node: The method node which implement interface and
+            whose root module contains or imports the interface.
+        @type node: A L{logilab.astng.nodes.Function}
+
+        @param interface_reference: The local reference to the
+            interface class used in the parent class @implementer
+            decorator.
+        @type interface_reference: C{str}
+        """
         interface_reference_parts = interface_reference.split('.')
         interface_name = interface_reference_parts[-1]
         interface_node = (
             node.root().locals[interface_reference_parts[0]][0])
 
         # Handle imported interfaces
-        # In this case the target interface is imported
         if isinstance(interface_node,
                       (astng.nodes.From, astng.nodes.Import)):
-            # now build the full path e.g.
-            # [twisted, internet, interfaces, IResolver]
+            # Now build the full path as a list. Handled differently
+            # depending on whether the interface was imported using an
+            # import or a from .. import statement.
             if isinstance(interface_node, astng.nodes.Import):
                 interface_reference_absolute = interface_reference_parts
             elif isinstance(interface_node, astng.nodes.From):
@@ -159,7 +169,7 @@ class DocstringChecker(PylintDocStringChecker):
                 raise AssertionError(
                     'Unexpected interface_node class %r' % (interface_node,))
 
-            # load the module as astng (everything but the last part)
+            # Load the module as astng (everything but the last part)
             module_node = node.root().import_module(
                 '.'.join(interface_reference_absolute[:-1]))
 
@@ -171,9 +181,7 @@ class DocstringChecker(PylintDocStringChecker):
             else:
                 raise AssertionError('Interface %r not in module %r' % (interface_name, module_node))
 
-        # Handle locally defined interfaces In this case
-        # the interface is an astng Class instance which happens
-        # to be iterable, just like a zope.interface
+        # Handle locally defined interfaces.
         elif isinstance(interface_node, astng.nodes.Class):
             interface = interface_node
         else:
