@@ -15,3 +15,7 @@ formattedString = "%(num)d" % mapFoo
 num = 3
 # a tuple used in the string formatting operation.
 formattedString = "%d" % (num,)
+
+# a modulo operation
+# no warnings should be generated
+number = 34 % 4
