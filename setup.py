@@ -7,7 +7,7 @@
 Distutils installer for TwistedChecker.
 """
 
-import sys, os
+import sys
 
 try:
     from setuptools import setup
