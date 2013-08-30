@@ -126,7 +126,7 @@ class PEP8Checker(BaseChecker):
         'W293': ('W9011', ''),
         'E301': ('W9012', r'expected 2 blank lines, found (\d+)'),
         'E302': ('W9013', r'expected 3 blank lines, found (\d+)'),
-        'E303': ('W9015', r'too many blank lines, expected \((\d+)\)'),
+        'E303': ('W9015', r'too many blank lines \((\d+)\)'),
         'E305': ('W9016', r'too many blank lines after docstring \((\d+)\)'),
         'W391': ('W9017', ''),
         'W292': ('W9018', ''),
@@ -189,6 +189,11 @@ class PEP8Checker(BaseChecker):
             return
         for warning in warnings:
             linenum, offset, msgidInPEP8, text = warning
+
+            if text.startswith(msgidInPEP8):
+                # If the PEP8 code is at the start of the text, trim it out
+                text = text[len(msgidInPEP8) + 1:]
+
             if msgidInPEP8 in self.mapPEP8Messages:
                 msgid, patternArguments = self.mapPEP8Messages[msgidInPEP8]
                 if (not self.pep8Enabled and
@@ -279,7 +284,7 @@ def checkBlankLinesForPEP8(logical_line, blank_lines,
                 "E302 expected 3 blank lines, found %d" % max_blank_lines)
 
     elif max_blank_lines > 1 and indent_level:
-        return 0, "E303 too many blank lines, expected (%d)" % max_blank_lines
+        return 0, "E303 too many blank lines (%d)" % max_blank_lines
 
 
 
