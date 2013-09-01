@@ -15,6 +15,8 @@ import pep8
 from pep8 import DOCSTRING_REGEX
 from pep8 import Checker as PEP8OriginalChecker
 
+
+
 class PEP8WarningRecorder(PEP8OriginalChecker):
     """
     A subclass of pep8's checker that records warnings.
@@ -28,6 +30,19 @@ class PEP8WarningRecorder(PEP8OriginalChecker):
         """
         pep8.options = pep8.process_options([file])[0]
         PEP8OriginalChecker.__init__(self, file)
+
+        for item in self._logical_checks:
+            # This cycles through all of the logical checks that the Checker
+            # does. The reason why we have to monkeypatch it here is that
+            # upon init, it makes a list of all of the plugins/functions it
+            # has, and therefore already /has/ a reference to the
+            # blank_lines that we don't want. So this cycles over the logical
+            # checks, and replaces the old blank_lines with the one that
+            # matches Twisted's blank spaces convention.
+            if item[0] == "blank_lines":
+                replacetuple = (item[0], modifiedBlankLines, item[2])
+                self._logical_checks[self._logical_checks.index(item)] = replacetuple
+
         self.report_error = self.errorRecorder
         self.warnings = []
         self.run()
@@ -44,11 +59,7 @@ class PEP8WarningRecorder(PEP8OriginalChecker):
         @param check: check object in pep8
         """
         code = text.split(" ")[0]
-        if hasattr(self, 'report'):
-            lineOffset = self.report.line_offset
-        else:
-            # old pep8.py
-            lineOffset = self.line_offset
+        lineOffset = self.report.line_offset
 
         self.warnings.append((lineOffset + lineNumber,
                               offset + 1, code, text))
@@ -86,7 +97,7 @@ class PEP8Checker(BaseChecker):
      'W9013': ('Expected 3 blank lines, found %s',
                'Top-level functions should be separated '
                'with 3 blank lines.'),
-     'W9015': ('Too many blank lines, expected %s',
+     'W9015': ('Too many blank lines, found %s',
                'Used when too many blank lines are found.'),
      'W9016': ('Too many blank lines after docstring, found %s',
                'Used when too many blank lines after docstring are found.'),
@@ -151,12 +162,6 @@ class PEP8Checker(BaseChecker):
         @param linter: current C{PyLinter} object.
         """
         BaseChecker.__init__(self, linter)
-        argumentsBlankLines = inspect.getargspec(pep8.blank_lines).args
-        if 'blank_lines_before_comment' in argumentsBlankLines:
-            # using old pep8.py
-            pep8.blank_lines = modifiedBlankLinesForOldPEP8
-        else:
-            pep8.blank_lines = modifiedBlankLines
         self.pep8Enabled = self.linter.option_value("pep8")
 
 
@@ -209,10 +214,8 @@ class PEP8Checker(BaseChecker):
 
 
 
-def checkBlankLinesForPEP8(logical_line, blank_lines,
-                                 indent_level, line_number,
-                                 previous_logical, previous_indent_level,
-                                 blank_lines_before_comment):
+def modifiedBlankLines(logical_line, blank_lines, indent_level, line_number,
+                       previous_logical, previous_indent_level):
     """
     This function is copied from a modified pep8 checker for Twisted.
     See https://github.com/cyli/TwistySublime/blob/master/twisted_pep8.py
@@ -248,6 +251,7 @@ def checkBlankLinesForPEP8(logical_line, blank_lines,
     if line_number == 1:
         return
 
+    blank_lines_before_comment = 0
     max_blank_lines = max(blank_lines, blank_lines_before_comment)
     previous_is_comment = DOCSTRING_REGEX.match(previous_logical)
 
@@ -264,7 +268,7 @@ def checkBlankLinesForPEP8(logical_line, blank_lines,
             # the next function
             if previous_is_comment:
                 if max_blank_lines > 1:
-                    return 0, (
+                    yield 0, (
                         "E305 too many blank lines after docstring (%d)" %
                         max_blank_lines)
 
@@ -274,57 +278,14 @@ def checkBlankLinesForPEP8(logical_line, blank_lines,
                 if not (max_blank_lines == 2 or
                         indent_level > 4 or
                         previous_indent_level <= indent_level):
-                    return 0, ("E301 expected 2 blank lines, found %d" %
+                    yield 0, ("E301 expected 2 blank lines, found %d" %
                                    max_blank_lines)
 
         # top level, there should be 3 blank lines between class/function
-        # definitions (but not necessarily after varable declarations)
+        # definitions (but not necessarily after variable declarations)
         elif previous_indent_level and max_blank_lines != 3:
-            return (0,
+            yield (0,
                 "E302 expected 3 blank lines, found %d" % max_blank_lines)
 
     elif max_blank_lines > 1 and indent_level:
-        return 0, "E303 too many blank lines (%d)" % max_blank_lines
-
-
-
-def modifiedBlankLinesForOldPEP8(logical_line, blank_lines,
-                                 indent_level, line_number,
-                                 previous_logical, previous_indent_level,
-                                 blank_lines_before_comment):
-    """
-    This function is same as modifiedBlankLines,
-    but supports old version of pep8.py.
-    """
-    return checkBlankLinesForPEP8(logical_line, blank_lines,
-                                 indent_level, line_number,
-                                 previous_logical, previous_indent_level,
-                                 blank_lines_before_comment)
-
-
-
-def modifiedBlankLines(logical_line, blank_lines, indent_level, line_number,
-                       previous_logical, previous_indent_level):
-    """
-    A function for checking blank lines as a replacement for that in pep8.py.
-
-    Okay: def a():\n    pass\n\n\n\ndef b():\n    pass
-    Okay: class A():\n    pass\n\n\n\nclass B():\n    pass
-    Okay: def a():\n    pass\n\n\n# Foo\n# Bar\n\ndef b():\n    pass
-
-    E301: class Foo:\n    b = 0\n    def bar():\n        pass
-    E302: def a():\n    pass\n\ndef b(n):\n    pass
-    E303: def a():\n    pass\n\n\n\ndef b(n):\n    pass
-    E303: def a():\n\n\n\n    pass
-    E304: @decorator\n\ndef a():\n    pass
-    E305: "comment"\n\n\ndef a():\n    pass
-    E306: variable="value"\ndef a():   pass
-    """
-    result = checkBlankLinesForPEP8(logical_line, blank_lines,
-                                 indent_level, line_number,
-                                 previous_logical, previous_indent_level,
-                                 0)
-    if result:
-        yield result
-    else:
-        return
+        yield 0, "E303 too many blank lines (%d)" % max_blank_lines
