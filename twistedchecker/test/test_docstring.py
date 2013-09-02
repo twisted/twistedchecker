@@ -155,17 +155,38 @@ class DocstringTestCase(unittest.TestCase):
             DocstringChecker(linter=None)._docstringInherited(node))
 
 
+    def _createMethodNode(self, methodName='baz', className='Foo',
+                          decoratorName=None, decoratorArgs=()):
+        """
+        """
+        if decoratorName is None:
+            decorators = None
+        else:
+            decoratorNode = CallFunc()
+            decoratorNode.func = Function(name=decoratorName, doc='')
+            decoratorNode.args = []
+            for n in decoratorArgs:
+                argNameNode = Name()
+                argNameNode.name = n
+                decoratorNode.args.append(argNameNode)
+            decorators = Decorators(nodes=[decoratorNode])
+
+        parentNode = Class(name=className, doc='')
+        parentNode.decorators = decorators
+        childNode = Function(name=methodName, doc='')
+        childNode.type = 'method'
+        childNode.parent = parentNode
+        self.assertTrue(childNode.is_method())
+        return childNode
+
+
     def test_docstringInheritedNoDecorators(self):
         """
         L{DocstringChecker._docstringInherited} returns L{False} if the
         supplied method C{node}'s parent class has no decorators.
         """
-        parentNode = Class(name='Foo', doc='')
-        parentNode.decorators = None
-        childNode = Function(name='foo', doc='')
-        childNode.type = 'method'
-        childNode.parent = parentNode
-        self.assertTrue(childNode.is_method())
+        childNode = self._createMethodNode(
+            decoratorName=None)
 
         self.assertFalse(
             DocstringChecker(linter=None)._docstringInherited(childNode))
@@ -178,40 +199,12 @@ class DocstringTestCase(unittest.TestCase):
         "implementer".
         XXX: fragile -- see comment in code.
         """
-        decorator = CallFunc()
-        decorator.func = Function(name='FOOBAR', doc='')
-
-        parentNode = Class(name='Foo', doc='')
-        parentNode.decorators = Decorators(nodes=[decorator])
-        childNode = Function(name='foo', doc='')
-        childNode.type = 'method'
-        childNode.parent = parentNode
-        self.assertTrue(childNode.is_method())
+        childNode = self._createMethodNode(
+            methodName='baz',
+            decoratorName='FOOBAR')
 
         self.assertFalse(
             DocstringChecker(linter=None)._docstringInherited(childNode))
-
-
-    def _createMethodNode(self, methodName='baz', interfaceNames=None):
-        if interfaceNames is None:
-            decorators = None
-        else:
-            decoratorNode = CallFunc()
-            decoratorNode.func = Function(name='implementer', doc='')
-            decoratorNode.args = []
-            for n in interfaceNames:
-                interfaceNameNode = Name()
-                interfaceNameNode.name = n
-                decoratorNode.args.append(interfaceNameNode)
-            decorators = Decorators(nodes=[decoratorNode])
-
-        parentNode = Class(name='Foo', doc='')
-        parentNode.decorators = decorators
-        childNode = Function(name=methodName, doc='')
-        childNode.type = 'method'
-        childNode.parent = parentNode
-        self.assertTrue(childNode.is_method())
-        return childNode
 
 
     def test_docstringInheritedWithMultipleNonMatchingDecoratorArguments(self):
@@ -238,7 +231,8 @@ class DocstringTestCase(unittest.TestCase):
 
         childNode = self._createMethodNode(
             methodName='foo',
-            interfaceNames=['Ignored1', 'Ignored2'])
+            decoratorName='implementer',
+            decoratorArgs=['Ignored1', 'Ignored2'])
         result = checker._docstringInherited(childNode)
 
         self.assertEqual(
@@ -265,7 +259,8 @@ class DocstringTestCase(unittest.TestCase):
 
         childNode = self._createMethodNode(
             methodName='baz',
-            interfaceNames=['Ignored1'])
+            decoratorName='implementer',
+            decoratorArgs=['Ignored1'])
 
         result = checker._docstringInherited(childNode)
 
