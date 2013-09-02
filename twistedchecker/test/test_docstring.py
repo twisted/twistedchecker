@@ -241,7 +241,6 @@ class DocstringTestCase(unittest.TestCase):
         )
 
 
-
     def test_docstringInheritedWithMatchingDecoratorArguments(self):
         """
         If any of the named interfaces returned by _getInterface contain
@@ -265,6 +264,41 @@ class DocstringTestCase(unittest.TestCase):
         result = checker._docstringInherited(childNode)
 
         self.assertTrue(result)
+
+
+    def test_getInterfaceUndefinedLocalInterfaceName(self):
+        """
+        L{DocstringChecker._getInterface} raises KeyError if the supplied
+        interface name is not found among the local variables of
+        node's root module.
+        """
+        class DummyChild(object):
+            locals = {}
+            def root(self):
+                return self
+
+        e = self.assertRaises(
+            KeyError,
+            DocstringChecker(linter=None)._getInterface,
+            node=DummyChild(), interfaceName='IFoo')
+        self.assertEqual('IFoo', e.message)
+
+
+    def test_getInterfaceUndefinedModuleInterfaceName(self):
+        """
+        If the supplied interfaceName is a qualified name, the first
+        segment of the name is looked up in the node's root module.
+        """
+        class DummyChild(object):
+            locals = {}
+            def root(self):
+                return self
+
+        e = self.assertRaises(
+            KeyError,
+            DocstringChecker(linter=None)._getInterface,
+            node=DummyChild(), interfaceName='foo.bar.IFoo')
+        self.assertEqual('foo', e.message)
 
 
     def test_docstringInheritedLocalInterface(self):

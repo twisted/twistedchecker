@@ -145,7 +145,7 @@ class DocstringChecker(PylintDocStringChecker):
         return False
 
 
-    def _getInterface(self, node, interface_reference):
+    def _getInterface(self, node, interfaceName):
         """
         Load an C{astng} representation of the given interface class.
 
@@ -153,52 +153,56 @@ class DocstringChecker(PylintDocStringChecker):
             whose root module contains or imports the interface.
         @type node: A L{logilab.astng.nodes.Function}
 
-        @param interface_reference: The local reference to the
-            interface class used in the parent class @implementer
+        @param interfaceName: The qualified name of the
+            interface class passed to the @implementer
             decorator.
-        @type interface_reference: C{str}
+        @type interfaceName: C{str}
         """
-        interface_reference_parts = interface_reference.split('.')
-        interface_name = interface_reference_parts[-1]
-        interface_import_node = (
-            node.root().locals[interface_reference_parts[0]][0])
-
+        interfaceNameSegments = interfaceName.split('.')
+        interfaceClassName = interfaceNameSegments[-1]
+        # Raises KeyError if interface name not found.
+        matchingLocalNodes = node.root().locals[interfaceNameSegments[0]]
+        # XXX: Safe to assume there's only one node with that name?
+        interfaceImportNode = matchingLocalNodes[0]
+#        import pdb; pdb.set_trace()
         # Handle imported interfaces
-        if isinstance(interface_import_node,
+        if isinstance(interfaceImportNode,
                       (astng.nodes.From, astng.nodes.Import)):
             # Now build the full path as a list. Handled differently
             # depending on whether the interface was imported using an
             # import or a from .. import statement.
-            if isinstance(interface_import_node, astng.nodes.Import):
-                interface_reference_absolute = interface_reference_parts
-            elif isinstance(interface_import_node, astng.nodes.From):
-                interface_reference_absolute = (
-                    interface_import_node.modname.split('.')
-                    + interface_reference_parts)
+            if isinstance(interfaceImportNode, astng.nodes.Import):
+                interfaceNameSegmentsAbs = interfaceNameSegments
+            elif isinstance(interfaceImportNode, astng.nodes.From):
+                interfaceNameSegmentsAbs = (
+                    interfaceImportNode.modname.split('.')
+                    + interfaceNameSegments)
 
             # Load the module as astng (everything but the last part)
-            module_node = node.root().import_module(
-                '.'.join(interface_reference_absolute[:-1]))
+            moduleNode = node.root().import_module(
+                '.'.join(interfaceNameSegmentsAbs[:-1]))
 
             try:
-                interface = module_node[interface_name]
+#                import pdb; pdb.set_trace()
+                interface = moduleNode[interfaceClassName]
             except KeyError:
-                raise AssertionError('Interface %r not in module %r' % (interface_name, module_node))
+                raise AssertionError(
+                    'Interface %r not in module %r' % (interfaceName, moduleNode))
 
         # Handle locally defined interfaces.
-        elif isinstance(interface_import_node, astng.nodes.Class):
-            interface = interface_import_node
+        elif isinstance(interfaceImportNode, astng.nodes.Class):
+            interface = interfaceImportNode
         else:
             raise AssertionError(
                 'Unexpected interface_import_node type. '
                 'Must be one of astng.nodes.{Class, Import or From}. '
-                'interface_import_node: %r.' % (interface_import_node,))
+                'interfaceImportNode: %r.' % (interfaceImportNode,))
 
         assert isinstance(interface, nodes.Class), (
             'Unexpected interface type. '
             'Must be a subclass nodes.Class. '
             'interface_reference: %r, '
-            'interface: %r.' % (interface_reference, interface))
+            'interface: %r.' % (interfaceName, interface))
 
         return  interface
 
