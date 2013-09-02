@@ -1,7 +1,8 @@
+from collections import namedtuple
 import os
 import sys
 
-from logilab.astng import MANAGER
+from logilab.astng import MANAGER, scoped_nodes
 
 from twisted.trial import unittest
 
@@ -23,6 +24,10 @@ class FakeLinter(object):
 
     def add_message(self, *args, **kwargs):
         self.messages.append((args, kwargs))
+
+
+
+DummyNode = namedtuple('DummyNode', 'parent doc')
 
 
 
@@ -49,6 +54,40 @@ class DocstringTestCase(unittest.TestCase):
         sys.modules.clear()
         sys.modules.update(self.originalModules)
         sys.path[:] = self.originalPath
+
+
+    def test_checkDocstringCallsDocStringInherited(self):
+        """
+        L{DocstringChecker._check_docstring} calls C{_docStringInherited}
+        if the supplied documentation node is None (missing).
+        """
+        dummyNode = DummyNode(parent=None, doc=None)
+        checker = DocstringChecker(linter=None)
+        calls = []
+        self.patch(checker, '_docStringInherited',
+                   lambda node: calls.append(node))
+
+        checker._check_docstring('module', dummyNode)
+
+        self.assertEquals([dummyNode], calls)
+
+
+    def test_checkDocstringSkipsDocStringInheritedForNestedFunctions(self):
+        """
+        L{DocstringChecker._check_docstring} does not call
+        C{_docStringInherited} if the supplied documentation node is
+        a nested function.
+        """
+        dummyNode = DummyNode(
+            parent=scoped_nodes.Function(name='foo', doc=None), doc=None)
+        checker = DocstringChecker(linter=None)
+        calls = []
+        self.patch(checker, '_docStringInherited',
+                   lambda node: calls.append(node))
+
+        checker._check_docstring('module', dummyNode)
+
+        self.assertEquals([], calls)
 
 
     def test_missingModuleDocstring(self):

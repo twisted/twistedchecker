@@ -85,20 +85,21 @@ class DocstringChecker(PylintDocStringChecker):
         @param node_type: type of node
         @param node: current node of pylint
         """
-        docstring = node.doc
-        if docstring is None:
-            # The node does not have a docstring.
-            # But that's ok if this is part of a documented interface.
-            # or if this is a nested function or method.
-            if (not self._docStringInherited(node)
-                and type(node.parent) is not scoped_nodes.Function):
-                self.add_message('W9208', node=node)
+        if node.doc is None:
+            if type(node.parent) is scoped_nodes.Function:
+                # Allow missing docstrings on nested functions
+                return
+            else:
+                # Allow missing docstrings if the interface has a
+                # docstring for that function.
+                if self._docStringInherited(node):
+                    self.add_message('W9208', node=node)
             return
-
-        elif not docstring.strip():
-            # Empty docstring.
-            self.add_message('W9209', node=node)
-            return
+        else:
+            if not node.doc.strip():
+                # Empty docstring.
+                self.add_message('W9209', node=node)
+                return
 
         # Get line number of docstring.
         linenoDocstring = self._getDocstringLineno(node_type, node)
