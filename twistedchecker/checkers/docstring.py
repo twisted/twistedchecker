@@ -86,20 +86,23 @@ class DocstringChecker(PylintDocStringChecker):
         @param node: current node of pylint
         """
         if node.doc is None:
+            # Missing docstring
             if type(node.parent) is scoped_nodes.Function:
                 # Allow missing docstrings on nested functions
                 return
-            else:
-                # Allow missing docstrings if the interface has a
+
+            if self._docstringInherited(node):
+                # Allow missing docstrings if there is an interface which has a
                 # docstring for that function.
-                if self._docStringInherited(node):
-                    self.add_message('W9208', node=node)
-            return
-        else:
-            if not node.doc.strip():
-                # Empty docstring.
-                self.add_message('W9209', node=node)
                 return
+
+            self.add_message('W9208', node=node)
+            return
+
+        if not node.doc.strip():
+            # Empty docstring.
+            self.add_message('W9209', node=node)
+            return
 
         # Get line number of docstring.
         linenoDocstring = self._getDocstringLineno(node_type, node)
@@ -108,29 +111,35 @@ class DocstringChecker(PylintDocStringChecker):
         self._checkBlankLineBeforeEpytext(node_type, node, linenoDocstring)
 
 
-    def _docStringInherited(self, node):
+    def _docstringInherited(self, node):
         """
         Check whether a node is part of a documented interface implementation.
 
         @param node: The node to inspect
         @type node: L{logilab.astng.scoped_nodes.Function}
         """
-        if (isinstance(node, nodes.Function)
-            and node.type == 'method'
-            and node.parent.decorators):
+        if not isinstance(node, nodes.Function):
+            # We currently look for inherited docstrings in function
+            # nodes.
+            return False
 
+        if not node.is_method():
+            # We currently look for inherited docstrings if the
+            # node is a method.
+            return False
+
+        if node.parent.decorators:
             # check for 'implementer' class decorators
-            for n in node.parent.decorators.nodes:
-                # n.as_string()
-                # 'implementer(interfaces.IResolver)'
-                m = re.match('implementer\(([^\)]+)\)', n.as_string())
-                if m:
-                    # could be interfaces.IResolver or simply IResolver
-                    interface_references = m.group(1).split(',')
-                    for interface_reference in interface_references:
-                        if node.name in self._getInterface(
-                            node, interface_reference.strip()):
-
+            for decoratorNode in node.parent.decorators.nodes:
+                # XXX: This is fragile, the zope.interface.implementer
+                # decorator could have been imported with a different
+                # name. Or there could be a non-zope decorators called
+                # implementer.
+                if decoratorNode.func.name == 'implementer':
+                    for interfaceNode in decoratorNode.args:
+                        interface = self._getInterface(
+                            node, interfaceNode.as_string())
+                        if interface is not None and node.name in interface:
                             return True
 
         return False
