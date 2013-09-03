@@ -20,6 +20,28 @@ from pylint.checkers.base import NO_REQUIRED_DOC_RGX
 
 
 
+def _closest(node, ancestorTypes):
+    """
+    Get the first element that is an instance of one of the
+    C{ancestorTypes} by testing the C{node} itself and traversing up
+    through its ancestors.
+
+    @param node: The node on which to start the search
+    @type node: L{logilab.astng.nodes}
+
+    @param ancestorTypes: A tuple of node types to search for.
+    @type ancestorTypes: L{tuple} of L{type}
+
+    @return: the nearest matching node or L{None} if no matches.
+    @rtype: L{logilab.astng.nodes} or L{None}
+    """
+    while node:
+        if isinstance(node, ancestorTypes):
+            return node
+        node = getattr(node, 'parent', None)
+
+
+
 class DocstringChecker(PylintDocStringChecker):
     """
     A checker for checking docstrings.
@@ -50,6 +72,7 @@ class DocstringChecker(PylintDocStringChecker):
     __implements__ = IASTNGChecker
     name = 'docstring'
     options = ()
+    _closest = staticmethod(_closest)
 
 
     def open(self):
@@ -141,9 +164,11 @@ class DocstringChecker(PylintDocStringChecker):
             # method.
             return False
 
-        if node.parent.decorators:
+        parentClassNode = self._closest(node, nodes.Class)
+        decorators = getattr(parentClassNode, 'decorators', None)
+        if decorators:
             # Check for 'implementer' class decorators
-            for decoratorNode in node.parent.decorators.nodes:
+            for decoratorNode in decorators.nodes:
                 # XXX: This is fragile, the zope.interface.implementer
                 # decorator could have been imported with a different
                 # name. Or there could be a non-zope decorators called

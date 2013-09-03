@@ -138,3 +138,18 @@ class FooImplementationExternalMultipleInterface(object):
     """
     def bar(self):
         pass
+
+
+@implementer(IFoo)
+class FooImplementationConditionalMethods1(object):
+    """
+    A class whose methods are not direct children in the node tree.
+    """
+    try:
+        def bar(self):
+            # An interface implementation method still inherits the
+            # interface documentation if it's within another scoped
+            # node such as try...except
+            pass
+    except:
+        pass

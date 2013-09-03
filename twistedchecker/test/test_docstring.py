@@ -10,12 +10,20 @@ import os
 import sys
 
 from logilab.astng.nodes import (
-    CallFunc, Decorators, From, Import, Module, Name)
+    CallFunc, Decorators, From, Import, Module, Name, TryExcept)
 from logilab.astng.scoped_nodes import Function, Class
 
 from twisted.trial import unittest
 
-from twistedchecker.checkers.docstring import DocstringChecker
+from twistedchecker.checkers.docstring import _closest, DocstringChecker
+
+
+
+class RaisedArgs(Exception):
+    def __init__(self, args, kwargs):
+        self.args = args
+        self.kwargs = kwargs
+
 
 
 # A container for the messages passed to FakeLinter.add_message
@@ -242,10 +250,68 @@ class DocstringTestCase(unittest.TestCase):
         return childNode
 
 
-    def test_docstringInheritedNoDecorators(self):
+    def test_closest(self):
+        """
+        L{docstring._closest} locates the nearest ancestor class node.
+        """
+        childNode = self._createMethodNode(
+            decoratorName=None)
+
+        te = TryExcept()
+        childNode.parent, te.parent = te, childNode.parent
+
+        self.assertIdentical(te.parent, _closest(childNode, Class))
+
+
+    def test_docstringCheckerClosest(self):
+        """
+        L{DocstringChecker._closest} is L{docstring._closest} by default
+        """
+        self.assertIdentical(_closest, DocstringChecker._closest)
+
+
+    def test_docstringInheritedCallsClosestToFindNearestClass(self):
+        """
+        L{DocstringChecker._docstringInherited} calls _closest to locate
+        the nearest ancestor Class node to check for decorators.
+        """
+        childNode = self._createMethodNode(
+            decoratorName=None)
+
+        checker = DocstringChecker(linter=None)
+        def raisingClosest(*args, **kwargs):
+            raise RaisedArgs(args, kwargs)
+        self.patch(checker, '_closest', raisingClosest)
+
+        e = self.assertRaises(
+            RaisedArgs,
+            checker._docstringInherited, childNode)
+        self.assertEqual(
+            ((childNode, Class), {}),
+            (e.args, e.kwargs))
+
+
+    def test_docstringInheritedInderectParentClassNoDecorators(self):
         """
         L{DocstringChecker._docstringInherited} returns L{False} if the
-        supplied method C{node}'s parent class has no decorators.
+        supplied method C{node}'s closest class node does not have a decorators
+        attribute, even when the method is in a try..except
+        """
+        childNode = self._createMethodNode(
+            decoratorName=None)
+
+        te = TryExcept()
+        childNode.parent, te.parent = te, childNode.parent
+
+        self.assertFalse(
+            DocstringChecker(linter=None)._docstringInherited(childNode))
+
+
+    def test_docstringInheritedEmptyDecorators(self):
+        """
+        L{DocstringChecker._docstringInherited} returns L{False} if the
+        supplied method C{node}'s parent node has an empty decorators
+        attribute.
         """
         childNode = self._createMethodNode(
             decoratorName=None)
@@ -414,11 +480,6 @@ class DocstringTestCase(unittest.TestCase):
         """
         dummyInterface = Import()
 
-        class RaisedArgs(Exception):
-            def __init__(self, args, kwargs):
-                self.args = args
-                self.kwargs = kwargs
-
         class DummyChild(object):
             # Return unhandled node type
             locals = dict(foo=[dummyInterface])
@@ -446,11 +507,6 @@ class DocstringTestCase(unittest.TestCase):
         from foo import bar
         bar.IFoo
         """
-        class RaisedArgs(Exception):
-            def __init__(self, args, kwargs):
-                self.args = args
-                self.kwargs = kwargs
-
         class DummyChild(object):
             # Return unhandled node type
             locals = dict(bar=[From(fromname='foo', names=[('bar', None)])])
