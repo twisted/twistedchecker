@@ -169,6 +169,9 @@ class DocstringChecker(PylintDocStringChecker):
         if decorators:
             # Check for 'implementer' class decorators
             for decoratorNode in decorators.nodes:
+                # Ignore simple non-parameterised decorators
+                if not isinstance(decoratorNode, nodes.CallFunc):
+                    continue
                 # XXX: This is fragile, the zope.interface.implementer
                 # decorator could have been imported with a different
                 # name. Or there could be a non-zope decorators called

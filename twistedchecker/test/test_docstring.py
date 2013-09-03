@@ -232,13 +232,17 @@ class DocstringTestCase(unittest.TestCase):
         if decoratorName is None:
             decorators = None
         else:
-            decoratorNode = CallFunc()
-            decoratorNode.func = Function(name=decoratorName, doc='')
-            decoratorNode.args = []
-            for n in decoratorArgs:
-                argNameNode = Name()
-                argNameNode.name = n
-                decoratorNode.args.append(argNameNode)
+            if decoratorArgs:
+                decoratorNode = CallFunc()
+                decoratorNode.func = Function(name=decoratorName, doc='')
+                decoratorNode.args = []
+                for n in decoratorArgs:
+                    argNameNode = Name()
+                    argNameNode.name = n
+                    decoratorNode.args.append(argNameNode)
+            else:
+                decoratorNode = Name()
+                decoratorNode.name = decoratorName
             decorators = Decorators(nodes=[decoratorNode])
 
         parentNode = Class(name=className, doc='')
@@ -320,6 +324,20 @@ class DocstringTestCase(unittest.TestCase):
             DocstringChecker(linter=None)._docstringInherited(childNode))
 
 
+    def test_docstringInheritedWithSimpleDecorators(self):
+        """
+        L{DocstringChecker._docstringInherited} returns L{False} if the
+        supplied method C{node}'s parent class is decorated with
+        simple no-argument decorators
+        """
+        childNode = self._createMethodNode(
+            methodName='baz',
+            decoratorName='foobar')
+
+        self.assertFalse(
+            DocstringChecker(linter=None)._docstringInherited(childNode))
+
+
     def test_docstringInheritedWithOtherDecorators(self):
         """
         L{DocstringChecker._docstringInherited} returns L{False} if the
@@ -329,7 +347,8 @@ class DocstringTestCase(unittest.TestCase):
         """
         childNode = self._createMethodNode(
             methodName='baz',
-            decoratorName='FOOBAR')
+            decoratorName='foobar',
+            decoratorArgs=('baz', 'qux'))
 
         self.assertFalse(
             DocstringChecker(linter=None)._docstringInherited(childNode))
