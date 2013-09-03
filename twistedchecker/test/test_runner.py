@@ -283,7 +283,10 @@ C0111:  10,0: Missing docstring
 
 def listAllTestModules():
     """
-    Get all functional test modules.
+    Discover all the functional test modules.
+
+    @return: A list of test file paths and module names
+    @rtype: L{list} of 2-L{tuple}(L{str}, L{str})
     """
     testmodules = []
     pathTestModules = os.path.join(twistedchecker.abspath,
@@ -309,7 +312,7 @@ def _limitMessages(testfile, runner):
     # enable/disable: [Message ID], ...
 
     @param testfile: testfile to read, enable and disable infomation should
-    in the first line of it.
+        in the first line of it.
     @param runner: current runner for checking testfile.
     """
     firstline = open(testfile).readline()
@@ -347,61 +350,98 @@ def _getChecker(runner, checkerName):
 
 
 
+def _testNameFromModuleName(moduleName):
+    """
+    Mangle a module name so it can be used as a test function name.
+
+    @param moduleName: The qualified module name.
+    @type moduleName: L{str}
+    """
+    return 'test_' + moduleName.replace('.', '_')
+
+
+
+def _buildTestMethod(testFilePath, moduleName):
+    """
+    @param testFilePath: The path to the sample module to test.
+    @type testFilePath: L{str}
+
+    @param moduleName: The qualified module name.
+    @type moduleName: L{str}
+    """
+    return lambda self: self._runTest(testFilePath, moduleName)
+
+
+
+def _addFunctionalTests(testCaseClass):
+    """
+
+    """
+    for testFilePath, moduleName in listAllTestModules():
+        setattr(
+            testCaseClass,
+            _testNameFromModuleName(moduleName),
+            _buildTestMethod(testFilePath, moduleName)
+            )
+
+
+
 class FunctionalTests(unittest.TestCase):
-    def test_functions(self):
+
+    def _runTest(self, testFilePath, moduleName):
         """
-        This will automatically test some functional test files
-        controlled by C{RunnerTestCase.configFunctionalTest}.
+        Run a functional test.
+
+        @param
         """
-        errors = []
-        testmodules = listAllTestModules()
-        for pathTestFile, modulename in testmodules:
-            pathResultFile = pathTestFile.replace(".py", ".result")
+        pathResultFile = testFilePath.replace(".py", ".result")
 
-            self.assertTrue(
-                os.path.exists(pathTestFile),
-                msg="could not find testfile: %r" % pathTestFile)
-            self.assertTrue(
-                os.path.exists(pathResultFile),
-                msg="could not find resultfile: %r" % pathResultFile)
+        self.assertTrue(
+            os.path.exists(testFilePath),
+            msg="could not find testfile: %r" % testFilePath)
+        self.assertTrue(
+            os.path.exists(pathResultFile),
+            msg="could not find resultfile: %r" % pathResultFile)
 
 
-            outputStream = StringIO.StringIO()
-            runner = Runner()
-            runner.allowOptions = False
-            runner.setOutput(outputStream)
+        outputStream = StringIO.StringIO()
+        runner = Runner()
+        runner.allowOptions = False
+        runner.setOutput(outputStream)
 
-            # Set the reporter to C{twistedchecker.reporters.test.TestReporter}
-            runner.setReporter(TestReporter())
-            _limitMessages(pathTestFile, runner)
+        # Set the reporter to C{twistedchecker.reporters.test.TestReporter}
+        runner.setReporter(TestReporter())
+        _limitMessages(testFilePath, runner)
 
-            # Enable pep8 checking
-            pep8Checker = _getChecker(runner, "pep8")
-            if pep8Checker:
-                pep8Checker.pep8Enabled = True
+        # Enable pep8 checking
+        pep8Checker = _getChecker(runner, "pep8")
+        if pep8Checker:
+            pep8Checker.pep8Enabled = True
 
-            # Run the test
-            runner.run([modulename])
+        # Run the test
+        runner.run([moduleName])
 
-            # Check the results
-            expectedResult = _removeSpaces(
-                open(pathResultFile).read()).splitlines()
-            outputResult = _removeSpaces(
-                outputStream.getvalue()).splitlines()
+        # Check the results
+        expectedResult = _removeSpaces(
+            open(pathResultFile).read()).splitlines()
+        outputResult = _removeSpaces(
+            outputStream.getvalue()).splitlines()
 
-            try:
-                self.assertEqual(expectedResult, outputResult)
-            except unittest.FailTest:
-                # Format the results side by side for easy comparison
-                i = itertools.izip_longest(
-                    ['= Expected ='] + expectedResult,
-                    ['= Actual ='] + outputResult, fillvalue='')
+        try:
+            self.assertEqual(expectedResult, outputResult)
+        except unittest.FailTest:
+            # Format the results side by side for easy comparison
+            i = itertools.izip_longest(
+                ['= Expected ='] + expectedResult,
+                ['= Actual ='] + outputResult, fillvalue='')
 
-                output = ['', modulename]
-                for col1, col2 in i:
-                    output.append(col1.ljust(20) + col2)
+            output = ['', moduleName]
+            for col1, col2 in i:
+                output.append(col1.ljust(20) + col2)
+            output.append('')
 
-                errors.append('\n'.join(output) + '\n')
+            self.fail('\n'.join(output))
 
-        if errors:
-            self.fail('\n'.join(errors))
+
+
+_addFunctionalTests(FunctionalTests)
