@@ -391,9 +391,11 @@ def _addFunctionalTests(testCaseClass):
             _testNameFromModuleName(moduleName),
             _buildTestMethod(testFilePath, moduleName)
             )
+    return testCaseClass
 
 
 
+@_addFunctionalTests
 class FunctionalTests(unittest.TestCase):
     """
     A TestCase to which functional test methods will be dynamically
@@ -456,7 +458,3 @@ class FunctionalTests(unittest.TestCase):
             output.append('')
 
             self.fail('\n'.join(output))
-
-
-
-_addFunctionalTests(FunctionalTests)
