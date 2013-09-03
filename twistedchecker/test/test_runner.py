@@ -1,10 +1,10 @@
+import itertools
 import sys
 import os
 import StringIO
 import operator
 
 from twisted.trial import unittest
-from twisted.python.filepath import FilePath
 
 import twistedchecker
 from twistedchecker.core.runner import Runner
@@ -218,36 +218,56 @@ class RunnerTestCase(unittest.TestCase):
         This will automatically test some functional test files
         controlled by C{RunnerTestCase.configFunctionalTest}.
         """
-        print >> sys.stderr, "\n\t----------------"
+        errors = []
         testmodules = self.listAllTestModules()
         for pathTestFile, modulename in testmodules:
             pathResultFile = pathTestFile.replace(".py", ".result")
-            self.assertTrue(os.path.exists(pathTestFile),
-                       msg="could not find testfile:\n%s" % pathTestFile)
-            self.assertTrue(os.path.exists(pathResultFile),
-                       msg="could not find resultfile:\n%s" % pathResultFile)
+
+            self.assertTrue(
+                os.path.exists(pathTestFile),
+                msg="could not find testfile: %r" % pathTestFile)
+            self.assertTrue(
+                os.path.exists(pathResultFile),
+                msg="could not find resultfile: %r" % pathResultFile)
+
             self.clearOutputStream()
             runner = Runner()
             runner.allowOptions = False
             runner.setOutput(self.outputStream)
-            # set the reporter to C{twistedchecker.reporters.test.TestReporter}
+
+            # Set the reporter to C{twistedchecker.reporters.test.TestReporter}
             runner.setReporter(TestReporter())
             self._limitMessages(pathTestFile, runner)
-            # enable pep8 checking
+
+            # Enable pep8 checking
             pep8Checker = self._getChecker(runner, "pep8")
             if pep8Checker:
                 pep8Checker.pep8Enabled = True
+
+            # Run the test
             runner.run([modulename])
-            # check the results
-            if self.debug:
-                print >> sys.stderr, self.outputStream.getvalue()
-            predictResult = self._removeSpaces(open(pathResultFile).read())
-            outputResult = self._removeSpaces(self.outputStream.getvalue())
-            self.assertEqual(outputResult, predictResult,
-                 "Incorrect result of %s, should be:\n---\n%s\n---" % \
-                 (modulename, predictResult))
-            print >> sys.stderr, "\t%s\n" % modulename
-        print >> sys.stderr, "\t----------------\n"
+
+            # Check the results
+            expectedResult = self._removeSpaces(
+                open(pathResultFile).read()).splitlines()
+            outputResult = self._removeSpaces(
+                self.outputStream.getvalue()).splitlines()
+
+            try:
+                self.assertEqual(expectedResult, outputResult)
+            except unittest.FailTest:
+                i = itertools.izip_longest(
+                    ['Expected'] + expectedResult,
+                    ['Actual'] + outputResult, fillvalue='')
+
+                output = [modulename]
+                for col1, col2 in i:
+                    output.append(col1.ljust(30) + col2.ljust(30))
+
+                errors.append('\n'.join(output) + '\n')
+
+        if errors:
+            self.fail('\n'.join(errors))
 
 
     def test_parseWarnings(self):
@@ -372,7 +392,7 @@ C0111:  10,0: Missing docstring
         moduleName = os.path.basename(pathTestFiles)
         runner.run([moduleName])
         os.chdir(workingDir)
-        
+
         predictResult = "11:C0103\n14:C0103\n15:C0103"
         outputResult = self._removeSpaces(self.outputStream.getvalue())
         self.assertEqual(outputResult, predictResult)
