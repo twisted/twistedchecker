@@ -256,13 +256,14 @@ class RunnerTestCase(unittest.TestCase):
             try:
                 self.assertEqual(expectedResult, outputResult)
             except unittest.FailTest:
+                # Format the results side by side for easy comparison
                 i = itertools.izip_longest(
-                    ['Expected'] + expectedResult,
-                    ['Actual'] + outputResult, fillvalue='')
+                    ['= Expected ='] + expectedResult,
+                    ['= Actual ='] + outputResult, fillvalue='')
 
                 output = [modulename]
                 for col1, col2 in i:
-                    output.append(col1.ljust(30) + col2.ljust(30))
+                    output.append(col1.ljust(20) + col2)
 
                 errors.append('\n'.join(output) + '\n')
 
