@@ -173,35 +173,37 @@ class DocstringChecker(PylintDocStringChecker):
             # import or a from .. import statement.
             if isinstance(interfaceImportNode, astng.nodes.Import):
                 interfaceNameSegmentsAbs = interfaceNameSegments
+#                import pdb; pdb.set_trace()
             elif isinstance(interfaceImportNode, astng.nodes.From):
                 interfaceNameSegmentsAbs = (
                     interfaceImportNode.modname.split('.')
                     + interfaceNameSegments)
-
+#                import pdb; pdb.set_trace()
             # Load the module as astng (everything but the last part)
             moduleNode = node.root().import_module(
                 '.'.join(interfaceNameSegmentsAbs[:-1]))
-
+#            import pdb; pdb.set_trace()
             try:
-#                import pdb; pdb.set_trace()
                 interface = moduleNode[interfaceClassName]
             except KeyError:
+#                import pdb; pdb.set_trace()
                 raise AssertionError(
-                    'Interface %r not in module %r' % (interfaceName, moduleNode))
+                    'Interface not found. '
+                    'name: %r, module: %r' % (interfaceClassName, moduleNode))
 
         # Handle locally defined interfaces.
         elif isinstance(interfaceImportNode, astng.nodes.Class):
+#            import pdb; pdb.set_trace()
             interface = interfaceImportNode
         else:
             raise AssertionError(
-                'Unexpected interface_import_node type. '
-                'Must be one of astng.nodes.{Class, Import or From}. '
-                'interfaceImportNode: %r.' % (interfaceImportNode,))
+                'Unexpected interfaceNode type. '
+                'Got: %r.' % (interfaceImportNode,)
+            )
 
         assert isinstance(interface, nodes.Class), (
             'Unexpected interface type. '
-            'Must be a subclass nodes.Class. '
-            'interface_reference: %r, '
+            'interfaceName: %r, '
             'interface: %r.' % (interfaceName, interface))
 
         return  interface

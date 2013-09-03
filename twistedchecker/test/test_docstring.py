@@ -3,7 +3,7 @@ import os
 import sys
 
 from logilab.astng import MANAGER
-from logilab.astng.nodes import CallFunc, Decorators, Name
+from logilab.astng.nodes import CallFunc, Decorators, From, Import, Module, Name
 from logilab.astng.scoped_nodes import Function, Class
 
 from twisted.trial import unittest
@@ -266,7 +266,7 @@ class DocstringTestCase(unittest.TestCase):
         self.assertTrue(result)
 
 
-    def test_getInterfaceUndefinedLocalInterfaceName(self):
+    def test_getInterfaceUndefinedUnqualifiedInterfaceName(self):
         """
         L{DocstringChecker._getInterface} raises KeyError if the supplied
         interface name is not found among the local variables of
@@ -284,7 +284,7 @@ class DocstringTestCase(unittest.TestCase):
         self.assertEqual('IFoo', e.message)
 
 
-    def test_getInterfaceUndefinedModuleInterfaceName(self):
+    def test_getInterfaceUndefinedQualifiedInterfaceName(self):
         """
         If the supplied interfaceName is a qualified name, the first
         segment of the name is looked up in the node's root module.
@@ -299,6 +299,184 @@ class DocstringTestCase(unittest.TestCase):
             DocstringChecker(linter=None)._getInterface,
             node=DummyChild(), interfaceName='foo.bar.IFoo')
         self.assertEqual('foo', e.message)
+
+
+    def test_getInterfaceUnexpectedNodeType(self):
+        """
+        L{DocstringChecker._getInterface} raises AssertionError if the
+        requested interface is not a local C{class} or imported using
+        C{import}, C{import from}.
+        """
+        class DummyChild(object):
+            # return unhandled node type
+            locals = dict(foo=[Function(name='foo', doc='')])
+            def root(self):
+                return self
+
+        e = self.assertRaises(
+            AssertionError,
+            DocstringChecker(linter=None)._getInterface,
+            node=DummyChild(), interfaceName='foo.IFoo')
+        self.assertIn('Unexpected interfaceNode type.', e.message)
+
+
+    def test_getInterfaceClassNode(self):
+        """
+        L{DocstringChecker._getInterface} returns a local interface as a
+        Class node. (when I say "local interface" I meand one defined
+        in the same module as the implementation class.)
+        """
+        dummyInterface = Class(name='IFoo', doc='')
+
+        class DummyChild(object):
+            # return unhandled node type
+            locals = dict(IFoo=[dummyInterface])
+            def root(self):
+                return self
+
+        self.assertIdentical(
+            dummyInterface,
+            DocstringChecker(linter=None)._getInterface(
+                node=DummyChild(), interfaceName='IFoo'))
+
+
+    def test_getInterfaceImportNode(self):
+        """
+        If the interface is imported using a simple import statement
+        L{DocstringChecker._getInterface} will call the C{import_node}
+        method on the root module, supplying module name of the
+        imported interface node as the argument.
+
+        import foo.bar
+        foo.bar.IFoo
+        """
+        dummyInterface = Import()
+
+        class RaisedArgs(Exception):
+            def __init__(self, args, kwargs):
+                self.args = args
+                self.kwargs = kwargs
+
+        class DummyChild(object):
+            # return unhandled node type
+            locals = dict(foo=[dummyInterface])
+            def root(self):
+                return self
+            def import_module(self, *args, **kwargs):
+                raise RaisedArgs(args, kwargs)
+
+        e = self.assertRaises(
+            RaisedArgs,
+            DocstringChecker(linter=None)._getInterface,
+            node=DummyChild(), interfaceName='foo.bar.IFoo')
+        self.assertEqual(
+            (e.args, e.kwargs),
+            (('foo.bar',), {}))
+
+
+    def test_getInterfaceFromNode(self):
+        """
+        If the interface is imported using a import from statement
+        L{DocstringChecker._getInterface} will call the C{import_node}
+        method on the root module, supplying module name of the
+        imported interface node as the argument.
+
+        from foo import bar
+        bar.IFoo
+        """
+        class RaisedArgs(Exception):
+            def __init__(self, args, kwargs):
+                self.args = args
+                self.kwargs = kwargs
+
+        class DummyChild(object):
+            # return unhandled node type
+            locals = dict(bar=[From(fromname='foo', names=[('bar', None)])])
+            def root(self):
+                return self
+            def import_module(self, *args, **kwargs):
+                raise RaisedArgs(args, kwargs)
+
+        e = self.assertRaises(
+            RaisedArgs,
+            DocstringChecker(linter=None)._getInterface,
+            node=DummyChild(), interfaceName='bar.IFoo')
+        self.assertEqual(
+            (e.args, e.kwargs),
+            (('foo.bar',), {}))
+
+
+    def test_getInterfaceNotFound(self):
+        """
+        L{DocstringChecker._getInterface} raises L{AssertionError} if the
+        module returned by C{import_node} does not contain the
+        interface classname.
+        """
+        class DummyChild(object):
+            # return unhandled node type
+            locals = dict(bar=[From(fromname='foo', names=[('bar', None)])])
+            def root(self):
+                return self
+            def import_module(self, *args, **kwargs):
+                m = Module(name='bar', doc='')
+                m.locals = dict()
+                return m
+
+        e = self.assertRaises(
+            AssertionError,
+            DocstringChecker(linter=None)._getInterface,
+            node=DummyChild(), interfaceName='bar.IFoo')
+        self.assertSubstring(
+            "Interface not found. name: 'IFoo', module: ", e.message)
+
+
+    def test_getInterfaceUnexpectedType(self):
+        """
+        L{DocstringChecker._getInterface} raises L{AssertionError} if the
+        module returned by C{import_node} contains the interface
+        classname but with type that is not Class.
+        """
+        class DummyChild(object):
+            # return unhandled node type
+            locals = dict(bar=[From(fromname='foo', names=[('bar', None)])])
+            def root(self):
+                return self
+            def import_module(self, *args, **kwargs):
+                m = Module(name='bar', doc='')
+                m.locals = dict(IFoo=[object()])
+                return m
+
+        e = self.assertRaises(
+            AssertionError,
+            DocstringChecker(linter=None)._getInterface,
+            node=DummyChild(), interfaceName='bar.IFoo')
+        self.assertSubstring(
+            "Unexpected interface type. "
+            "interfaceName: 'bar.IFoo', "
+            "interface: <object object", e.message)
+
+
+    def test_getInterfaceFound(self):
+        """
+        L{DocstringChecker._getInterface} returns the Class node
+        representing imported interface.
+        """
+        dummyInterface = Class(name='IFoo', doc='')
+
+        class DummyChild(object):
+            # return unhandled node type
+            locals = dict(bar=[From(fromname='foo', names=[('bar', None)])])
+            def root(self):
+                return self
+            def import_module(self, *args, **kwargs):
+                m = Module(name='bar', doc='')
+                m.locals = dict(IFoo=[dummyInterface])
+                return m
+
+        checker = DocstringChecker(linter=None)
+        self.assertIdentical(
+            dummyInterface,
+            checker._getInterface(node=DummyChild(), interfaceName='bar.IFoo'))
 
 
     def test_docstringInheritedLocalInterface(self):
