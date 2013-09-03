@@ -2,17 +2,12 @@ from collections import namedtuple
 import os
 import sys
 
-from logilab.astng import MANAGER
 from logilab.astng.nodes import CallFunc, Decorators, From, Import, Module, Name
 from logilab.astng.scoped_nodes import Function, Class
 
 from twisted.trial import unittest
 
 from twistedchecker.checkers.docstring import DocstringChecker
-
-
-# Shortened function name for convenience in tests.
-astng = MANAGER.astng_from_module_name
 
 
 
@@ -477,83 +472,6 @@ class DocstringTestCase(unittest.TestCase):
         self.assertIdentical(
             dummyInterface,
             checker._getInterface(node=DummyChild(), interfaceName='bar.IFoo'))
-
-
-    def test_docstringInheritedLocalInterface(self):
-        """
-        L{DocstringChecker._docstringInherited} returns L{True} if the
-        supplied C{node} is found to implement a local interface.
-        """
-        checker = DocstringChecker(linter=None)
-        module = astng('examples.example_docstrings_missing')
-        self.assertTrue(
-            checker._docstringInherited(module['FooImplementation']['bar']))
-
-
-    def test_allowInheritedDocstringExternalAbsoluteInterface(self):
-        """
-        L{DocstringChecker._docstringInherited} returns L{True} if the
-        supplied C{node} is found to implement a local interface.
-        """
-        checker = DocstringChecker(linter=None)
-        module = astng('examples.example_docstrings_missing')
-        self.assertTrue(
-            checker._docstringInherited(module['FooImplementation']['bar']))
-
-
-        """
-        Docstrings can be omitted if the method is contributing to a
-        documented interface. In this case an interface that has been
-        imported from another module and is referenced using its
-        absolute path.
-        """
-        linter = FakeLinter()
-        checker = DocstringChecker(linter=linter)
-        checker._check_docstring(
-            'method',
-            astng('examples.example_docstrings_missing')['FooImplementationExternalAbsoluteInterface']['bar'])
-        self.assertEquals(len(linter.messages), 0)
-
-
-    def test_allowInheritedDocstringExternalRelativeInterface(self):
-        """
-        Docstrings can be omitted if the method is contributing to a
-        documented interface. In this case the interface is referenced
-        using a local relative import path.
-        """
-        linter = FakeLinter()
-        checker = DocstringChecker(linter=linter)
-        checker._check_docstring(
-            'method',
-            astng('examples.example_docstrings_missing')['FooImplementationExternalRelativeInterface']['bar'])
-
-        self.assertEquals(len(linter.messages), 0)
-
-
-    def test_allowInheritedDocstringExternalMultipleInterface(self):
-        """
-        Docstrings can be omitted if the method is contributing to a
-        documented interface. Here the class implements multiple
-        interfaces.
-        """
-        linter = FakeLinter()
-        checker = DocstringChecker(linter=linter)
-        checker._check_docstring(
-            'method',
-            astng('examples.example_docstrings_missing')['FooImplementationExternalMultipleInterface']['bar'])
-        self.assertEquals(len(linter.messages), 0)
-
-
-    def test_emptyModuleDocstring(self):
-        """
-        L{DocstringChecker} issues a warning for empty module
-        docstrings.
-        """
-        linter = FakeLinter()
-        checker = DocstringChecker(linter=linter)
-        checker._check_docstring(
-            'module', astng('examples.example_docstrings_empty'))
-        self.assertEquals(len(linter.messages), 1)
 
 
     def test_getLineIndent(self):
