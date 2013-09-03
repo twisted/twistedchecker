@@ -1,8 +1,16 @@
+# Copyright (c) Twisted Matrix Laboratories.
+# See LICENSE for details.
+
+"""
+Tests for L{twistedchecker.checkers.docstring}
+"""
+
 from collections import namedtuple
 import os
 import sys
 
-from logilab.astng.nodes import CallFunc, Decorators, From, Import, Module, Name
+from logilab.astng.nodes import (
+    CallFunc, Decorators, From, Import, Module, Name)
 from logilab.astng.scoped_nodes import Function, Class
 
 from twisted.trial import unittest
@@ -10,7 +18,7 @@ from twisted.trial import unittest
 from twistedchecker.checkers.docstring import DocstringChecker
 
 
-
+# A container for the messages passed to FakeLinter.add_message
 FakeLinterMessage = namedtuple('FakeLinterMessage', 'msg_id line node args')
 
 
@@ -26,14 +34,36 @@ class FakeLinter(object):
 
     def add_message(self, msg_id, line=None, node=None, args=None):
         """
+        Record calls to C{add_message}
 
+        @see: L{pylint.interfaces.ILinter.add_message} for signature
+            documentation.
         """
         self.messages.append(FakeLinterMessage(msg_id, line, node, args))
 
 
 
 class DummyNode(object):
+    """
+    A dummy implementation of L{logilab.astng.bases.Statement}.
+
+    Use as a dummy for certain scoped nodes eg C{Function}, C{Class},
+    C{Module} etc.
+    """
     def __init__(self, doc=None, parent=None, type=None):
+        """
+        Set the minimum required attributes on the dummy node.
+
+        @param doc: A fake docstring to add to the node.
+        @type doc: L{str}
+
+        @param parent: A dummy parent node
+        @type parent: mixed
+
+        @param type: The name of the node type eg function, method,
+            class, module.
+        @type type: L{str}
+        """
         self.doc = doc
         self.parent = parent
         self.type = type
@@ -130,8 +160,8 @@ class DocstringTestCase(unittest.TestCase):
         nodes = [DummyNode() for nodeType in nodeTypes]
         linter = FakeLinter()
         checker = DocstringChecker(linter=linter)
-
         calls = []
+
         def fakeDocstringInherited(node):
             calls.append(node)
             return True
@@ -170,6 +200,26 @@ class DocstringTestCase(unittest.TestCase):
     def _createMethodNode(self, methodName='baz', className='Foo',
                           decoratorName=None, decoratorArgs=()):
         """
+        Return an L{astng} node of a dummy method wrapped in a dummy class
+        with or without class decorators.
+
+        @param methodName: The name of the dummy method
+        @type methodName: L{str}
+
+        @param className: The name of the dummy class
+        @type className: L{str}
+
+        @param decoratorName: The (optional) name of a dummy class
+            decorator to be added to the dummy class. Default L{None}
+            means no decorator.
+        @type decoratorName: L{str} or L{None}
+
+        @param decoratorArgs: A list of dummy arguments to be added to
+            the class decorator.
+        @type decoratorArgs: L{list} of L{str}
+
+        @return: The dummy method node.
+        @rtype: L{logilab.astng.nodes.Class}
         """
         if decoratorName is None:
             decorators = None
@@ -237,7 +287,7 @@ class DocstringTestCase(unittest.TestCase):
         def fakeGetInterface(node, interfaceName):
             nodes.append(node)
             interfaceNames.append(interfaceName)
-            # return an empty class
+            # Return an empty class
             return Class(name=interfaceName, doc='')
         self.patch(checker, '_getInterface', fakeGetInterface)
 
@@ -262,7 +312,7 @@ class DocstringTestCase(unittest.TestCase):
         checker = DocstringChecker(linter=None)
 
         def fakeGetInterface(node, interfaceName):
-            # return a  class with a dummy baz method
+            # Return a  class with a dummy baz method
             c = Class(name=interfaceName, doc='')
             c.locals['baz'] = object()
             return c
@@ -320,7 +370,7 @@ class DocstringTestCase(unittest.TestCase):
         C{import}, C{import from}.
         """
         class DummyChild(object):
-            # return unhandled node type
+            # Return unhandled node type
             locals = dict(foo=[Function(name='foo', doc='')])
             def root(self):
                 return self
@@ -341,7 +391,7 @@ class DocstringTestCase(unittest.TestCase):
         dummyInterface = Class(name='IFoo', doc='')
 
         class DummyChild(object):
-            # return unhandled node type
+            # Return unhandled node type
             locals = dict(IFoo=[dummyInterface])
             def root(self):
                 return self
@@ -370,7 +420,7 @@ class DocstringTestCase(unittest.TestCase):
                 self.kwargs = kwargs
 
         class DummyChild(object):
-            # return unhandled node type
+            # Return unhandled node type
             locals = dict(foo=[dummyInterface])
             def root(self):
                 return self
@@ -402,7 +452,7 @@ class DocstringTestCase(unittest.TestCase):
                 self.kwargs = kwargs
 
         class DummyChild(object):
-            # return unhandled node type
+            # Return unhandled node type
             locals = dict(bar=[From(fromname='foo', names=[('bar', None)])])
             def root(self):
                 return self
@@ -425,7 +475,7 @@ class DocstringTestCase(unittest.TestCase):
         interface classname.
         """
         class DummyChild(object):
-            # return unhandled node type
+            # Return unhandled node type
             locals = dict(bar=[From(fromname='foo', names=[('bar', None)])])
             def root(self):
                 return self
@@ -449,7 +499,7 @@ class DocstringTestCase(unittest.TestCase):
         classname but with type that is not Class.
         """
         class DummyChild(object):
-            # return unhandled node type
+            # Return unhandled node type
             locals = dict(bar=[From(fromname='foo', names=[('bar', None)])])
             def root(self):
                 return self
@@ -476,7 +526,7 @@ class DocstringTestCase(unittest.TestCase):
         dummyInterface = Class(name='IFoo', doc='')
 
         class DummyChild(object):
-            # return unhandled node type
+            # Return unhandled node type
             locals = dict(bar=[From(fromname='foo', names=[('bar', None)])])
             def root(self):
                 return self

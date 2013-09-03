@@ -1,3 +1,12 @@
+# -*- test-case-name: twistedchecker.test.test_docstring -*-
+# Copyright (c) Twisted Matrix Laboratories.
+# See LICENSE for details.
+
+"""
+Classes and functions for checking docstrings for compliance with
+the Twisted Coding Standard.
+"""
+
 import re
 
 from logilab import astng
@@ -8,6 +17,8 @@ from logilab.astng import nodes
 from pylint.interfaces import IASTNGChecker
 from pylint.checkers.base import DocStringChecker as PylintDocStringChecker
 from pylint.checkers.base import NO_REQUIRED_DOC_RGX
+
+
 
 class DocstringChecker(PylintDocStringChecker):
     """
@@ -78,9 +89,7 @@ class DocstringChecker(PylintDocStringChecker):
 
     def _check_docstring(self, node_type, node):
         """
-        Check whether the opening and the closing of docstring
-        on a line by themselves.
-        Then check for epytext markups for function or method.
+        Check for missing, empty, or incorrectly formatted docstrings.
 
         @param node_type: type of node
         @param node: current node of pylint
@@ -113,23 +122,27 @@ class DocstringChecker(PylintDocStringChecker):
 
     def _docstringInherited(self, node):
         """
-        Check whether a node is part of a documented interface implementation.
+        Check whether a node is part of a documented interface
+        implementation.
 
         @param node: The node to inspect
         @type node: L{logilab.astng.scoped_nodes.Function}
+
+        @return: L{True} if there is an interface function with the
+            method name else L{False}.
+        @rtype: L{bool}
         """
         if not isinstance(node, nodes.Function):
-            # We currently look for inherited docstrings in function
-            # nodes.
+            # Only look for inherited docstrings in function nodes.
             return False
 
         if not node.is_method():
-            # We currently look for inherited docstrings if the
-            # node is a method.
+            # Only look for inherited docstrings if the node is a
+            # method.
             return False
 
         if node.parent.decorators:
-            # check for 'implementer' class decorators
+            # Check for 'implementer' class decorators
             for decoratorNode in node.parent.decorators.nodes:
                 # XXX: This is fragile, the zope.interface.implementer
                 # decorator could have been imported with a different
@@ -151,12 +164,15 @@ class DocstringChecker(PylintDocStringChecker):
 
         @param node: The method node which implement interface and
             whose root module contains or imports the interface.
-        @type node: A L{logilab.astng.nodes.Function}
+        @type node: L{logilab.astng.nodes.Function}
 
         @param interfaceName: The qualified name of the
             interface class passed to the @implementer
             decorator.
         @type interfaceName: C{str}
+
+        @return: The C{astng} node representing the named interface.
+        @rtype: L{logilab.astng.nodes.Class}
         """
         interfaceNameSegments = interfaceName.split('.')
         interfaceClassName = interfaceNameSegments[-1]
