@@ -1,4 +1,4 @@
-# enable: W9201,W9202,W9203,W9204,W9205,W9206,W9207
+# enable: W9201,W9202,W9203,W9204,W9205,W9206,W9207,W9208,W9209
 """
 A docstring with a wrong indentation.
 Docstring should have consistent indentations.
@@ -62,3 +62,79 @@ class foo:
         A method returns nothing.
         """
         return
+
+
+
+from zope.interface import implementer, Interface
+
+
+
+class IFoo(Interface):
+    """
+    An example of a locally defined interface
+    The interface should be documented
+    """
+    def bar():
+        """
+        A locally defined interface method which should be
+        documented too.
+        """
+        pass
+
+
+
+@implementer(IFoo)
+class FooImplementation(object):
+    """
+    The class which implements the interface must be documented.
+    """
+    def bar(self):
+        # This method implements part of the interface so doesn't
+        # require documentation.
+        pass
+
+
+    def baz(self):
+        """
+        This method is not part of the interface so should be
+        documented.
+        """
+        pass
+
+
+
+import twistedchecker.functionaltests.example_interfaces
+from twistedchecker import functionaltests
+from twistedchecker.functionaltests.example_interfaces import IFoo2
+
+
+
+@implementer(twistedchecker.functionaltests.example_interfaces.IFoo)
+class FooImplementationExternalAbsoluteInterface(object):
+    """
+    A class whose interface is referenced using a fully qualified
+    module name.
+    """
+    def bar(self):
+        pass
+
+
+
+@implementer(functionaltests.example_interfaces.IFoo2)
+class FooImplementationExternalRelativeModuleInterface(object):
+    """
+    A class whose interface is referenced using a relative qualified
+    module name.
+    """
+    def bar(self):
+        pass
+
+
+
+@implementer(functionaltests.example_interfaces.IFoo, IFoo2)
+class FooImplementationExternalMultipleInterface(object):
+    """
+    A class which implements multiple interfaces
+    """
+    def bar(self):
+        pass
