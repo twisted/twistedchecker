@@ -167,4 +167,8 @@ class FooImplementationExternalRelativeModuleInterface(object):
 class FooImplementationExternalMultipleInterface(object):
     # A class which implements multiple interfaces
     def bar(self):
+        """
+        """
+        # An empty docstring on an implementation method cancels any
+        # inheritance and is not allowed.
         pass
