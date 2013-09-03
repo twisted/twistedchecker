@@ -261,7 +261,7 @@ class RunnerTestCase(unittest.TestCase):
                     ['= Expected ='] + expectedResult,
                     ['= Actual ='] + outputResult, fillvalue='')
 
-                output = [modulename]
+                output = ['', modulename]
                 for col1, col2 in i:
                     output.append(col1.ljust(20) + col2)
 
