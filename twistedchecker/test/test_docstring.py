@@ -68,7 +68,7 @@ class DocstringTestCase(unittest.TestCase):
     def test_missingDocstring(self):
         """
         L{DocstringChecker._check_docstring} issues a W9208 warning for
-        nodes of any type with missing docstrings.
+        nodes of any type with MISSING docstrings.
         """
         nodeTypes = ('module', 'function', 'class', 'method')
         linter = FakeLinter()
@@ -78,6 +78,23 @@ class DocstringTestCase(unittest.TestCase):
 
         self.assertEqual(
             ['W9208'] * len(nodeTypes),
+            [m.msg_id for m in linter.messages]
+        )
+
+
+    def test_emptyDocstring(self):
+        """
+        L{DocstringChecker._check_docstring} issues a W9209 warning for
+        nodes of any type with EMPTY docstrings.
+        """
+        nodeTypes = ('module', 'function', 'class', 'method')
+        linter = FakeLinter()
+        checker = DocstringChecker(linter=linter)
+        for nodeType in nodeTypes:
+            checker._check_docstring(nodeType, DummyNode(doc=''))
+
+        self.assertEqual(
+            ['W9209'] * len(nodeTypes),
             [m.msg_id for m in linter.messages]
         )
 
