@@ -164,7 +164,7 @@ class DocstringChecker(PylintDocStringChecker):
         matchingLocalNodes = node.root().locals[interfaceNameSegments[0]]
         # XXX: Safe to assume there's only one node with that name?
         interfaceImportNode = matchingLocalNodes[0]
-#        import pdb; pdb.set_trace()
+
         # Handle imported interfaces
         if isinstance(interfaceImportNode,
                       (astng.nodes.From, astng.nodes.Import)):
@@ -173,27 +173,25 @@ class DocstringChecker(PylintDocStringChecker):
             # import or a from .. import statement.
             if isinstance(interfaceImportNode, astng.nodes.Import):
                 interfaceNameSegmentsAbs = interfaceNameSegments
-#                import pdb; pdb.set_trace()
+
             elif isinstance(interfaceImportNode, astng.nodes.From):
                 interfaceNameSegmentsAbs = (
                     interfaceImportNode.modname.split('.')
                     + interfaceNameSegments)
-#                import pdb; pdb.set_trace()
+
             # Load the module as astng (everything but the last part)
             moduleNode = node.root().import_module(
                 '.'.join(interfaceNameSegmentsAbs[:-1]))
-#            import pdb; pdb.set_trace()
+
             try:
                 interface = moduleNode[interfaceClassName]
             except KeyError:
-#                import pdb; pdb.set_trace()
                 raise AssertionError(
                     'Interface not found. '
                     'name: %r, module: %r' % (interfaceClassName, moduleNode))
 
         # Handle locally defined interfaces.
         elif isinstance(interfaceImportNode, astng.nodes.Class):
-#            import pdb; pdb.set_trace()
             interface = interfaceImportNode
         else:
             raise AssertionError(
