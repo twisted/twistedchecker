@@ -375,7 +375,15 @@ def _buildTestMethod(testFilePath, moduleName):
 
 def _addFunctionalTests(testCaseClass):
     """
+    Discover functional test modules and add test methods to a
+    TestCase class for each discovered functional test.
 
+    These test methods can be discovered and run individually by
+    trial.
+
+    @param testCaseClass: The class to which test methods will be
+        added.
+    @type testCaseClass: L{type}
     """
     for testFilePath, moduleName in listAllTestModules():
         setattr(
@@ -387,12 +395,19 @@ def _addFunctionalTests(testCaseClass):
 
 
 class FunctionalTests(unittest.TestCase):
-
+    """
+    A TestCase to which functional test methods will be dynamically
+    added at module load time.
+    """
     def _runTest(self, testFilePath, moduleName):
         """
         Run a functional test.
 
-        @param
+        @param testFilePath: The path to the module to test.
+        @type testFilePath: L{str}
+
+        @param moduleName: The qualified name of the module to test.
+        @type moduleName: L{str}
         """
         pathResultFile = testFilePath.replace(".py", ".result")
 
@@ -403,13 +418,13 @@ class FunctionalTests(unittest.TestCase):
             os.path.exists(pathResultFile),
             msg="could not find resultfile: %r" % pathResultFile)
 
-
         outputStream = StringIO.StringIO()
         runner = Runner()
         runner.allowOptions = False
         runner.setOutput(outputStream)
 
-        # Set the reporter to C{twistedchecker.reporters.test.TestReporter}
+        # Set the reporter to
+        # C{twistedchecker.reporters.test.TestReporter}
         runner.setReporter(TestReporter())
         _limitMessages(testFilePath, runner)
 
