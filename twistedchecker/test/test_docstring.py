@@ -6,8 +6,6 @@ Tests for L{twistedchecker.checkers.docstring}
 """
 
 from collections import namedtuple
-import os
-import sys
 
 from logilab.astng.nodes import (
     CallFunc, Decorators, From, Import, Module, Name, TryExcept)
@@ -20,7 +18,19 @@ from twistedchecker.checkers.docstring import _closest, DocstringChecker
 
 
 class RaisedArgs(Exception):
+    """
+    An exception to trace arguments passed to a patched function.
+    """
     def __init__(self, args, kwargs):
+        """
+        Store the arguments.
+
+        @param args: the positional arguments.
+        @type args: L{tuple}
+
+        @param kwargs: the keyword arguments.
+        @type kwargs: L{dict}
+        """
         self.args = args
         self.kwargs = kwargs
 
@@ -82,27 +92,6 @@ class DocstringTestCase(unittest.TestCase):
     """
     Test for twistedchecker.checkers.docstring
     """
-
-    def setUp(self):
-        """
-        Manipulate the Python import path so that the test module and
-        its test interface module can be imported.
-        """
-        self.originalPath = sys.path[:]
-        self.originalModules = sys.modules.copy()
-        sys.path.append(os.path.dirname(__file__))
-
-
-    def tearDown(self):
-        """
-        Return the import path and the imported modules to their
-        original state.
-        """
-        sys.modules.clear()
-        sys.modules.update(self.originalModules)
-        sys.path[:] = self.originalPath
-
-
     def test_missingDocstring(self):
         """
         L{DocstringChecker._check_docstring} issues a W9208 warning for
