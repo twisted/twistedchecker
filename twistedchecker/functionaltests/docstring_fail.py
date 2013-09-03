@@ -139,13 +139,13 @@ class FooImplementation(object):
 
 
 
-import twistedchecker.functionaltests.example_interfaces
+import twistedchecker.functionaltests._example_interfaces
 from twistedchecker import functionaltests
-from twistedchecker.functionaltests.example_interfaces import IFoo2
+from twistedchecker.functionaltests._example_interfaces import IFoo2
 
 
 
-@implementer(twistedchecker.functionaltests.example_interfaces.IFoo)
+@implementer(twistedchecker.functionaltests._example_interfaces.IFoo)
 class FooImplementationExternalAbsoluteInterface(object):
     # A class whose interface is referenced using a fully qualified
     # module name.
@@ -154,7 +154,7 @@ class FooImplementationExternalAbsoluteInterface(object):
 
 
 
-@implementer(functionaltests.example_interfaces.IFoo2)
+@implementer(functionaltests._example_interfaces.IFoo2)
 class FooImplementationExternalRelativeModuleInterface(object):
     # A class whose interface is referenced using a relative qualified
     # module name.
@@ -163,7 +163,7 @@ class FooImplementationExternalRelativeModuleInterface(object):
 
 
 
-@implementer(functionaltests.example_interfaces.IFoo, IFoo2)
+@implementer(functionaltests._example_interfaces.IFoo, IFoo2)
 class FooImplementationExternalMultipleInterface(object):
     # A class which implements multiple interfaces
     def bar(self):

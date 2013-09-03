@@ -285,6 +285,8 @@ def listAllTestModules():
     """
     Discover all the functional test modules.
 
+    Modules whose name begin with an underscore are ignored.
+
     @return: A list of test file paths and module names
     @rtype: L{list} of 2-L{tuple}(L{str}, L{str})
     """
@@ -293,7 +295,9 @@ def listAllTestModules():
                                    "functionaltests")
     for root, dirs, files in os.walk(pathTestModules):
         for testfile in files:
-            if testfile.endswith(".py") and testfile != "__init__.py":
+            if testfile.startswith("_"):
+                continue
+            if testfile.endswith(".py"):
                 pathFile = os.path.join(twistedchecker.abspath,
                                         root, testfile)
                 pathRelative = os.path.relpath(pathFile,
