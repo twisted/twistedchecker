@@ -107,3 +107,32 @@ class foo:
 
 def moduleLevelFunctionWithoutDocstring():
     pass
+
+
+
+from zope.interface import implementer, Interface
+
+
+
+class IFoo(Interface):
+    # An example of a locally defined interface
+    # The interface should be documented
+    def bar():
+        # A locally defined interface method which should be
+        # documented too.
+        pass
+
+
+@implementer(IFoo)
+class FooImplementation(object):
+    # The class which implements the interface must be documented.
+    def bar(self):
+        # This method implements part of the interface so doesn't
+        # require documentation.
+        pass
+
+
+    def baz(self):
+        # This method is not part of the interface so should be
+        # documented.
+        pass
