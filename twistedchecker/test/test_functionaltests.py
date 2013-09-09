@@ -22,7 +22,8 @@ def _removeSpaces(str):
     """
     Remove whitespaces in str.
 
-    @param: a string
+    @param str: a string
+    @return: The stripped string
     """
     return str.strip().replace(" ", "")
 
@@ -68,7 +69,7 @@ def _limitMessages(testfile, runner):
     """
     firstline = open(testfile).readline()
     if "enable" not in firstline and "disable" not in firstline:
-        # could not find enable or disable messages
+        # Could not find enable or disable messages
         return
     action, messages = firstline.strip("#").strip().split(":")
     messages = _removeSpaces(messages).split(",")
@@ -76,7 +77,7 @@ def _limitMessages(testfile, runner):
     action = action.strip()
 
     if action == "enable":
-        # disable all other messages
+        # Disable all other messages
         runner.linter.disable_noerror_messages()
         for msgid in messages:
             runner.linter.enable(msgid)
@@ -107,6 +108,9 @@ def _testNameFromModuleName(moduleName):
 
     @param moduleName: The qualified module name.
     @type moduleName: L{str}
+
+    @return: The test name derived from the supplied C{moduleName}.
+    @rtype: L{str}
     """
     return 'test_' + moduleName.replace('.', '_')
 
@@ -114,11 +118,18 @@ def _testNameFromModuleName(moduleName):
 
 def _buildTestMethod(testFilePath, moduleName):
     """
+    Create a closure function which will call C{_runTest} on its
+    parent instance, supplying the arguments enclosed in this function
+    call.
+
     @param testFilePath: The path to the sample module to test.
     @type testFilePath: L{str}
 
     @param moduleName: The qualified module name.
     @type moduleName: L{str}
+
+    @return: The closure function
+    @rtype: L{function}
     """
     return lambda self: self._runTest(testFilePath, moduleName)
 
@@ -135,6 +146,9 @@ def _addFunctionalTests(testCaseClass):
     @param testCaseClass: The class to which test methods will be
         added.
     @type testCaseClass: L{type}
+
+    @return: The modified C{testCaseClass}
+    @rtype: L{type}
     """
     for testFilePath, moduleName in listAllTestModules():
         setattr(
@@ -143,7 +157,6 @@ def _addFunctionalTests(testCaseClass):
             _buildTestMethod(testFilePath, moduleName)
             )
     return testCaseClass
-
 
 
 @_addFunctionalTests
@@ -166,10 +179,10 @@ class FunctionalTests(unittest.TestCase):
 
         self.assertTrue(
             os.path.exists(testFilePath),
-            msg="could not find testfile: %r" % testFilePath)
+            msg="could not find testfile: %r" % (testFilePath,))
         self.assertTrue(
             os.path.exists(pathResultFile),
-            msg="could not find resultfile: %r" % pathResultFile)
+            msg="could not find resultfile: %r" % (pathResultFile,))
 
         outputStream = StringIO.StringIO()
         runner = Runner()
