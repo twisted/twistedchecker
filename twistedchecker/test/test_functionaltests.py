@@ -18,17 +18,6 @@ from twistedchecker.reporters.test import TestReporter
 
 
 
-def _removeSpaces(str):
-    """
-    Remove whitespaces in str.
-
-    @param str: a string
-    @return: The stripped string
-    """
-    return str.strip().replace(" ", "")
-
-
-
 def listAllTestModules():
     """
     Discover all the functional test modules.
@@ -71,9 +60,8 @@ def _limitMessages(testfile, runner):
     if "enable" not in firstline and "disable" not in firstline:
         # Could not find enable or disable messages
         return
-    action, messages = firstline.strip("#").strip().split(":")
-    messages = _removeSpaces(messages).split(",")
-    messages = [msgid for msgid in messages if msgid]
+    action, messages = firstline.lstrip("#").strip().split(":", 1)
+    messages = [msgid for msgid in messages.strip().split(",") if msgid]
     action = action.strip()
 
     if action == "enable":
@@ -203,10 +191,8 @@ class FunctionalTests(unittest.TestCase):
         runner.run([moduleName])
 
         # Check the results
-        expectedResult = _removeSpaces(
-            open(pathResultFile).read()).splitlines()
-        outputResult = _removeSpaces(
-            outputStream.getvalue()).splitlines()
+        expectedResult = open(pathResultFile).read().splitlines()
+        outputResult = outputStream.getvalue().splitlines()
 
         try:
             self.assertEqual(expectedResult, outputResult)

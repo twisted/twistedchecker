@@ -22,16 +22,6 @@ from twistedchecker.test.test_exceptionfinder import (
 
 
 
-def _removeSpaces(str):
-    """
-    Remove whitespaces in str.
-
-    @param: a string
-    """
-    return str.strip().replace(" ", "")
-
-
-
 class RunnerTestCase(unittest.TestCase):
     """
     Test for twistedchecker.core.runner.Runner.
@@ -281,6 +271,6 @@ C0111:  10,0: Missing docstring
         runner.run([moduleName])
         os.chdir(workingDir)
 
-        predictResult = "11:C0103\n14:C0103\n15:C0103"
-        outputResult = _removeSpaces(self.outputStream.getvalue())
+        predictResult = "11:C0103\n14:C0103\n15:C0103\n"
+        outputResult = self.outputStream.getvalue()
         self.assertEqual(outputResult, predictResult)
