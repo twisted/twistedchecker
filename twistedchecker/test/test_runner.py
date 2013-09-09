@@ -1,10 +1,10 @@
+import itertools
 import sys
 import os
 import StringIO
 import operator
 
 from twisted.trial import unittest
-from twisted.python.filepath import FilePath
 
 import twistedchecker
 from twistedchecker.core.runner import Runner
@@ -13,6 +13,17 @@ from twistedchecker.checkers.header import HeaderChecker
 
 from twistedchecker.test.test_exceptionfinder import (createTestFiles as
                                     createTestFilesForFindingExceptions)
+
+
+
+def _removeSpaces(str):
+    """
+    Remove whitespaces in str.
+
+    @param: a string
+    """
+    return str.strip().replace(" ", "")
+
 
 
 class RunnerTestCase(unittest.TestCase):
@@ -36,44 +47,6 @@ class RunnerTestCase(unittest.TestCase):
         self.outputStream = StringIO.StringIO()
 
 
-    def _removeSpaces(self, str):
-        """
-        Remove whitespaces in str.
-
-        @param: a string
-        """
-        return str.strip().replace(" ", "")
-
-
-    def _limitMessages(self, testfile, runner):
-        """
-        Enable or disable messages according to the testfile.
-        The first line of testfile should in format of:
-        # enable/disable: [Message ID], ...
-
-        @param testfile: testfile to read, enable and disable infomation should
-        in the first line of it.
-        @param runner: current runner for checking testfile.
-        """
-        firstline = open(testfile).readline()
-        if "enable" not in firstline and "disable" not in firstline:
-            # could not find enable or disable messages
-            return
-        action, messages = firstline.strip("#").strip().split(":")
-        messages = self._removeSpaces(messages).split(",")
-        messages = [msgid for msgid in messages if msgid]
-        action = action.strip()
-
-        if action == "enable":
-            # disable all other messages
-            runner.linter.disable_noerror_messages()
-            for msgid in messages:
-                runner.linter.enable(msgid)
-        else:
-            for msgid in messages:
-                runner.linter.disable(msgid)
-
-
     def _loadAllowedMessages(self):
         """
         Load allowed messages from test files.
@@ -90,20 +63,6 @@ class RunnerTestCase(unittest.TestCase):
                 messages = firstline.split(":")[1].strip().split(",")
                 messagesAllowed.update(messages)
         return messagesAllowed
-
-
-    def _getChecker(self, runner, checkerName):
-        """
-        Get a specified checker from a Runner object.
-
-        @param runner: an instance of Runner
-        @param checkerName: the name of a checker
-        @return: a checker object
-        """
-        for checker in runner.linter.get_checkers():
-            if hasattr(checker, "name") and checker.name == checkerName:
-                return checker
-        return None
 
 
     def test_findUselessCheckers(self):
@@ -191,63 +150,6 @@ class RunnerTestCase(unittest.TestCase):
         self.assertRaises(SystemExit, runner.run, ["--version"])
         self.assertTrue(self.outputStream.getvalue().count("Python") > 0, \
                         msg="failed to call pylint")
-
-
-    def listAllTestModules(self):
-        """
-        Get all functional test modules.
-        """
-        testmodules = []
-        pathTestModules = os.path.join(twistedchecker.abspath,
-                                       "functionaltests")
-        for root, dirs, files in os.walk(pathTestModules):
-            for testfile in files:
-                if testfile.endswith(".py") and testfile != "__init__.py":
-                    pathFile = os.path.join(twistedchecker.abspath,
-                                            root, testfile)
-                    pathRelative = os.path.relpath(pathFile,
-                                                   twistedchecker.abspath)
-                    modulename = "twistedchecker." + \
-                        pathRelative.replace(".py", "").replace(os.sep, ".")
-                    testmodules.append((pathFile, modulename))
-        return testmodules
-
-
-    def test_functions(self):
-        """
-        This will automatically test some functional test files
-        controlled by C{RunnerTestCase.configFunctionalTest}.
-        """
-        print >> sys.stderr, "\n\t----------------"
-        testmodules = self.listAllTestModules()
-        for pathTestFile, modulename in testmodules:
-            pathResultFile = pathTestFile.replace(".py", ".result")
-            self.assertTrue(os.path.exists(pathTestFile),
-                       msg="could not find testfile:\n%s" % pathTestFile)
-            self.assertTrue(os.path.exists(pathResultFile),
-                       msg="could not find resultfile:\n%s" % pathResultFile)
-            self.clearOutputStream()
-            runner = Runner()
-            runner.allowOptions = False
-            runner.setOutput(self.outputStream)
-            # set the reporter to C{twistedchecker.reporters.test.TestReporter}
-            runner.setReporter(TestReporter())
-            self._limitMessages(pathTestFile, runner)
-            # enable pep8 checking
-            pep8Checker = self._getChecker(runner, "pep8")
-            if pep8Checker:
-                pep8Checker.pep8Enabled = True
-            runner.run([modulename])
-            # check the results
-            if self.debug:
-                print >> sys.stderr, self.outputStream.getvalue()
-            predictResult = self._removeSpaces(open(pathResultFile).read())
-            outputResult = self._removeSpaces(self.outputStream.getvalue())
-            self.assertEqual(outputResult, predictResult,
-                 "Incorrect result of %s, should be:\n---\n%s\n---" % \
-                 (modulename, predictResult))
-            print >> sys.stderr, "\t%s\n" % modulename
-        print >> sys.stderr, "\t----------------\n"
 
 
     def test_parseWarnings(self):
@@ -372,7 +274,191 @@ C0111:  10,0: Missing docstring
         moduleName = os.path.basename(pathTestFiles)
         runner.run([moduleName])
         os.chdir(workingDir)
-        
+
         predictResult = "11:C0103\n14:C0103\n15:C0103"
-        outputResult = self._removeSpaces(self.outputStream.getvalue())
+        outputResult = _removeSpaces(self.outputStream.getvalue())
         self.assertEqual(outputResult, predictResult)
+
+
+
+def listAllTestModules():
+    """
+    Discover all the functional test modules.
+
+    Modules whose name begin with an underscore are ignored.
+
+    @return: A list of test file paths and module names
+    @rtype: L{list} of 2-L{tuple}(L{str}, L{str})
+    """
+    testmodules = []
+    pathTestModules = os.path.join(twistedchecker.abspath,
+                                   "functionaltests")
+    for root, dirs, files in os.walk(pathTestModules):
+        for testfile in files:
+            if testfile.startswith("_"):
+                continue
+            if testfile.endswith(".py"):
+                pathFile = os.path.join(twistedchecker.abspath,
+                                        root, testfile)
+                pathRelative = os.path.relpath(pathFile,
+                                               twistedchecker.abspath)
+                modulename = "twistedchecker." + \
+                    pathRelative.replace(".py", "").replace(os.sep, ".")
+                testmodules.append((pathFile, modulename))
+    return testmodules
+
+
+
+def _limitMessages(testfile, runner):
+    """
+    Enable or disable messages according to the testfile.
+    The first line of testfile should in format of:
+    # enable/disable: [Message ID], ...
+
+    @param testfile: testfile to read, enable and disable infomation should
+        in the first line of it.
+    @param runner: current runner for checking testfile.
+    """
+    firstline = open(testfile).readline()
+    if "enable" not in firstline and "disable" not in firstline:
+        # could not find enable or disable messages
+        return
+    action, messages = firstline.strip("#").strip().split(":")
+    messages = _removeSpaces(messages).split(",")
+    messages = [msgid for msgid in messages if msgid]
+    action = action.strip()
+
+    if action == "enable":
+        # disable all other messages
+        runner.linter.disable_noerror_messages()
+        for msgid in messages:
+            runner.linter.enable(msgid)
+    else:
+        for msgid in messages:
+            runner.linter.disable(msgid)
+
+
+
+def _getChecker(runner, checkerName):
+    """
+    Get a specified checker from a Runner object.
+
+    @param runner: an instance of Runner
+    @param checkerName: the name of a checker
+    @return: a checker object
+    """
+    for checker in runner.linter.get_checkers():
+        if hasattr(checker, "name") and checker.name == checkerName:
+            return checker
+    return None
+
+
+
+def _testNameFromModuleName(moduleName):
+    """
+    Mangle a module name so it can be used as a test function name.
+
+    @param moduleName: The qualified module name.
+    @type moduleName: L{str}
+    """
+    return 'test_' + moduleName.replace('.', '_')
+
+
+
+def _buildTestMethod(testFilePath, moduleName):
+    """
+    @param testFilePath: The path to the sample module to test.
+    @type testFilePath: L{str}
+
+    @param moduleName: The qualified module name.
+    @type moduleName: L{str}
+    """
+    return lambda self: self._runTest(testFilePath, moduleName)
+
+
+
+def _addFunctionalTests(testCaseClass):
+    """
+    Discover functional test modules and add test methods to a
+    TestCase class for each discovered functional test.
+
+    These test methods can be discovered and run individually by
+    trial.
+
+    @param testCaseClass: The class to which test methods will be
+        added.
+    @type testCaseClass: L{type}
+    """
+    for testFilePath, moduleName in listAllTestModules():
+        setattr(
+            testCaseClass,
+            _testNameFromModuleName(moduleName),
+            _buildTestMethod(testFilePath, moduleName)
+            )
+    return testCaseClass
+
+
+
+@_addFunctionalTests
+class FunctionalTests(unittest.TestCase):
+    """
+    A TestCase to which functional test methods will be dynamically
+    added at module load time.
+    """
+    def _runTest(self, testFilePath, moduleName):
+        """
+        Run a functional test.
+
+        @param testFilePath: The path to the module to test.
+        @type testFilePath: L{str}
+
+        @param moduleName: The qualified name of the module to test.
+        @type moduleName: L{str}
+        """
+        pathResultFile = testFilePath.replace(".py", ".result")
+
+        self.assertTrue(
+            os.path.exists(testFilePath),
+            msg="could not find testfile: %r" % testFilePath)
+        self.assertTrue(
+            os.path.exists(pathResultFile),
+            msg="could not find resultfile: %r" % pathResultFile)
+
+        outputStream = StringIO.StringIO()
+        runner = Runner()
+        runner.allowOptions = False
+        runner.setOutput(outputStream)
+
+        # Set the reporter to
+        # C{twistedchecker.reporters.test.TestReporter}
+        runner.setReporter(TestReporter())
+        _limitMessages(testFilePath, runner)
+
+        # Enable pep8 checking
+        pep8Checker = _getChecker(runner, "pep8")
+        if pep8Checker:
+            pep8Checker.pep8Enabled = True
+
+        # Run the test
+        runner.run([moduleName])
+
+        # Check the results
+        expectedResult = _removeSpaces(
+            open(pathResultFile).read()).splitlines()
+        outputResult = _removeSpaces(
+            outputStream.getvalue()).splitlines()
+
+        try:
+            self.assertEqual(expectedResult, outputResult)
+        except unittest.FailTest:
+            # Format the results side by side for easy comparison
+            i = itertools.izip_longest(
+                ['= Expected ='] + expectedResult,
+                ['= Actual ='] + outputResult, fillvalue='')
+
+            output = ['', moduleName]
+            for col1, col2 in i:
+                output.append(col1.ljust(20) + col2)
+            output.append('')
+
+            self.fail('\n'.join(output))
