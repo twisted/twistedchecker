@@ -1,15 +1,17 @@
+# Copyright (c) Twisted Matrix Laboratories.
+# See LICENSE for details.
+
+"""
+Checks the code using pep8.py and a custom blank line checker that matches the
+Twisted Coding Standard.
+"""
+
 import sys
 import StringIO
 import re
-import inspect
-
-from logilab import astng
-from logilab.common.ureports import Table
-from logilab.astng import are_exclusive
 
 from pylint.interfaces import IASTNGChecker
-from pylint.reporters import diff_string
-from pylint.checkers import BaseChecker, EmptyReport
+from pylint.checkers import BaseChecker
 
 import pep8
 from pep8 import DOCSTRING_REGEX
@@ -41,7 +43,8 @@ class PEP8WarningRecorder(PEP8OriginalChecker):
             # matches Twisted's blank spaces convention.
             if item[0] == "blank_lines":
                 replacetuple = (item[0], modifiedBlankLines, item[2])
-                self._logical_checks[self._logical_checks.index(item)] = replacetuple
+                self._logical_checks[
+                    self._logical_checks.index(item)] = replacetuple
 
         self.report_error = self.errorRecorder
         self.warnings = []
@@ -103,7 +106,7 @@ class PEP8Checker(BaseChecker):
                'Used when too many blank lines after docstring are found.'),
      # general pep8 warnings
      'W9017': ('Blank line at end of file',
-               'More than one blank line found at end of file (W391 in pep8).'),
+               'More than one blank line found at EOF (W391 in pep8).'),
      'W9018': ('No newline at end of file',
                'No blank line is found at end of file (W292 in pep8).'),
      'W9019': ("Whitespace after '%s'",
@@ -130,7 +133,7 @@ class PEP8Checker(BaseChecker):
     __implements__ = IASTNGChecker
     name = 'pep8'
     # map pep8 messages to messages in pylint.
-    # it's foramt should look like this:
+    # it's format should look like this:
     # 'msgid in pep8' : ('msgid in pylint','a string to extract arguments')
     mapPEP8Messages = {
         'W291': ('W9010', ''),
@@ -256,11 +259,9 @@ def modifiedBlankLines(logical_line, blank_lines, indent_level, line_number,
     previous_is_comment = DOCSTRING_REGEX.match(previous_logical)
 
     # Check blank lines after a decorator,
-    # but this checking is removed because no this requirement in
-    # Twisted Coding Standard.
-    # if previous_logical.startswith('@'):
-    #     if max_blank_lines:
-    #         return 0, "E304 blank lines found after function decorator"
+    if previous_logical.startswith('@'):
+        if max_blank_lines:
+            yield 0, "E304 blank lines found after function decorator"
 
     if isClassDefDecorator(logical_line):
         if indent_level:
