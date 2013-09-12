@@ -1,3 +1,4 @@
+# -*- test-case-name: twistedchecker.test.test_runner -*-
 # Copyright (c) Twisted Matrix Laboratories.
 # See LICENSE for details.
 
@@ -70,7 +71,7 @@ class PEP8WarningRecorder(pep8.Checker):
         """
         Run pep8 checker and record warnings.
         """
-        # set a stream to replace stdout, and get results in it
+        # Set a stream to replace stdout, and get results in it
         stdoutBak = sys.stdout
         streamResult = StringIO.StringIO()
         sys.stdout = streamResult
@@ -91,7 +92,7 @@ class PEP8Checker(BaseChecker):
                'Used when a line contains a trailing space.'),
      'W9011': ('Blank line contains whitespace',
                'Used when found a line contains whitespace.'),
-     # messages for checking blank lines
+     # Messages for checking blank lines
      'W9012': ('Expected 2 blank lines, found %s',
                'Class-level functions should be separated '
                'with 2 blank lines.'),
@@ -102,7 +103,7 @@ class PEP8Checker(BaseChecker):
                'Used when too many blank lines are found.'),
      'W9016': ('Too many blank lines after docstring, found %s',
                'Used when too many blank lines after docstring are found.'),
-     # general pep8 warnings
+     # General pep8 warnings
      'W9017': ('Blank line at end of file',
                'More than one blank line found at EOF (W391 in pep8).'),
      'W9018': ('No newline at end of file',
@@ -130,7 +131,7 @@ class PEP8Checker(BaseChecker):
     pep8Enabled = None
     __implements__ = IASTNGChecker
     name = 'pep8'
-    # map pep8 messages to messages in pylint.
+    # Map pep8 messages to messages in pylint.
     # it's format should look like this:
     # 'msgid in pep8' : ('msgid in pylint','a string to extract arguments')
     mapPEP8Messages = {
@@ -191,7 +192,7 @@ class PEP8Checker(BaseChecker):
         line number and message id
         """
         if not warnings:
-            # no warnings were found
+            # No warnings were found
             return
         for warning in warnings:
             linenum, offset, msgidInPEP8, text = warning
@@ -271,7 +272,7 @@ def modifiedBlankLines(logical_line, blank_lines, indent_level, line_number,
                         "E305 too many blank lines after docstring "
                         "(%d)" % (max_blank_lines,))
 
-            # between first level functions, there should be 2 blank lines.
+            # Between first level functions, there should be 2 blank lines.
             # any further indended functions can have one or zero lines
             else:
                 if not (max_blank_lines == 2 or
@@ -280,7 +281,7 @@ def modifiedBlankLines(logical_line, blank_lines, indent_level, line_number,
                     yield 0, ("E301 expected 2 blank lines, "
                               "found %d" % (max_blank_lines,))
 
-        # top level, there should be 3 blank lines between class/function
+        # Top level, there should be 3 blank lines between class/function
         # definitions (but not necessarily after variable declarations)
         elif previous_indent_level and max_blank_lines != 3:
             yield 0, ("E302 expected 3 blank lines, "
