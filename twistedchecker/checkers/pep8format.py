@@ -170,6 +170,8 @@ class PEP8Checker(BaseChecker):
     def visit_module(self, node):
         """
         A interface will be called when visiting a module.
+
+        @param node: The module node to check.
         """
         self._runPEP8Checker(node.file)
 
