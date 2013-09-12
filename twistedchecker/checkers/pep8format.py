@@ -14,12 +14,10 @@ from pylint.interfaces import IASTNGChecker
 from pylint.checkers import BaseChecker
 
 import pep8
-from pep8 import DOCSTRING_REGEX
-from pep8 import Checker as PEP8OriginalChecker
 
 
 
-class PEP8WarningRecorder(PEP8OriginalChecker):
+class PEP8WarningRecorder(pep8.Checker):
     """
     A subclass of pep8's checker that records warnings.
     """
@@ -31,7 +29,7 @@ class PEP8WarningRecorder(PEP8OriginalChecker):
         @param file: file to be checked
         """
         pep8.options = pep8.process_options([file])[0]
-        PEP8OriginalChecker.__init__(self, file)
+        pep8.Checker.__init__(self, file)
 
         for item in self._logical_checks:
             # This cycles through all of the logical checks that the Checker
@@ -77,7 +75,7 @@ class PEP8WarningRecorder(PEP8OriginalChecker):
         streamResult = StringIO.StringIO()
         sys.stdout = streamResult
         try:
-            PEP8OriginalChecker.check_all(self)
+            pep8.Checker.check_all(self)
         finally:
             sys.stdout = stdoutBak
 
@@ -256,7 +254,7 @@ def modifiedBlankLines(logical_line, blank_lines, indent_level, line_number,
 
     blank_lines_before_comment = 0
     max_blank_lines = max(blank_lines, blank_lines_before_comment)
-    previous_is_comment = DOCSTRING_REGEX.match(previous_logical)
+    previous_is_comment = pep8.DOCSTRING_REGEX.match(previous_logical)
 
     # Check blank lines after a decorator,
     if previous_logical.startswith('@'):
