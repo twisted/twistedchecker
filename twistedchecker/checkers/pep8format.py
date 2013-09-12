@@ -126,7 +126,7 @@ class PEP8Checker(BaseChecker):
                "Found less than two spaces before inline comment "
                "(E261 in pep8)."),
     }
-    standardPEP8Messages = ['W%d' % id for id in range(9017,9027)]
+    standardPEP8Messages = ['W%d' % (id,) for id in range(9017,9027)]
     pep8Enabled = None
     __implements__ = IASTNGChecker
     name = 'pep8'
@@ -268,8 +268,8 @@ def modifiedBlankLines(logical_line, blank_lines, indent_level, line_number,
             if previous_is_comment:
                 if max_blank_lines > 1:
                     yield 0, (
-                        "E305 too many blank lines after docstring (%d)" %
-                        max_blank_lines)
+                        "E305 too many blank lines after docstring "
+                        "(%d)" % (max_blank_lines,))
 
             # between first level functions, there should be 2 blank lines.
             # any further indended functions can have one or zero lines
@@ -277,14 +277,14 @@ def modifiedBlankLines(logical_line, blank_lines, indent_level, line_number,
                 if not (max_blank_lines == 2 or
                         indent_level > 4 or
                         previous_indent_level <= indent_level):
-                    yield 0, ("E301 expected 2 blank lines, found %d" %
-                                   max_blank_lines)
+                    yield 0, ("E301 expected 2 blank lines, "
+                              "found %d" % (max_blank_lines,))
 
         # top level, there should be 3 blank lines between class/function
         # definitions (but not necessarily after variable declarations)
         elif previous_indent_level and max_blank_lines != 3:
-            yield (0,
-                "E302 expected 3 blank lines, found %d" % max_blank_lines)
+            yield 0, ("E302 expected 3 blank lines, "
+                      "found %d" % (max_blank_lines,))
 
     elif max_blank_lines > 1 and indent_level:
-        yield 0, "E303 too many blank lines (%d)" % max_blank_lines
+        yield 0, "E303 too many blank lines (%d)" % (max_blank_lines,)
