@@ -248,6 +248,13 @@ def modifiedBlankLines(logical_line, blank_lines, indent_level, line_number,
     E304: @decorator\n\ndef a():\n    pass
     E305: "comment"\n\n\ndef a():\n    pass
     E306: variable="value"\ndef a():   pass
+
+    @param logical_line: Supplied by PEP8. The content of the line it is dealing with.
+    @param blank_lines: Supplied by PEP8.
+    @param indent_level: Supplied by PEP8. The current indent level.
+    @param line_number: Supplied by PEP8. The current line number.
+    @param previous_logical: Supplied by PEP8. The previous logical line.
+    @param previous_indent_level: Supplied by PEP8. The indent level of the previous line.
     """
     def isClassDefDecorator(thing):
         return (thing.startswith('def ') or

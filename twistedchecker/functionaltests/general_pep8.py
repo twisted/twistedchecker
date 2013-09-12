@@ -1,4 +1,4 @@
-# enable: W9019,W9020,W9021,W9022,W9023,W9024,W9025,W9026
+# enable: W9019,W9020,W9021,W9022,W9023,W9024,W9025,W9026,W9027
 
 # Whitespace after '['.
 a = [ 1, 2]
@@ -36,3 +36,13 @@ c = 1 # an inline comment
 # Good example.
 c = 1  # an inline comment
 
+# Example of a well-done decorator
+@imaginarydecorator
+def correct_decorator():
+	pass
+
+# Example of a decorator with incorrect spacing
+@imaginarydecorator
+
+def incorrect_decorator():
+	pass
