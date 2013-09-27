@@ -94,6 +94,20 @@ def _setLinterLimits(linter, action, messages):
 
 
 
+def _enablePep8Checker(linter):
+    """
+    Enable pep8 checking
+    """
+    checkers = linter.get_checkers()
+    for checker in checkers:
+        if getattr(checker, "name", None) == "pep8":
+            checker.pep8Enabled = True
+            return
+    else:
+        raise RuntimeError('pep8 checker not found in ', checkers)
+
+
+
 def _runTest(testCase, testFilePath):
     """
     Run a functional test.
@@ -115,6 +129,8 @@ def _runTest(testCase, testFilePath):
         action, messages = limits
         _setLinterLimits(runner.linter, action, messages)
 
+    _enablePep8Checker(runner.linter)
+
     runner.run([moduleName])
 
     # Check the results
@@ -126,11 +142,6 @@ def _runTest(testCase, testFilePath):
     except unittest.FailTest:
         testCase.fail(_formatResults(moduleName, expectedResult, outputResult))
 
-# Enable pep8 checking
-# pep8Checker = _getChecker(runner, "pep8")
-# if pep8Checker:
-#     pep8Checker.pep8Enabled = True
-# Run the test
 
 
 def tests():
@@ -141,7 +152,7 @@ def tests():
              _runTest,
              testFilePath=('/home/richard/projects/TwistedChecker/'
                            'branches/isolated-functional-tests-1010392/'
-                           'twistedchecker/functionaltests/argumentname.py')))
+                           'twistedchecker/functionaltests/module_docstring_fail.py')))
     )
     return dict(t)
 
