@@ -62,6 +62,38 @@ def _formatResults(moduleName, expectedResult, actualResult):
 
 
 
+
+def _parseLimitMessages(testfile):
+    """
+    The first line of testfile should in format of:
+    # enable/disable: [Message ID], ...
+
+    @param testfile: testfile to read, enable and disable infomation should
+        in the first line of it.
+    """
+    firstline = open(testfile).readline()
+    if "enable" not in firstline and "disable" not in firstline:
+        # Could not find enable or disable messages
+        return
+    action, messages = firstline.lstrip("#").strip().split(":", 1)
+    messages = [msgid for msgid in messages.strip().split(",") if msgid]
+    action = action.strip()
+
+    return action, messages
+
+
+
+def _setLinterLimits(linter, action, messages):
+    if action == "enable":
+        # Disable all other messages
+        linter.disable_noerror_messages()
+
+    messageModifier = getattr(linter, action)
+    for msgid in messages:
+        messageModifier(msgid)
+
+
+
 def _runTest(testCase, testFilePath):
     """
     Run a functional test.
@@ -77,6 +109,12 @@ def _runTest(testCase, testFilePath):
     runner.allowOptions = False
     runner.setOutput(outputStream)
     runner.setReporter(TestReporter())
+
+    limits = _parseLimitMessages(testFilePath)
+    if limits is not None:
+        action, messages = limits
+        _setLinterLimits(runner.linter, action, messages)
+
     runner.run([moduleName])
 
     # Check the results
@@ -88,7 +126,6 @@ def _runTest(testCase, testFilePath):
     except unittest.FailTest:
         testCase.fail(_formatResults(moduleName, expectedResult, outputResult))
 
-#    _limitMessages(testFilePath, runner)
 # Enable pep8 checking
 # pep8Checker = _getChecker(runner, "pep8")
 # if pep8Checker:
