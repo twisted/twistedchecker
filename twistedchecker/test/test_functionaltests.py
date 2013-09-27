@@ -5,6 +5,7 @@
 Test cases for running the functional tests in
 L{twistedchecker.functionaltests}.
 """
+
 from functools import update_wrapper
 import io
 import itertools
@@ -59,7 +60,6 @@ def _formatResults(moduleName, expectedResult, actualResult):
     for col1, col2 in i:
         output.append(col1.ljust(20) + col2)
     return os.linesep.join(output)
-
 
 
 
@@ -144,15 +144,31 @@ def _runTest(testCase, testFilePath):
 
 
 
+def _testNameFromModuleName(moduleName):
+    """
+    Mangle a module name so it can be used as a test function name.
+
+    @param moduleName: The qualified module name.
+    @type moduleName: L{str}
+
+    @return: The test name derived from the supplied C{moduleName}.
+    @rtype: L{str}
+    """
+    return 'test_' + moduleName.replace('.', '_')
+
+
+
+modulePath = ('/home/richard/projects/TwistedChecker/'
+              'branches/isolated-functional-tests-1010392/'
+              'twistedchecker/functionaltests/module_docstring_fail.py')
+moduleName = filenameToModuleName(modulePath)
 def tests():
     t = []
     t.append(
-        ('test_foo',
+        (_testNameFromModuleName(moduleName),
          _partial2(
              _runTest,
-             testFilePath=('/home/richard/projects/TwistedChecker/'
-                           'branches/isolated-functional-tests-1010392/'
-                           'twistedchecker/functionaltests/module_docstring_fail.py')))
+             testFilePath=modulePath))
     )
     return dict(t)
 
