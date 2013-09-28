@@ -14,6 +14,7 @@ import os
 from twisted.python.reflect import filenameToModuleName
 from twisted.trial import unittest
 
+import twistedchecker
 from twistedchecker.core.runner import Runner
 from twistedchecker.reporters.test import TestReporter
 
@@ -54,7 +55,8 @@ def _formatResults(moduleName, expectedResult, actualResult):
     """
     i = itertools.izip_longest(
         ['= Expected ='] + expectedResult.splitlines(),
-        ['= Actual ='] + actualResult.splitlines(), fillvalue='')
+        ['= Actual ='] + actualResult.splitlines(),
+        fillvalue='')
 
     output = ['', moduleName]
     for col1, col2 in i:
@@ -134,8 +136,8 @@ def _runTest(testCase, testFilePath):
     runner.run([moduleName])
 
     # Check the results
-    expectedResult = open(pathResultFile).read()
-    outputResult = outputStream.getvalue()
+    expectedResult = open(pathResultFile).read().strip()
+    outputResult = outputStream.getvalue().strip()
 
     try:
         testCase.assertEqual(expectedResult, outputResult)
@@ -158,18 +160,33 @@ def _testNameFromModuleName(moduleName):
 
 
 
-modulePath = ('/home/richard/projects/TwistedChecker/'
-              'branches/isolated-functional-tests-1010392/'
-              'twistedchecker/functionaltests/module_docstring_fail.py')
-moduleName = filenameToModuleName(modulePath)
-def tests():
+def _testModules():
+    """
+    Discover all the functional test modules.
+
+    Modules whose name begin with an underscore are ignored.
+
+    @return: A list of test file paths and module names
+    @rtype: L{list} of 2-L{tuple}(L{str}, L{str})
+    """
+    pathTestModules = os.path.join(twistedchecker.abspath, "functionaltests")
+    for root, dirs, files in os.walk(pathTestModules):
+        for testfile in files:
+            if testfile.startswith("_"):
+                continue
+            if testfile.endswith(".py"):
+                yield os.path.join(twistedchecker.abspath, root, testfile)
+
+
+
+def _testsForModules(testModules):
     t = []
-    t.append(
-        (_testNameFromModuleName(moduleName),
-         _partial2(
-             _runTest,
-             testFilePath=modulePath))
-    )
+    for modulePath in testModules:
+        moduleName = filenameToModuleName(modulePath)
+        t.append(
+            (_testNameFromModuleName(moduleName),
+             _partial2(_runTest, testFilePath=modulePath))
+        )
     return dict(t)
 
 
@@ -177,5 +194,5 @@ def tests():
 FunctionalTests = type(
     "FunctionalTests",
     (unittest.TestCase,),
-    tests()
+    _testsForModules(_testModules())
 )
