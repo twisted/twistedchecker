@@ -26,6 +26,9 @@ def _partial2(wrapped, *partialArgs, **partialKwargs):
     instead of a partial object.  This allows it to be assigned to a class
     attribute and used as an instance method.
 
+    @see: U{https://twistedmatrix.com/trac/ticket/2645}
+    @see: U{http://bugs.python.org/issue4331}
+
     @param wrapped: The function whose arguments will be partially applied
     @type wrapped: L{callable}
 
