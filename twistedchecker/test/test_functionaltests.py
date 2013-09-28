@@ -244,6 +244,8 @@ def _testsForModules(testModules):
 
 
 
+# Create a TestCase class using a dictionary of dynamically generated test
+# methods.
 FunctionalTests = type(
     "FunctionalTests",
     (unittest.TestCase,),
