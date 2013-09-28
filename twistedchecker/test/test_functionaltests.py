@@ -51,7 +51,20 @@ def _partial2(wrapped, *partialArgs, **partialKwargs):
 
 def _formatResults(moduleName, expectedResult, actualResult):
     """
-    Format the results side by side for easy comparison
+    Format the expected and actual results side by side for easy comparison.
+
+    @param moduleName: The fully qualified module name.
+    @type moduleName: L{str}
+
+    @param expectedResult: The expected I{twistedchecker} output.
+    @type expectedResult: L{str}
+
+    @param actualResult: The actual I{twistedchecker} output.
+    @type actualResult: L{str}
+
+    @return: The expected and actual output formatted in two columns with
+        headings.
+    @rtype: L{str}
     """
     i = itertools.izip_longest(
         ['= Expected ='] + expectedResult.splitlines(),
@@ -65,15 +78,22 @@ def _formatResults(moduleName, expectedResult, actualResult):
 
 
 
-def _parseLimitMessages(testfile):
+def _parseLimitMessages(testFilePath):
     """
-    The first line of testfile should in format of:
-    # enable/disable: [Message ID], ...
+    Parse a test module file for a message control header.
 
-    @param testfile: testfile to read, enable and disable infomation should
-        in the first line of it.
+    The first line of testfile should in format of:
+    enable/disable: [Message ID], ...
+
+    @param testFilePath: test module file to read.
+    @type testFilePath: L{str}
+
+    @return: A 2-tuple of (C{action}, C{messages}) where C{action} is either
+        C{"enable"} or C{"disable"} and C{messages} is a list of
+        I{twistedchecker} message IDs.
+    @rtype: L{tuple}
     """
-    firstline = open(testfile).readline()
+    firstline = open(testFilePath).readline()
     if "enable" not in firstline and "disable" not in firstline:
         # Could not find enable or disable messages
         return
@@ -86,6 +106,20 @@ def _parseLimitMessages(testfile):
 
 
 def _setLinterLimits(linter, action, messages):
+    """
+    Enable or disable the reporting of certain linter messages.
+
+    @param linter: The linter whose
+        L{twistedchecker.checkers.pep8format.PEP8Checker} will be enabled.
+    @type linter: L{pylint.lint.PyLinter}
+
+    @param action: Either C{"enable"} or C{"disable"}.
+    @type action: L{str}
+
+    @param messages: A list of twistedchecker message IDs to be enabled or
+        disabled.
+    @type messages: L{list} of L{str}
+    """
     if action == "enable":
         # Disable all other messages
         linter.disable_noerror_messages()
@@ -98,7 +132,11 @@ def _setLinterLimits(linter, action, messages):
 
 def _enablePep8Checker(linter):
     """
-    Enable pep8 checking
+    Enable pep8 checking on the twistedchecker linter.
+
+    @param linter: The linter whose
+        L{twistedchecker.checkers.pep8format.PEP8Checker} will be enabled.
+    @type linter: L{pylint.lint.PyLinter}
     """
     checkers = linter.get_checkers()
     for checker in checkers:
@@ -113,6 +151,9 @@ def _enablePep8Checker(linter):
 def _runTest(testCase, testFilePath):
     """
     Run a functional test.
+
+    @param testCase: The test case on which to call assertions
+    @type testCase: L{unittest.TestCase}
 
     @param testFilePath: The path to the module to test.
     @type testFilePath: L{str}
@@ -166,8 +207,8 @@ def _testModules():
 
     Modules whose name begin with an underscore are ignored.
 
-    @return: A list of test file paths and module names
-    @rtype: L{list} of 2-L{tuple}(L{str}, L{str})
+    @return: An iterator of test module file paths
+    @rtype: L{iter}
     """
     pathTestModules = os.path.join(twistedchecker.abspath, "functionaltests")
     for root, dirs, files in os.walk(pathTestModules):
@@ -180,6 +221,15 @@ def _testModules():
 
 
 def _testsForModules(testModules):
+    """
+    Return a dictionary of test names and test functions.
+
+    @param testModules: An iterable list of functional test module names.
+    @type testModules: L{iter}
+
+    @return: A dictionary of test functions keyed by test name.
+    @rtype: L{dict} of (L{str}, L{callable})
+    """
     t = []
     for modulePath in testModules:
         moduleName = filenameToModuleName(modulePath)
