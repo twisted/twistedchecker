@@ -133,9 +133,9 @@ def _setLinterLimits(linter, action, messages):
 
 
 
-def _enablePep8Checker(linter):
+def _enablePEP8Checker(linter):
     """
-    Enable pep8 checking on the twistedchecker linter.
+    Enable PEP8 checking on the twistedchecker linter.
 
     @param linter: The linter whose
         L{twistedchecker.checkers.pep8format.PEP8Checker} will be enabled.
@@ -175,7 +175,7 @@ def _runTest(testCase, testFilePath):
         action, messages = limits
         _setLinterLimits(runner.linter, action, messages)
 
-    _enablePep8Checker(runner.linter)
+    _enablePEP8Checker(runner.linter)
 
     runner.run([moduleName])
 
