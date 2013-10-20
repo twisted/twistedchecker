@@ -29,7 +29,7 @@ def _partial2(wrapped, *partialArgs, **partialKwargs):
     @see: U{https://twistedmatrix.com/trac/ticket/2645}
     @see: U{http://bugs.python.org/issue4331}
 
-    @param wrapped: The function whose arguments will be partially applied
+    @param wrapped: The function whose arguments will be partially applied.
     @type wrapped: L{callable}
 
     @param partialArgs: The positional arguments which will be applied to
@@ -155,7 +155,7 @@ def _runTest(testCase, testFilePath):
     """
     Run a functional test.
 
-    @param testCase: The test case on which to call assertions
+    @param testCase: The test case on which to call assertions.
     @type testCase: L{unittest.TestCase}
 
     @param testFilePath: The path to the module to test.
@@ -210,7 +210,7 @@ def _testModules():
 
     Modules whose name begin with an underscore are ignored.
 
-    @return: An iterator of test module file paths
+    @return: An iterator of test module file paths.
     @rtype: L{iter}
     """
     pathTestModules = os.path.join(twistedchecker.abspath, "functionaltests")
