@@ -1,4 +1,7 @@
 # -*- test-case-name: twistedchecker.test.test_runner -*-
+# Copyright (c) Twisted Matrix Laboratories.
+# See LICENSE for details.
+
 import sys
 import os
 import StringIO
