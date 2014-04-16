@@ -62,3 +62,31 @@ class foo:
         A method returns nothing.
         """
         return
+
+
+
+class Bar(self):
+    """
+    A cvar is recognized as being the start of epytext markup.
+
+    @cvar foo: bar baz
+    @type foo: bax
+    """
+
+    def a(self):
+        """
+        A raises field is recognized as being the start of epytext markup.
+
+        @raises FoobarException: An exception.
+        @returns: C{int}
+        """
+
+
+
+class Baz(self):
+    """
+    An ivar is recognized as being the start of epytext markup.
+
+    @ivar foo: bar baz
+    @type foo: bax
+    """

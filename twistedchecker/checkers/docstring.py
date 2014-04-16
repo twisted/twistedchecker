@@ -207,7 +207,8 @@ class DocstringChecker(PylintDocStringChecker):
         @param linenoDocstring: linenumber of docstring
         """
         # Check whether there is a blank line before epytext markups.
-        patternEpytext = (r"\n *@(param|type|return|returns|rtype)"
+        patternEpytext = (r"\n *@(param|type|return|returns|rtype|ivar|cvar"
+                          r"|raises)"
                           r"\s*[a-zA-Z0-9_]*\s*\:")
         matchedEpytext = re.search(patternEpytext, node.doc)
         if matchedEpytext:
