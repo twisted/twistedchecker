@@ -81,6 +81,15 @@ class Bar(self):
         @returns: C{int}
         """
 
+    def b(self):
+        """
+        A raise (because we are inconsistent about stuff) should also be
+        recognized as the start of epytext markup.
+
+        @raise BarException: Another exception.
+        @returns: C{int}
+        """
+
 
 
 class Baz(self):
