@@ -1,13 +1,11 @@
-import sys
-import os
-import StringIO
-
 from twisted.trial import unittest
 
 from twistedchecker.core.exceptionfinder import PatternFinder
 from twistedchecker.core.exceptionfinder import findPatternsInFile
 from twistedchecker.core.exceptionfinder import findAllExceptions
 from twisted.python.filepath import FilePath
+
+
 
 class ExceptionFinderTestCase(unittest.TestCase):
     """

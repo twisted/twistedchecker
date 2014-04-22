@@ -1,10 +1,7 @@
-import sys
-import os
-import StringIO
-
 from twisted.trial import unittest
 
 from twistedchecker.core.util import isTestModule, moduleNeedsTests
+
 
 
 class UtilTestCase(unittest.TestCase):

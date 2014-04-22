@@ -1,15 +1,10 @@
-import sys
 import re
 
-from logilab import astng
-from logilab.common.ureports import Table
-from logilab.astng import are_exclusive
-
 from pylint.interfaces import IASTNGChecker
-from pylint.reporters import diff_string
-from pylint.checkers import BaseChecker, EmptyReport
+from pylint.checkers import BaseChecker
 
-from twistedchecker.core.util import isTestModule, moduleNeedsTests
+from twistedchecker.core.util import isTestModule
+
 
 class ModuleNameChecker(BaseChecker):
     """
@@ -41,7 +36,6 @@ class ModuleNameChecker(BaseChecker):
         @param node: node of current module
         """
         modulename = node.name.split(".")[-1]
-        codeOfModule = node.file_stream.read()
         if isTestModule(node.name) and self.moduleContainsTestCase(node):
             self._checkTestModuleName(modulename, node)
 

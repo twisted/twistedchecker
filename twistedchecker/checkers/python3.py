@@ -1,17 +1,14 @@
 """
 Checker for python3 compatibility issues.
 """
-import sys
-import os
 import re
-from logilab import astng
 
 import logilab.astng.node_classes
 from logilab.astng.exceptions import ASTNGError
 
 from pylint.interfaces import IASTNGChecker
 from pylint.checkers import BaseChecker
-from pylint.checkers import utils
+
 
 
 class Python3Checker(BaseChecker):

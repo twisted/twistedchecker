@@ -1,15 +1,10 @@
-import sys
 import re
 
-from logilab import astng
-from logilab.common.ureports import Table
-from logilab.astng import are_exclusive
-
 from pylint.interfaces import IASTNGChecker
-from pylint.reporters import diff_string
-from pylint.checkers import BaseChecker, EmptyReport
+from pylint.checkers import BaseChecker
 
 from twistedchecker.core.util import isTestModule, moduleNeedsTests
+
 
 class HeaderChecker(BaseChecker):
     """

@@ -1,10 +1,9 @@
-import os
 import sys
-
-from logilab.common.textutils import colorize_ansi
 
 from pylint.interfaces import IReporter
 from pylint.reporters import BaseReporter
+
+
 
 class TestReporter(BaseReporter):
     """
