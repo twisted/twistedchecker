@@ -3,10 +3,10 @@ language: python
 python:
   - "2.7"
 
-# command to install dependencies
+# Twisted is required for trial.
 install: "pip install twisted==13.2.0 ."
 
-script: trial twistechecker
+script: trial twistedchecker
 
 # Dump trial log on failure.
 after_failure: "cat _trial_temp/test.log"
