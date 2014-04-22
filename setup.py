@@ -37,7 +37,7 @@ setup(
         ],
     install_requires=[
         "pylint == 0.26.0",
-        "pep8"
+        "pep8 == 1.5.1",
         ],
     long_description=file('README.rst').read()
     )
