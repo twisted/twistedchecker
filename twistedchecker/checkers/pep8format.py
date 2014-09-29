@@ -222,7 +222,7 @@ class PEP8Checker(BaseChecker):
 
 
 def modifiedBlankLines(logical_line, blank_lines, indent_level, line_number,
-                       previous_logical, previous_indent_level):
+                       blank_before, previous_logical, previous_indent_level):
     """
     This function is copied from a modified pep8 checker for Twisted.
     See https://github.com/cyli/TwistySublime/blob/master/twisted_pep8.py
@@ -253,6 +253,7 @@ def modifiedBlankLines(logical_line, blank_lines, indent_level, line_number,
     @param blank_lines: Supplied by PEP8.
     @param indent_level: Supplied by PEP8. The current indent level.
     @param line_number: Supplied by PEP8. The current line number.
+    @param blank_before: Supplied by PEP8. The number of blank lines before this one.
     @param previous_logical: Supplied by PEP8. The previous logical line.
     @param previous_indent_level: Supplied by PEP8. The indent level of the previous line.
     """
@@ -265,13 +266,11 @@ def modifiedBlankLines(logical_line, blank_lines, indent_level, line_number,
     if line_number == 1:
         return
 
-    blank_lines_before_comment = 0
-    max_blank_lines = max(blank_lines, blank_lines_before_comment)
     previous_is_comment = pep8.DOCSTRING_REGEX.match(previous_logical)
 
     # Check blank lines after a decorator,
     if previous_logical.startswith('@'):
-        if max_blank_lines:
+        if blank_before:
             yield 0, "E304 blank lines found after function decorator"
 
     if isClassDefDecorator(logical_line):
@@ -279,25 +278,25 @@ def modifiedBlankLines(logical_line, blank_lines, indent_level, line_number,
             # There should only be 1 line or less between docstrings and
             # the next function
             if previous_is_comment:
-                if max_blank_lines > 1:
+                if blank_before > 1:
                     yield 0, (
                         "E305 too many blank lines after docstring "
-                        "(%d)" % (max_blank_lines,))
+                        "(%d)" % (blank_before,))
 
             # Between first level functions, there should be 2 blank lines.
             # any further indended functions can have one or zero lines
             else:
-                if not (max_blank_lines == 2 or
+                if not (blank_before == 2 or
                         indent_level > 4 or
                         previous_indent_level <= indent_level):
                     yield 0, ("E301 expected 2 blank lines, "
-                              "found %d" % (max_blank_lines,))
+                              "found %d" % (blank_before,))
 
         # Top level, there should be 3 blank lines between class/function
         # definitions (but not necessarily after variable declarations)
-        elif previous_indent_level and max_blank_lines != 3:
+        elif previous_indent_level and blank_before != 3:
             yield 0, ("E302 expected 3 blank lines, "
-                      "found %d" % (max_blank_lines,))
+                      "found %d" % (blank_before,))
 
-    elif max_blank_lines > 1 and indent_level:
-        yield 0, "E303 too many blank lines (%d)" % (max_blank_lines,)
+    elif blank_before > 1 and indent_level:
+        yield 0, "E303 too many blank lines (%d)" % (blank_before,)
