@@ -16,10 +16,10 @@ setup(
     packages=find_packages(),
     package_data={
         "twistedchecker": ["configuration/pylintrc"]
-        },
+    },
     scripts=[
         'bin/twistedchecker'
-        ],
+    ],
     license='MIT',
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -31,14 +31,14 @@ setup(
         "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
         "Topic :: Software Development :: Quality Assurance"
-        ],
+    ],
     keywords=[
         "twisted", "checker", "compliance", "pep8"
-        ],
+    ],
     install_requires=[
         "pylint == 0.26.0",
         "logilab-common == 0.62.0",
         "pep8 == 1.5.6"
-        ],
+    ],
     long_description=file('README.rst').read()
-    )
+)
