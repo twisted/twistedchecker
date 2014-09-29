@@ -9,7 +9,7 @@ install:
 
 script:
   - trial twistedchecker
-  - pyflakes twistedchecker
+  - python ./check_pyflakes.py ./twistedchecker setup.py
 
 # Dump trial log on failure.
 after_failure: "cat _trial_temp/test.log"
