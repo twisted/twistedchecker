@@ -12,7 +12,7 @@ setup(
     version='0.2.0',
     author='Twisted Matrix Laboratories',
     author_email='twisted-python@twistedmatrix.com',
-    url='https://launchpad.net/twistedchecker',
+    url='https://github.com/twisted/twistedchecker',
     packages=find_packages(),
     package_data={
         "twistedchecker": ["configuration/pylintrc"]
