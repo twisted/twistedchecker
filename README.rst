@@ -14,6 +14,9 @@ TwistedChecker's dependencies are pylint (== 0.26.0) and a recent version of PEP
 Tests
 -----
 
+.. image:: https://travis-ci.org/chevah/twistedchecker.svg?branch=master
+    :target: https://travis-ci.org/chevah/twistedchecker
+
 To test twistedchecker, run the following in the source directory::
 
     trial twistedchecker
