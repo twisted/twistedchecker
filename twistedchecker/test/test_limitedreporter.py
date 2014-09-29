@@ -1,4 +1,3 @@
-import sys
 import os
 import StringIO
 
@@ -6,7 +5,7 @@ from twisted.trial import unittest
 
 import twistedchecker
 from twistedchecker.core.runner import Runner
-from twistedchecker.reporters.limited import LimitedReporter
+
 
 
 class LimitedReporterTestCase(unittest.TestCase):

@@ -1,11 +1,11 @@
 import os
 import sys
 
-from logilab.common.textutils import colorize_ansi
 from pylint.interfaces import IReporter
-from pylint.reporters import BaseReporter
 from pylint.reporters.text import TextReporter
 import twistedchecker
+
+
 
 class LimitedReporter(TextReporter):
     """

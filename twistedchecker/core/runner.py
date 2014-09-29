@@ -264,7 +264,7 @@ class Runner():
                 # then transform it to a path.
                 try:
                     filepath = file_from_modpath(fileOrMod.split('.'))
-                except (ImportError, SyntaxError) as ex:
+                except (ImportError, SyntaxError):
                     # Could not load this module.
                     continue
                 if not os.path.exists(filepath):
@@ -346,7 +346,7 @@ class Runner():
         newResult = self.streamForDiff.getvalue()
         newWarnings = self.computeWarnings(newResult)
 
-        diffWarnings = self.generateDiff(oldResult, newResult)
+        diffWarnings = self.generateDiff(oldWarnings, newWarnings)
         diffResult = self.formatWarnings(diffWarnings)
         self.outputStream.write(diffResult + "\n")
         exitCode = 1 if diffWarnings else 0
