@@ -37,6 +37,7 @@ setup(
         ],
     install_requires=[
         "pylint == 0.26.0",
+        "logilab-common == 0.62.0",
         "pep8 == 1.5.6"
         ],
     long_description=file('README.rst').read()
