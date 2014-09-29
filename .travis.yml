@@ -5,7 +5,7 @@ python:
 
 # Twisted is required for trial.
 install:
-  - pip install twisted==13.2.0 pyflakes==0.8.1 .
+  - pip install --upgrade twisted==13.2.0 pyflakes==0.8.1 .
 
 script:
   - trial twistedchecker
