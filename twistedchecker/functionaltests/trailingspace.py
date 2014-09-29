@@ -5,3 +5,4 @@ print "this line has trailing space"
 
 # next blank line contains a whitespace
  
+# end of file

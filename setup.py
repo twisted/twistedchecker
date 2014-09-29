@@ -12,7 +12,7 @@ setup(
     version='0.2.0',
     author='Twisted Matrix Laboratories',
     author_email='twisted-python@twistedmatrix.com',
-    url='https://launchpad.net/twistedchecker',
+    url='https://github.com/twisted/twistedchecker',
     packages=find_packages(),
     package_data={
         "twistedchecker": ["configuration/pylintrc"]
@@ -37,7 +37,8 @@ setup(
         ],
     install_requires=[
         "pylint == 0.26.0",
-        "pep8 == 1.5.1",
+        "logilab-common == 0.62.0",
+        "pep8 == 1.5.6"
         ],
     long_description=file('README.rst').read()
     )
