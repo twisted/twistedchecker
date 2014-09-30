@@ -34,6 +34,8 @@ class RunnerTestCase(unittest.TestCase):
         """
         self.outputStream = StringIO.StringIO()
         self.patch(sys, "stdout", self.outputStream)
+        self.errorStream = StringIO.StringIO()
+        self.patch(sys, "stderr", self.errorStream)
 
 
     def clearOutputStream(self):
@@ -41,6 +43,15 @@ class RunnerTestCase(unittest.TestCase):
         A function to clear output stream.
         """
         self.outputStream = StringIO.StringIO()
+
+
+    def makeRunner(self):
+        """
+        Return a runner instance.
+        """
+        runner = Runner()
+        runner.setOutput(self.outputStream)
+        return runner
 
 
     def _loadAllowedMessages(self):
@@ -135,17 +146,20 @@ class RunnerTestCase(unittest.TestCase):
                          messagesFromReporter)
 
 
-    def test_run(self):
+    def test_runVersion(self):
         """
         Pass argument "--version" to C{runner.run}, and it should show
         a version infomation, then exit. So that I could know it called pylint.
         """
-        self.clearOutputStream()
         runner = Runner()
         runner.setOutput(self.outputStream)
-        self.assertRaises(SystemExit, runner.run, ["--version"])
+
+        exitResult = self.assertRaises(SystemExit, runner.run, ["--version"])
+
         self.assertTrue(self.outputStream.getvalue().count("Python") > 0, \
                         msg="failed to call pylint")
+        self.assertIsNone(runner.diffOption)
+        self.assertEqual(0, exitResult.code)
 
 
     def test_parseWarnings(self):
@@ -170,6 +184,122 @@ C0111:  10,0: Missing docstring
 
         warnings = Runner().parseWarnings(textWarnings)
         self.assertEqual(warnings, warningsCorrect)
+
+    def test_runDiffNoWarnings(self):
+        """
+        When running in diff mode set path to result file and exit with 0 if
+        no warnings were found.
+        """
+        runner = self.makeRunner()
+        # Mock showDiffResults to check that it is called.
+        showDiffResultsCalls = []
+        runner.showDiffResults = lambda: showDiffResultsCalls.append(True)
+
+        exitResult = self.assertRaises(
+            SystemExit,
+            runner.run, ['--diff', 'path/to/previous.results', 'target'])
+
+        self.assertEqual('path/to/previous.results', runner.diffOption)
+        # Called once.
+        self.assertEqual([True], showDiffResultsCalls)
+        # Nothing in stderr or stdout.
+        self.assertEqual('', self.outputStream.getvalue())
+        self.assertEqual('', self.errorStream.getvalue())
+        self.assertEqual(0, exitResult.code)
+
+
+    def test_runDiffWarnings(self):
+        """
+        Exit with 1 when warnings are found in diff mode.
+        """
+        runner = self.makeRunner()
+        runner.showDiffResults = lambda: 3
+
+        exitResult = self.assertRaises(
+            SystemExit,
+            runner.run, ['--diff', 'path/to/previous.results', 'target'])
+
+        self.assertEqual(1, exitResult.code)
+
+
+    def test_showDiffResultsReadFail(self):
+        """
+        Show an error and exit with 1 when failing to read diff result file.
+        """
+        runner = self.makeRunner()
+        runner.diffOption = 'no/such/file'
+
+        result = runner.showDiffResults()
+
+        self.assertEqual(1, result)
+        self.assertEqual('', self.outputStream.getvalue())
+        self.assertEqual(
+            "Error: Failed to read result file 'no/such/file'.\n",
+            self.errorStream.getvalue(),
+            )
+
+    def test_showDiffResultEmpty(self):
+        """
+        Return 0 when both sources are empty.
+        """
+        runner = self.makeRunner()
+        runner.prepareDiff()
+        runner._readDiffFile = lambda: ''
+
+        result = runner.showDiffResults()
+
+        self.assertEqual(0, result)
+        self.assertEqual('', self.outputStream.getvalue())
+        self.assertEqual('', self.errorStream.getvalue())
+
+
+    def test_showDiffResultNoChanges(self):
+        """
+        Return 0 when both sources have same content.
+        """
+        runner = self.makeRunner()
+        runner.prepareDiff()
+        content = """
+************* Module foo
+W9001:  1,0: Missing copyright header
+        """.strip()
+        runner._readDiffFile = lambda: content
+        runner.streamForDiff.write(content)
+
+        result = runner.showDiffResults()
+
+        self.assertEqual(0, result)
+        self.assertEqual('', self.outputStream.getvalue())
+        self.assertEqual('', self.errorStream.getvalue())
+
+
+    def test_showDiffResultChanges(self):
+        """
+        Return 0 when both sources have same content.
+        """
+        runner = self.makeRunner()
+        runner.prepareDiff()
+        previous = """
+************* Module foo
+W9001:  1,0: Missing copyright header
+        """.strip()
+        new = """
+************* Module foo
+W9001:  1,0: Missing copyright header
+W9001:  2,0: Missing copyright header
+        """.strip()
+        expectedOutput = """
+************* Module foo
+W9001:  2,0: Missing copyright header
+""".lstrip()
+        runner._readDiffFile = lambda: previous
+        runner.streamForDiff.write(new)
+
+        result = runner.showDiffResults()
+
+        self.assertEqual(1, result)
+        self.assertEqual(expectedOutput, self.outputStream.getvalue())
+        self.assertEqual('', self.errorStream.getvalue())
 
 
     def test_formatWarnings(self):
