@@ -9,7 +9,7 @@ from setuptools import find_packages, setup
 setup(
     name='TwistedChecker',
     description='A Twisted coding standard compliance checker.',
-    version='0.2.1',
+    version='0.2.0',
     author='Twisted Matrix Laboratories',
     author_email='twisted-python@twistedmatrix.com',
     url='https://github.com/twisted/twistedchecker',
