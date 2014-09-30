@@ -246,7 +246,7 @@ class Runner():
                 # then transform it to a path.
                 try:
                     filepath = file_from_modpath(fileOrMod.split('.'))
-                except (ImportError, SyntaxError) as ex:
+                except (ImportError, SyntaxError):
                     # Could not load this module.
                     continue
                 if not os.path.exists(filepath):

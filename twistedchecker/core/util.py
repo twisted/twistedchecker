@@ -20,4 +20,4 @@ def moduleNeedsTests(modulename):
 
 
 
-__all__ = ["isTestModule", "isSpecialModule"]
+__all__ = ["isTestModule", "moduleNeedsTests"]
