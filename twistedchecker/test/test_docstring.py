@@ -1,10 +1,7 @@
-import sys
-import os
-import StringIO
-
 from twisted.trial import unittest
 
 from twistedchecker.checkers.docstring import DocstringChecker
+
 
 
 class DocstringTestCase(unittest.TestCase):

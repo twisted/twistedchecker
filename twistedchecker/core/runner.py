@@ -35,7 +35,7 @@ class Runner():
                                  "W0311",
                                  "W0312")
     diffOption = None
-    errorResultNotExist = "Error: Result file '%s' does not exist.\n"
+    errorResultRead = "Error: Failed to read result file '%s'.\n"
     prefixModuleName = "************* Module "
     regexLineStart = "^[WCEFR]\d{4}\:"
 
@@ -74,8 +74,7 @@ class Runner():
         """
         return (
             ("diff",
-             {"action": "callback", "callback": self._optionCallbackDiff,
-              "type": "string",
+             {"type": "string",
               "metavar": "<result-file>",
               "help": "Set comparing result file to automatically "
                       "generate a diff."}
@@ -91,23 +90,6 @@ class Runner():
               'help': "Check '@type' and '@rtype' in epydoc."}
             ),
           )
-
-
-    def _optionCallbackDiff(self, obj, opt, val, parser):
-        """
-        Be called when the option "--diff" is used.
-
-        @param obj: option object
-        @param opt: option name
-        @param val: option value
-        @param parser: option parser
-        """
-        # check if given value is a existing file
-        if not os.path.exists(val):
-            sys.stderr.write(self.errorResultNotExist % val)
-            sys.exit()
-
-        self.diffOption = val
 
 
     def setOutput(self, stream):
@@ -264,7 +246,7 @@ class Runner():
                 # then transform it to a path.
                 try:
                     filepath = file_from_modpath(fileOrMod.split('.'))
-                except (ImportError, SyntaxError) as ex:
+                except (ImportError, SyntaxError):
                     # Could not load this module.
                     continue
                 if not os.path.exists(filepath):
@@ -313,19 +295,26 @@ class Runner():
         # Check for 'strict-epydoc' option.
         if self.allowOptions and not self.linter.option_value("strict-epydoc"):
             map(self.linter.disable, ["W9203", "W9205"])
-        # check for diff option.
-        if self.diffOption:
-            self.prepareDiff()
+
         # insert current working directory to the python path to have a correct
         # behaviour.
         sys.path.insert(0, os.getcwd())
         # set exceptions for name checking.
         self.setNameExceptions(args)
+
+        # check for diff option.
+        self.diffOption = self.linter.option_value("diff")
+        if self.diffOption:
+            self.prepareDiff()
+
         # check codes.
         self.linter.check(args)
+
         # show diff of warnings if diff option on.
         if self.diffOption:
-            self.showDiffResults()
+            diffCount = self.showDiffResults()
+            exitCode = 1 if diffCount else 0
+            sys.exit(exitCode)
 
 
     def prepareDiff(self):
@@ -340,18 +329,33 @@ class Runner():
         """
         Show results when diff option on.
         """
-        oldResult = open(self.diffOption).read()
-        oldWarnings = self.computeWarnings(oldResult)
+        try:
+            oldWarnings = self.parseWarnings(self._readDiffFile())
+        except:
+            sys.stderr.write(self.errorResultRead % self.diffOption)
+            return 1
 
-        newResult = self.streamForDiff.getvalue()
-        newWarnings = self.computeWarnings(newResult)
+        newWarnings = self.parseWarnings(self.streamForDiff.getvalue())
 
-        diffWarnings = self.generateDiff(oldResult, newResult)
-        diffResult = self.formatWarnings(diffWarnings)
-        self.outputStream.write(diffResult + "\n")
-        exitCode = 1 if diffWarnings else 0
-        sys.exit(exitCode)
+        diffWarnings = self.generateDiff(oldWarnings, newWarnings)
 
+        if diffWarnings:
+            diffResult = self.formatWarnings(diffWarnings)
+            self.outputStream.write(diffResult + "\n")
+            return len(diffWarnings)
+        else:
+            return 0
+
+    def _readDiffFile(self):
+        """
+        Read content of diff file.
+
+        This is here to help with testing.
+
+        @return: File content.
+        @rtype: c{str}
+        """
+        return open(self.diffOption).read()
 
     def generateDiff(self, oldWarnings, newWarnings):
         """

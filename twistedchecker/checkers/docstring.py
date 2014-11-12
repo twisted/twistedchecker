@@ -1,16 +1,13 @@
-import sys
 import re
 
-from logilab import astng
-from logilab.common.ureports import Table
-from logilab.astng import are_exclusive
 from logilab.astng import node_classes
 from logilab.astng import scoped_nodes
 
 from pylint.interfaces import IASTNGChecker
-from pylint.reporters import diff_string
 from pylint.checkers.base import DocStringChecker as PylintDocStringChecker
 from pylint.checkers.base import NO_REQUIRED_DOC_RGX
+
+
 
 class DocstringChecker(PylintDocStringChecker):
     """

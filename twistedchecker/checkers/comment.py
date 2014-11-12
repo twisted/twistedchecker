@@ -1,14 +1,8 @@
-import sys
-import re
-
-from logilab import astng
-from logilab.common.ureports import Table
-from logilab.astng import are_exclusive
-
 from pylint.interfaces import IASTNGChecker
-from pylint.reporters import diff_string
-from pylint.checkers import BaseChecker, EmptyReport
+from pylint.checkers import BaseChecker
 from pylint.checkers.format import STRING_RGX, COMMENT_RGX
+
+
 
 class CommentChecker(BaseChecker):
     """
