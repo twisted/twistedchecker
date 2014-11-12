@@ -13,3 +13,12 @@ script:
 
 # Dump trial log on failure.
 after_failure: "cat _trial_temp/test.log"
+
+# Do an automatic PyPi release when a tag is created.
+# http://docs.travis-ci.com/user/deployment/pypi/
+deploy:
+  provider: pypi
+  user: twistedchecker-robot
+  password: ENCRYPTED_PASS_HERE
+  on:
+    tags: true
