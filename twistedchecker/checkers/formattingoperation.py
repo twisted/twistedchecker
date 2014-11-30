@@ -27,10 +27,16 @@ class FormattingOperationChecker(StringFormatChecker):
         if node.op != "%":
             return
         pattern = node.left.as_string()
+        # If the pattern's not a constant string, we don't know whether a
+        # dictionary or a tuple makes sense, so don't try to guess.
+        if not pattern.startswith("'") or pattern.startswith('"'):
+            return
+        # If the pattern has things like %(foo)s, then the values can't be a
+        # tuple, so don't check for it.
+        if "%(" in pattern:
+            return
         valueString = node.right.as_string()
-        # If the pattern has things like %(foo)s,
-        # then the values can't be a tuple, so don't check for it.
-        if "%(" not in pattern:
-            tupleUsed = valueString.startswith('(')
-            if not tupleUsed:
-                self.add_message('W9501', node=node)
+        tupleUsed = valueString.startswith('(')
+        if tupleUsed:
+            return
+        self.add_message('W9501', node=node)
