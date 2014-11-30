@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# -*- test-case-name: twistedchecker -*-
 # Copyright (c) Twisted Matrix Laboratories.
 # See LICENSE for details.
 
