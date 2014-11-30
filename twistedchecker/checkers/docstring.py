@@ -1,3 +1,11 @@
+# -*- test-case-name: twistedchecker.test.test_functionaltests -*-
+# Copyright (c) Twisted Matrix Laboratories.
+# See LICENSE for details.
+
+"""
+Checks for docstrings.
+"""
+
 import re
 
 from logilab.astng import node_classes
@@ -6,6 +14,24 @@ from logilab.astng import scoped_nodes
 from pylint.interfaces import IASTNGChecker
 from pylint.checkers.base import DocStringChecker as PylintDocStringChecker
 from pylint.checkers.base import NO_REQUIRED_DOC_RGX
+
+
+def _isInner(node):
+    """
+    Determine whether the given node is, at any point in its syntactic
+    parentage, defined within a function.
+
+    @param node: The node to inspect.
+    @type node: L{logilab.astng.bases.NodeNG}
+
+    @return: a boolean indicating if the given node is defined as an inner
+        class or inner function.
+    """
+    while node:
+        node = node.parent
+        if isinstance(node, scoped_nodes.Function):
+            return True
+    return False
 
 
 
@@ -89,7 +115,7 @@ class DocstringChecker(PylintDocStringChecker):
         if docstring is None:
             # The node does not have a docstring.
             # But do not check things inside a function or method.
-            if type(node.parent) != scoped_nodes.Function:
+            if not _isInner(node):
                 self.add_message('W9208', node=node)
             return
         elif not docstring.strip():
