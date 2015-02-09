@@ -20,3 +20,5 @@ a = 1 + 2  #  A comment begins with two whitespace.
 # '\r\n\t' a comment can start with a new lines characters.
 
 var = 1 + 2  # \r\n same for inline comments.
+
+# `literal` is fine at the start.
