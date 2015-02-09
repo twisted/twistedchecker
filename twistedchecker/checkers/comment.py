@@ -1,6 +1,6 @@
 from pylint.interfaces import IASTNGChecker
 from pylint.checkers import BaseChecker
-from pylint.checkers.format import STRING_RGX, COMMENT_RGX
+from pylint.checkers.format import COMMENT_RGX
 
 
 
@@ -33,7 +33,7 @@ class CommentChecker(BaseChecker):
         isFirstLineOfComment = True
         lines = node.file_stream.readlines()
         for linenum, line in enumerate(lines):
-            matchedComment = COMMENT_RGX.search(STRING_RGX.sub('', line))
+            matchedComment = COMMENT_RGX.search(line)
             if matchedComment:
                 if isFirstLineOfComment:
                     # Check for W9401
