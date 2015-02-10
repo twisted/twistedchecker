@@ -2,10 +2,6 @@
 
 class foo:
 
-    def testMethod(self):
-        pass
-
-
     def test(self):
         pass
 
@@ -25,6 +21,5 @@ class foo:
     def _FOOBAR(self):
         pass
 
-
-    def test_SOME_THING(self):
+    def _normalMethod(self):
         pass
