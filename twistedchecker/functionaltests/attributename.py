@@ -27,3 +27,5 @@ class FooClass:
         self.foobar = None
         self.__foobar__ = None
         self.__fooBar__ = None
+        self.__dict__ = {}
+        self.__version__ = {}
