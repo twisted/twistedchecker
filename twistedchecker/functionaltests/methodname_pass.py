@@ -21,5 +21,10 @@ class foo:
     def _FOOBAR(self):
         pass
 
-    def _normalMethod(self):
+
+    def _normalPrivateMethod(self):
+        pass
+
+
+    def __hiddenMethod(self):
         pass

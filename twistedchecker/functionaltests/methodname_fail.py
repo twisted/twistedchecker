@@ -45,6 +45,14 @@ class foo:
 
     def someMethod_name(self):
         """
-        Method names should be in camel case.
+        Method names should be fully in camel case.
         """
+        pass
+
+
+    def _privateMethods_not_all_camel(self):
+        pass
+
+
+    def __hiddenMethods_not_all_camel(self):
         pass
