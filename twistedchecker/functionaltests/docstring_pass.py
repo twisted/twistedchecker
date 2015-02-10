@@ -58,6 +58,21 @@ class foo:
             pass
 
 
+    @property
+    def someProperty(self):
+        """
+        Getter properties don't need return docstring.
+        """
+        return True
+
+
+    @someProperty.setter
+    def someProperty(self, value):
+        """
+        Setter properties don't need to document their value.
+        """
+
+
     def f(self):
         """
         A method returns nothing.
