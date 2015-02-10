@@ -398,9 +398,11 @@ C0111:  10,0: Missing docstring
         workingDir = os.getcwd()
         os.chdir(os.path.dirname(pathTestFiles))
         moduleName = os.path.basename(pathTestFiles)
-        runner.run([moduleName])
-        os.chdir(workingDir)
 
+        exitResult = self.assertRaises(SystemExit, runner.run, [moduleName])
+
+        os.chdir(workingDir)
         predictResult = "11:C0103\n14:C0103\n15:C0103\n"
         outputResult = self.outputStream.getvalue()
         self.assertEqual(outputResult, predictResult)
+        self.assertEqual(16, exitResult.code)

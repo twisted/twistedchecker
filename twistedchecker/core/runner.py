@@ -316,6 +316,8 @@ class Runner():
             exitCode = 1 if diffCount else 0
             sys.exit(exitCode)
 
+        sys.exit(self.linter.msg_status)
+
 
     def prepareDiff(self):
         """
