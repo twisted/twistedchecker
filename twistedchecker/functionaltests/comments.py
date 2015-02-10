@@ -22,6 +22,8 @@ a = 1 + 2  #  A coment begins with two whitespace.
 1. Comments should begin with one whitespace
 2. The first letter of comment should be capitalized
 
+Line with an epydoc C{#} markup.
+
 This is particularly triggered with url fragments
 @see U{https://example.com/test#fragment}
 """
@@ -30,6 +32,8 @@ This is particularly triggered with url fragments
 class SomeClass(object):
     """
     #twisted checker things this is a comment.
+
+    Line with an epydoc C{#} markup.
 
     Also triggered with url fragments U{https://example.com/test#fragment}
     """
