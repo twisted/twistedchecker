@@ -72,6 +72,20 @@ class foo:
         Setter properties don't need to document their value.
         """
 
+    @property
+    def otherProperty(self):
+        """
+        Getter properties used the test that setter don't need a docstring.
+        """
+        return True
+
+
+    @otherProperty.setter
+    def otherProperty(self, value):
+        # Setter don't need a docstring as most of the time is a duplicate of
+        # the getter docstring.
+        pass
+
 
     def f(self):
         """

@@ -36,6 +36,40 @@ def _isInner(node):
 
 
 
+def _getDecoratorsName(node):
+    """
+    Return a list with names of decorators attached to this node.
+
+    @param node: current node of pylint
+    """
+    try:
+        return node.decoratornames()
+    except InferenceError:
+        # For setter properties pylint fails so we use a custom code.
+        decorators = []
+        for decorator in node.decorators.nodes:
+            decorators.append(decorator.as_string())
+        return decorators
+
+
+def _isSetter(node_type, node):
+    """
+    Determine whether the given node is a setter property.
+
+    @param node_type: The type of the node to inspect.
+    @param node: The L{logilab.astng.bases.NodeNG} to inspect.
+
+    @return: a boolean indicating if the given node is a setter.
+    """
+    if node_type not in ['function', 'method']:
+        return False
+
+    for name in _getDecoratorsName(node):
+        if '.setter' in name:
+            return True
+    return False
+
+
 class DocstringChecker(PylintDocStringChecker):
     """
     A checker for checking docstrings.
@@ -115,9 +149,16 @@ class DocstringChecker(PylintDocStringChecker):
         docstring = node.doc
         if docstring is None:
             # The node does not have a docstring.
-            # But do not check things inside a function or method.
-            if not _isInner(node):
-                self.add_message('W9208', node=node)
+            if _isInner(node):
+                # Do not check things inside a function or method.
+                return
+
+            if _isSetter(node_type, node):
+                # Setters don't need a docstring as they are documented in
+                # the getter.
+                return
+
+            self.add_message('W9208', node=node)
             return
         elif not docstring.strip():
             # Empty docstring.
@@ -208,17 +249,14 @@ class DocstringChecker(PylintDocStringChecker):
         argnames = (node.argnames()[1:] if node_type == 'method'
                     else node.argnames())
 
-        decorators = self._getDecoratorsName(node)
-
-        for name in decorators:
-            if '.setter' in name:
-                # For setter methods we remove the `value` argument as it
-                # does not need to be documented.
-                try:
-                    argnames.remove('value')
-                except ValueError:
-                    # No `value` in arguments.
-                    pass
+        if _isSetter(node_type, node):
+           # For setter methods we remove the `value` argument as it
+            # does not need to be documented.
+            try:
+                argnames.remove('value')
+            except ValueError:
+                # No `value` in arguments.
+                pass
 
         for argname in argnames:
             if not re.search(r"@param\s+%s\s*:" % argname, node.doc):
@@ -228,20 +266,19 @@ class DocstringChecker(PylintDocStringChecker):
                 self.add_message('W9203', line=linenoDocstring,
                                  node=node, args=argname)
 
-        self._checkReturnValueEpytext(node, decorators, linenoDocstring)
+        self._checkReturnValueEpytext(node, linenoDocstring)
 
 
-    def _checkReturnValueEpytext(self, node, decorators, linenoDocstring):
+    def _checkReturnValueEpytext(self, node, linenoDocstring):
         """
         Check if return value is documented.
 
         @param node: current node of pylint
-        @param decorators: list with decorators attached to the node.
         @param linenoDocstring: linenumber of docstring
         """
         # Getter properties don't need to document their return value,
         # but then need to have a return value.
-        if '__builtin__.property' in decorators:
+        if '__builtin__.property' in _getDecoratorsName(node):
             if self._hasReturnValue(node):
                 # Getter properties don't need a docstring.
                 return
@@ -252,22 +289,6 @@ class DocstringChecker(PylintDocStringChecker):
                 self.add_message('W9204', line=linenoDocstring, node=node)
             if not re.search(r"@rtype\s*:", node.doc):
                 self.add_message('W9205', line=linenoDocstring, node=node)
-
-
-    def _getDecoratorsName(self, node):
-        """
-        Return a list with names of decorators attached to this node.
-
-        @param node: current node of pylint
-        """
-        try:
-            return node.decoratornames()
-        except InferenceError:
-            # For setter properties pylint fails so we use a custom code.
-            decorators = []
-            for decorator in node.decorators.nodes:
-                decorators.append(decorator.as_string())
-            return decorators
 
 
     def _checkBlankLineBeforeEpytext(self, node_type, node, linenoDocstring):
