@@ -180,8 +180,8 @@ def _runTest(testCase, testFilePath):
     runner.run([moduleName])
 
     # Check the results
-    expectedResult = open(pathResultFile).read()
-    outputResult = outputStream.getvalue()
+    expectedResult = open(pathResultFile).read().strip()
+    outputResult = outputStream.getvalue().strip()
 
     try:
         testCase.assertEqual(expectedResult, outputResult)
