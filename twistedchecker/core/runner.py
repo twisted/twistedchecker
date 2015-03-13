@@ -14,6 +14,8 @@ from logilab.common.modutils import file_from_modpath
 import twistedchecker
 from twistedchecker.reporters.limited import LimitedReporter
 from twistedchecker.core.exceptionfinder import findAllExceptions
+from twistedchecker.checkers import patch_pylint_format
+
 
 class Runner():
     """
@@ -125,6 +127,9 @@ class Runner():
 
         @return: a list of allowed messages
         """
+        # We patch the default pylint format checker.
+        patch_pylint_format.patch()
+
         # add checkers for python 3
         cfgfile = self.linter.cfgfile_parser
         if (cfgfile.has_option("TWISTEDCHECKER", "check-python3") and
