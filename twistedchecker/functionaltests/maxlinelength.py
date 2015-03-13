@@ -7,5 +7,5 @@ print "this line is long long  long  long long long long long ends at column 80"
 
 """"
 Long url form docstrings are ignored.
-See U{http://thisurlisverylongandwillneverfitinto80columnsnomatterwhat.example.com/somegreatcontent.html}
+See U{https://thisurlisverylongandwillneverfitinto80columnsnomatterwhat.example.com/somegreatcontent.html}
 """

@@ -13,7 +13,7 @@ def check_lines(self, lines, i):
     maxChars = self.config.max_line_length
     for line in lines.splitlines():
         if len(line) > maxChars:
-            if 'http://' in line or 'https' in line:
+            if 'http://' in line or 'https://' in line:
                 continue
             self.add_message('C0301', line=i, args=(len(line), maxChars))
         i += 1
