@@ -18,6 +18,11 @@ script:
 # Dump trial log on failure.
 after_failure: "cat _trial_temp/test.log"
 
+# Only run test when committing to master branch.
+branches:
+  only:
+    - master
+
 # Travis is a bit "simple" and will not automatically switch to the
 # deployment directory before running its own deploy code.
 before_deploy:
