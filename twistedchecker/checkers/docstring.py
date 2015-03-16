@@ -215,6 +215,9 @@ class DocstringChecker(PylintDocStringChecker):
                                  node=node, args=argname)
         # Check for return value.
         if self._hasReturnValue(node):
+            if node.name.startswith('test_'):
+                # Ignore return documentation for test methods.
+                return
             if not re.search(r"@return[s]{0,1}\s*:", node.doc):
                 self.add_message('W9204', line=linenoDocstring, node=node)
             if not re.search(r"@rtype\s*:", node.doc):

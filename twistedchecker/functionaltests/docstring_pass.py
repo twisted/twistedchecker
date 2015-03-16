@@ -65,6 +65,13 @@ class foo:
         return
 
 
+    def test_someTest(self):
+        """
+        Test methods in trial should not document their return value.
+        """
+        return 'deferred'
+
+
 
 class Bar(object):
     """
