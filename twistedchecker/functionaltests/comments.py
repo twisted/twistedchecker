@@ -18,7 +18,7 @@ someVariable = 1 + 2  #  A comment begins with two whitespace.
 #
 
 """
-#twisted checker things this is a comment and so
+#twisted checker thinks this is a comment and so
 1. Comments should begin with one whitespace
 2. The first letter of comment should be capitalized
 
