@@ -20,6 +20,7 @@ class FooClass:
         self._fooBar_ = None
         self._fooBar__ = None
         self.__fooBar_ = None
+
         # Good names.
         self.fooBarZar = None
         self._fooBarZar = None
@@ -28,3 +29,5 @@ class FooClass:
         self.__fooBar__ = None
         self.__dict__ = {}
         self.__version__ = {}
+        # In some cases constants are lazy initialized as instance members.
+        self.FOOBARZAR = None
