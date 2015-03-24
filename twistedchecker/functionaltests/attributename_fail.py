@@ -15,5 +15,4 @@ class FooClass:
         """
         self.foo_bar_zar = None
         self.FooBarZar = None
-        self.FOOBARZAR = None
         self.a = None

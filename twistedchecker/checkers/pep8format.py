@@ -278,6 +278,16 @@ def modifiedBlankLines(logical_line, blank_lines, indent_level, line_number,
             # There should only be 1 line or less between docstrings and
             # the next function
             if previous_is_comment:
+                # Previous is a comment so it has one extra indentation.
+                at_same_indent = previous_indent_level - 4 == indent_level
+                if (
+                    at_same_indent and
+                    logical_line.startswith('def ') and
+                    blank_before == 2
+                        ):
+                    # This look like a previous method with a docstring
+                    # and empty body.
+                    return
                 if blank_before > 1:
                     yield 0, (
                         "E305 too many blank lines after docstring "

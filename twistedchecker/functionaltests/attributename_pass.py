@@ -16,3 +16,5 @@ class FooClass:
         self.fooBarZar = None
         self._fooBarZar = None
         self.foobar = None
+        # In some cases constants are lazy initialized as instance members.
+        self.FOOBARZAR = None
