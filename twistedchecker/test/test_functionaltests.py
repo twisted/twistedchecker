@@ -47,7 +47,11 @@ def _partial2(wrapped, *partialArgs, **partialKwargs):
     def wrapper(*args, **kwargs):
         args = args + partialArgs[len(args):]
         kwargs.update(partialKwargs)
-        return wrapped(*args, **kwargs)
+        try:
+            wrapped(*args, **kwargs)
+        except SystemExit:
+            # Each run of the functional tests will exit at the end.
+            pass
     return update_wrapper(wrapper, wrapped)
 
 
@@ -180,8 +184,8 @@ def _runTest(testCase, testFilePath):
     runner.run([moduleName])
 
     # Check the results
-    expectedResult = open(pathResultFile).read()
-    outputResult = outputStream.getvalue()
+    expectedResult = open(pathResultFile).read().strip()
+    outputResult = outputStream.getvalue().strip()
 
     try:
         testCase.assertEqual(expectedResult, outputResult)
