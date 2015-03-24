@@ -162,6 +162,36 @@ class RunnerTestCase(unittest.TestCase):
         self.assertEqual(0, exitResult.code)
 
 
+    def test_runNoError(self):
+        """
+        When checked file is clean and has no errors it exit with code 0
+        without any other output.
+        """
+        runner = Runner()
+        runner.setOutput(self.outputStream)
+
+        # The twistedchecker/checkers/__init__.py is assumed to be clean.
+        exitResult = self.assertRaises(SystemExit, runner.run, [
+            "twistedchecker.checkers.__init__"])
+
+        self.assertEqual('', self.outputStream.getvalue())
+        self.assertEqual(0, exitResult.code)
+
+
+    def test_runWithErrors(self):
+        """
+        When checked file is not clean it will exit with non zero exit code.
+        """
+        runner = Runner()
+        runner.setOutput(self.outputStream)
+
+        # The comments functional test is assumed to have at lest one error.
+        exitResult = self.assertRaises(SystemExit, runner.run, [
+            "twistedchecker.functionaltests.comments"])
+
+        self.assertNotEqual(0, exitResult.code)
+
+
     def test_parseWarnings(self):
         """
         Test for twistedchecker.core.runner.Runner.parseWarnings.
@@ -398,9 +428,11 @@ C0111:  10,0: Missing docstring
         workingDir = os.getcwd()
         os.chdir(os.path.dirname(pathTestFiles))
         moduleName = os.path.basename(pathTestFiles)
-        runner.run([moduleName])
-        os.chdir(workingDir)
 
+        exitResult = self.assertRaises(SystemExit, runner.run, [moduleName])
+
+        os.chdir(workingDir)
         predictResult = "11:C0103\n14:C0103\n15:C0103\n"
         outputResult = self.outputStream.getvalue()
         self.assertEqual(outputResult, predictResult)
+        self.assertEqual(16, exitResult.code)

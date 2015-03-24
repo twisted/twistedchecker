@@ -7,6 +7,12 @@ class a:
         pass
 
 
+    def methodWithDocstringWithoutBody(self):
+        """
+        A valid method without a body.
+        """
+
+
     def b(self):
         pass
 

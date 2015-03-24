@@ -66,5 +66,9 @@ class HeaderChecker(BaseChecker):
         @param text: codes of the module
         @param node: node of the module
         """
+        if '.test.' in node.name or '.test_' in node.name:
+            # Test packages or test modules don't need references to tests.
+            return
+
         if not re.search(self.patternTestReference, text):
             self.add_message('W9002', node=node)
