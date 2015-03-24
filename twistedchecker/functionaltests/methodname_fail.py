@@ -22,13 +22,6 @@ class foo:
         pass
 
 
-    def test_SOME_THING(self):
-        """
-        Test method should not use underscores.
-        """
-        pass
-
-
     def testLegacyMethod(self):
         """
         Legacy test method names should no longer be accepted.
