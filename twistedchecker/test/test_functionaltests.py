@@ -47,11 +47,7 @@ def _partial2(wrapped, *partialArgs, **partialKwargs):
     def wrapper(*args, **kwargs):
         args = args + partialArgs[len(args):]
         kwargs.update(partialKwargs)
-        try:
-            wrapped(*args, **kwargs)
-        except SystemExit:
-            # Each run of the functional tests will exit at the end.
-            pass
+        wrapped(*args, **kwargs)
     return update_wrapper(wrapper, wrapped)
 
 
@@ -181,7 +177,11 @@ def _runTest(testCase, testFilePath):
 
     _enablePEP8Checker(runner.linter)
 
-    runner.run([moduleName])
+    exitCode = None
+    try:
+        runner.run([moduleName])
+    except SystemExit as error:
+        exitCode = error.code
 
     # Check the results
     expectedResult = open(pathResultFile).read().strip()
@@ -191,6 +191,11 @@ def _runTest(testCase, testFilePath):
         testCase.assertEqual(expectedResult, outputResult)
     except unittest.FailTest:
         testCase.fail(_formatResults(moduleName, expectedResult, outputResult))
+
+    if not expectedResult:
+        testCase.assertEqual(0, exitCode)
+    else:
+        testCase.assertNotEqual(0, exitCode)
 
 
 
