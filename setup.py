@@ -42,7 +42,7 @@ setup(
     ],
     extras_require = {
         'dev':  [
-            'twisted==13.2.0',
+            'twisted>=15.0.0',
             'pyflakes==0.8.1',
             ],
     },
