@@ -16,7 +16,6 @@ class FooClass:
         # Bad names.
         self.foo_bar_zar = None
         self.FooBarZar = None
-        self.FOOBARZAR = None
         self.a = None
         self._fooBar_ = None
         self._fooBar__ = None

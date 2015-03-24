@@ -38,7 +38,9 @@ def foo():
 
 
     def bar():
-        pass
+        """
+        This is defined to far from previous block.
+        """
     # Too many blank lines after this line.
 
 

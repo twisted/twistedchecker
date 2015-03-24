@@ -104,6 +104,21 @@ class foo:
         pass
 
 
+    @property
+    def goodGetterBadSetter(self):
+        """
+        Getter properties used to check for invalid setter docstring.
+        """
+        return True
+
+
+    @goodGetterBadSetter.setter
+    def goodGetterBadSetter(self, val):
+        """
+        Setter properties docstring exception is only for arguments
+        named `value`.
+        """
+
 
 def moduleLevelFunctionWithoutDocstring():
     pass
