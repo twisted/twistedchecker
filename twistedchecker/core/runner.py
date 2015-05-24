@@ -427,3 +427,11 @@ class Runner():
             lines.extend(warnings[modulename])
 
         return "\n".join(lines)
+
+
+def main():
+    """
+    An entry point used in the setup.py to create a runnable script.
+    """
+    runner = Runner()
+    runner.run(sys.argv[1:])
