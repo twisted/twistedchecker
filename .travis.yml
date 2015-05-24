@@ -11,5 +11,9 @@ script:
   - trial twistedchecker
   - python ./check_pyflakes.py ./twistedchecker setup.py
 
+  # Ensure the script was installed on $PATH
+  - python setup.py develop
+  - twistedchecker -h
+
 # Dump trial log on failure.
 after_failure: "cat _trial_temp/test.log"
