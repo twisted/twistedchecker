@@ -30,7 +30,8 @@ class Runner():
                 "pep8format.PEP8Checker",
                 "docstring.DocstringChecker",
                 "formattingoperation.FormattingOperationChecker",
-                "comment.CommentChecker")
+                "comment.CommentChecker",
+                "testclassname.TestClassNameChecker")
     allowedMessagesFromPylint = ("F0001",
                                  "C0103",
                                  "C0301",
