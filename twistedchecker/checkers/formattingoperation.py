@@ -9,7 +9,7 @@ class FormattingOperationChecker(StringFormatChecker):
     we should always use a tuple for non-mapping values.
     """
     msgs = {
-     'W9501': ('String formatting operations should always use a tuple'
+     'W9501': ('String formatting operations should always use a tuple '
                'for non-mapping values',
                'Checking string formatting operations.'),
     }

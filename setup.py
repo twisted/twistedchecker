@@ -40,5 +40,11 @@ setup(
         "logilab-common == 0.62.0",
         "pep8 == 1.5.7"
     ],
+    extras_require = {
+        'dev':  [
+            'twisted>=15.0.0',
+            'pyflakes==0.8.1',
+            ],
+    },
     long_description=file('README.rst').read()
 )

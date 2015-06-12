@@ -3,9 +3,8 @@ language: python
 python:
   - "2.7"
 
-# Twisted is required for trial.
 install:
-  - pip install --upgrade twisted==13.2.0 pyflakes==0.8.1 .
+  - pip install --upgrade -e '.[dev]'
 
 script:
   - trial twistedchecker
