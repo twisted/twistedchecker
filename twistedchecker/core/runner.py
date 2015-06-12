@@ -26,7 +26,7 @@ class Runner():
     allowOptions = None
     # Customized checkers.
     checkers = ("header.HeaderChecker",
-                "modulename.ModuleNameChecker",
+                "names.TwistedNamesChecker",
                 "pep8format.PEP8Checker",
                 "docstring.DocstringChecker",
                 "formattingoperation.FormattingOperationChecker",
