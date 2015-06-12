@@ -63,7 +63,7 @@ function-rgx=((([a-z])|([a-z]+_[a-z]))[a-zA-Z0-9]+)$|(__[a-z]+__)$|(\_.+)$|(test
 # Attribute names should be in mixed case, with the first letter lower case,
 # each word separated by having its first letter capitalized just like method names.
 # And all private names should begin with an underscore.
-attr-rgx=(((([a-z_])|([a-z]+_[a-z]))[a-zA-Z0-9]+)|(([A-Z_][A-Z0-9_]*)))$
+attr-rgx=(((([a-z_])|([a-z]+_[a-z])|(__))[a-zA-Z0-9]+|(__))|(([A-Z_][A-Z0-9_]*)))$
 
 # Classes are to be named in mixed case, with the first letter capitalized,
 # each word separated by having its first letter capitalized.
