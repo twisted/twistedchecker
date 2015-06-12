@@ -20,14 +20,19 @@ class FooClass:
         self._fooBar_ = None
         self._fooBar__ = None
         self.__fooBar_ = None
+        self.___longStart__ = None
+        self.__longEnd___ = None
 
         # Good names.
         self.fooBarZar = None
         self._fooBarZar = None
         self.foobar = None
+        # Any __*__ name is accepted.
         self.__foobar__ = None
         self.__fooBar__ = None
+        self.__foo_bar__ = None
         self.__dict__ = {}
         self.__version__ = {}
+        self.__a__ = {}
         # In some cases constants are lazy initialized as instance members.
         self.FOOBARZAR = None
