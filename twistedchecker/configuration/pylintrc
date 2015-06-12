@@ -46,7 +46,7 @@ module-rgx=(([a-z_][a-z0-9_]*))$
 
 # Default checker will accept all method names, but they are validated in a
 # custom checker.
-method-rgx=.*
+method-rgx=
 
 # Function names should be same as method names.
 
