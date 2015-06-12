@@ -13,21 +13,8 @@ class FooClass:
         """
         A init of this class
         """
-        # Bad names.
-        self.foo_bar_zar = None
-        self.FooBarZar = None
-        self.a = None
-        self._fooBar_ = None
-        self._fooBar__ = None
-        self.__fooBar_ = None
-
-        # Good names.
         self.fooBarZar = None
         self._fooBarZar = None
         self.foobar = None
-        self.__foobar__ = None
-        self.__fooBar__ = None
-        self.__dict__ = {}
-        self.__version__ = {}
         # In some cases constants are lazy initialized as instance members.
         self.FOOBARZAR = None
