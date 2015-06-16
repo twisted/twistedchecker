@@ -17,9 +17,11 @@ setup(
     package_data={
         "twistedchecker": ["configuration/pylintrc"]
     },
-    scripts=[
-        'bin/twistedchecker'
-    ],
+    entry_points={
+      "console_scripts": [
+          "twistedchecker = twistedchecker.core.runner:main"
+      ]
+    },
     license='MIT',
     classifiers=[
         "Development Status :: 3 - Alpha",
