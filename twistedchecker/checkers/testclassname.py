@@ -1,3 +1,5 @@
+import operator
+
 from pylint.interfaces import IASTNGChecker
 from pylint.checkers import BaseChecker
 from logilab.astng.scoped_nodes import Class
@@ -22,12 +24,19 @@ class TestClassNameChecker(BaseChecker):
 
     def visit_module(self, node):
         """
-        An interface will be called when visiting a module.
+        Called when the AST checker visits a module.
 
         @param node: node of current module
         """
-        if isTestModule(node.name):
-            self._checkTestClassNames(node)
+        if not isTestModule(node.name):
+            return
+
+        objects = node.values()
+        objects.sort(key=operator.attrgetter('lineno'))
+        for obj in objects:
+            if (isinstance(obj, Class) and self._isTestClass(obj) and
+                    not obj.name.endswith('Tests')):
+                self.add_message('W9701', line=obj.lineno)
 
 
     def _isTestClass(self, klass):
@@ -36,34 +45,20 @@ class TestClassNameChecker(BaseChecker):
         test class is any class that contains one or more test_* or
         test* methods and inherits from TestCase.
 
-        @param klass: A L{logilab.astng.scoped_nodes.Class} representing
-            a class within the current node.
+        @param klass: Class to be checked for whether it is a test class.
         @type klass: L{logilab.astng.scoped_nodes.Class}
 
-        @return: A L{bool} representing whether the given class is a test
-            class or not.
+        @return: C{True} if the given class is a test class, C{False}
+            otherwise.
         @rtype: L{bool}
         """
         ancestors = [ancestor.name for ancestor in klass.ancestors()]
         methods = [method.name for method in klass.mymethods()]
 
-        if 'TestCase' in ancestors:
-            for method in methods:
-                if method.startswith('test'):
-                    return True
+        if 'TestCase' not in ancestors:
+            return False
+
+        for method in methods:
+            if method.startswith('test'):
+                return True
         return False
-
-
-    def _checkTestClassNames(self, node):
-        """
-        Check whether test classes are named correctly. A test
-        class name should end with Tests (for instance, FooTests).
-
-        @param node: node of current module
-        """
-        objects = node.values()
-        objects.sort(key=lambda obj: obj.lineno)
-        for obj in objects:
-            if isinstance(obj, Class):
-                if self._isTestClass(obj) and not obj.name.endswith('Tests'):
-                    self.add_message('W9701', line=obj.lineno)
