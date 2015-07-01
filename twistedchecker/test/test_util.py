@@ -15,6 +15,7 @@ class UtilTestCase(unittest.TestCase):
         """
         self.assertTrue(isTestModule("twisted.test.test_dict"))
         self.assertTrue(isTestModule("twisted.python.test.test_util"))
+        self.assertFalse(isTestModule("twisted.test.iosim"))
         self.assertFalse(isTestModule("twisted.python.hook"))
 
 
