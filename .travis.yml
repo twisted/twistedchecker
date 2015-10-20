@@ -17,3 +17,16 @@ script:
 
 # Dump trial log on failure.
 after_failure: "cat _trial_temp/test.log"
+
+# Do an automatic PyPi release when a tag is created.
+# http://docs.travis-ci.com/user/deployment/pypi/
+deploy:
+  provider: pypi
+  user: twistedchecker-robot
+  password:
+    secure: ENCRYPTED-VALUE HERE
+  on:
+    tags: true
+    # All branches is still required.
+    # https://github.com/travis-ci/travis-ci/issues/1675
+    all_branches: true
