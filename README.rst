@@ -15,6 +15,9 @@ Development
 .. image:: https://travis-ci.org/twisted/twistedchecker.svg?branch=master
     :target: https://travis-ci.org/twisted/twistedchecker
 
+.. image:: https://badge.fury.io/py/TwistedChecker.svg
+    :target: https://badge.fury.io/py/TwistedChecker
+
 Get a development environment::
 
     virtualenv build
