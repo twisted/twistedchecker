@@ -1,12 +1,73 @@
+# -*- test-case-name: twistedchecker.test.test_functionaltests -*-
+# Copyright (c) Twisted Matrix Laboratories.
+# See LICENSE for details.
+
+"""
+Checks for docstrings.
+"""
+
 import re
 
 from logilab.astng import node_classes
 from logilab.astng import scoped_nodes
+from logilab.astng.exceptions import InferenceError
 
 from pylint.interfaces import IASTNGChecker
 from pylint.checkers.base import DocStringChecker as PylintDocStringChecker
 from pylint.checkers.base import NO_REQUIRED_DOC_RGX
 
+
+def _isInner(node):
+    """
+    Determine whether the given node is, at any point in its syntactic
+    parentage, defined within a function.
+
+    @param node: The node to inspect.
+    @type node: L{logilab.astng.bases.NodeNG}
+
+    @return: a boolean indicating if the given node is defined as an inner
+        class or inner function.
+    """
+    while node:
+        node = node.parent
+        if isinstance(node, scoped_nodes.Function):
+            return True
+    return False
+
+
+
+def _getDecoratorsName(node):
+    """
+    Return a list with names of decorators attached to this node.
+
+    @param node: current node of pylint
+    """
+    try:
+        return node.decoratornames()
+    except InferenceError:
+        # For setter properties pylint fails so we use a custom code.
+        decorators = []
+        for decorator in node.decorators.nodes:
+            decorators.append(decorator.as_string())
+        return decorators
+
+
+def _isSetter(node_type, node):
+    """
+    Determine whether the given node is a setter property.
+
+    @param node_type: The type of the node to inspect.
+    @param node: The L{logilab.astng.bases.NodeNG} to inspect.
+
+    @return: a boolean indicating if the given node is a setter.
+    """
+    if node_type not in ['function', 'method']:
+        return False
+
+    for name in _getDecoratorsName(node):
+        if '.setter' in name:
+            return True
+    return False
 
 
 class DocstringChecker(PylintDocStringChecker):
@@ -88,9 +149,16 @@ class DocstringChecker(PylintDocStringChecker):
         docstring = node.doc
         if docstring is None:
             # The node does not have a docstring.
-            # But do not check things inside a function or method.
-            if type(node.parent) != scoped_nodes.Function:
-                self.add_message('W9208', node=node)
+            if _isInner(node):
+                # Do not check things inside a function or method.
+                return
+
+            if _isSetter(node_type, node):
+                # Setters don't need a docstring as they are documented in
+                # the getter.
+                return
+
+            self.add_message('W9208', node=node)
             return
         elif not docstring.strip():
             # Empty docstring.
@@ -180,6 +248,16 @@ class DocstringChecker(PylintDocStringChecker):
         # The first argument usually named 'self'.
         argnames = (node.argnames()[1:] if node_type == 'method'
                     else node.argnames())
+
+        if _isSetter(node_type, node):
+           # For setter methods we remove the `value` argument as it
+            # does not need to be documented.
+            try:
+                argnames.remove('value')
+            except ValueError:
+                # No `value` in arguments.
+                pass
+
         for argname in argnames:
             if not re.search(r"@param\s+%s\s*:" % argname, node.doc):
                 self.add_message('W9202', line=linenoDocstring,
@@ -187,8 +265,29 @@ class DocstringChecker(PylintDocStringChecker):
             if not re.search(r"@type\s+%s\s*:" % argname, node.doc):
                 self.add_message('W9203', line=linenoDocstring,
                                  node=node, args=argname)
+
+        self._checkReturnValueEpytext(node, linenoDocstring)
+
+
+    def _checkReturnValueEpytext(self, node, linenoDocstring):
+        """
+        Check if return value is documented.
+
+        @param node: current node of pylint
+        @param linenoDocstring: linenumber of docstring
+        """
+        # Getter properties don't need to document their return value,
+        # but then need to have a return value.
+        if '__builtin__.property' in _getDecoratorsName(node):
+            if self._hasReturnValue(node):
+                # Getter properties don't need a docstring.
+                return
+
         # Check for return value.
         if self._hasReturnValue(node):
+            if node.name.startswith('test_'):
+                # Ignore return documentation for test methods.
+                return
             if not re.search(r"@return[s]{0,1}\s*:", node.doc):
                 self.add_message('W9204', line=linenoDocstring, node=node)
             if not re.search(r"@rtype\s*:", node.doc):

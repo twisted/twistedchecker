@@ -6,17 +6,26 @@ standard <https://twistedmatrix.com/documents/current/core/development/policy/co
 
 This was originally a project of Google Summer of Code 2012.
 
-Dependencies
-------------
+TwistedChecker's dependencies are recorded in setup.py.
 
-TwistedChecker's dependencies are pylint (== 0.26.0) and a recent version of PEP8.
 
-Tests
------
+Development
+-----------
 
 .. image:: https://travis-ci.org/twisted/twistedchecker.svg?branch=master
     :target: https://travis-ci.org/twisted/twistedchecker
 
+Get a development environment::
+
+    virtualenv build
+    . build/bin/activate
+    pip install -Ue '.[dev]'
+
 To test twistedchecker, run the following in the source directory::
 
     trial twistedchecker
+
+Check pyflakes status ignoring functional tests
+(#68 some day we might use twistedchecker on itself)::
+
+    python check_pyflakes.py twistedchecker/

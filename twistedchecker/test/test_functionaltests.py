@@ -47,7 +47,7 @@ def _partial2(wrapped, *partialArgs, **partialKwargs):
     def wrapper(*args, **kwargs):
         args = args + partialArgs[len(args):]
         kwargs.update(partialKwargs)
-        return wrapped(*args, **kwargs)
+        wrapped(*args, **kwargs)
     return update_wrapper(wrapper, wrapped)
 
 
@@ -177,16 +177,25 @@ def _runTest(testCase, testFilePath):
 
     _enablePEP8Checker(runner.linter)
 
-    runner.run([moduleName])
+    exitCode = None
+    try:
+        runner.run([moduleName])
+    except SystemExit as error:
+        exitCode = error.code
 
     # Check the results
-    expectedResult = open(pathResultFile).read()
-    outputResult = outputStream.getvalue()
+    expectedResult = open(pathResultFile).read().strip()
+    outputResult = outputStream.getvalue().strip()
 
     try:
         testCase.assertEqual(expectedResult, outputResult)
     except unittest.FailTest:
         testCase.fail(_formatResults(moduleName, expectedResult, outputResult))
+
+    if not expectedResult:
+        testCase.assertEqual(0, exitCode)
+    else:
+        testCase.assertNotEqual(0, exitCode)
 
 
 

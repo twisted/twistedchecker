@@ -1,4 +1,5 @@
-# enable: W9201,W9202,W9203,W9204,W9205,W9206,W9207
+# enable: W9201,W9202,W9203,W9204,W9205,W9206,W9207,W9208,W9209
+# -*- test-case-name: twistedchecker.test.test_functionaltests.FunctionalTests.test_twistedchecker_functionaltests_docstring_pass -*-
 """
 A docstring with a wrong indentation.
 Docstring should have consistent indentations.
@@ -57,6 +58,35 @@ class foo:
             pass
 
 
+    @property
+    def someProperty(self):
+        """
+        Getter properties don't need return docstring.
+        """
+        return True
+
+
+    @someProperty.setter
+    def someProperty(self, value):
+        """
+        Setter properties don't need to document their value.
+        """
+
+    @property
+    def otherProperty(self):
+        """
+        Getter properties used the test that setter don't need a docstring.
+        """
+        return True
+
+
+    @otherProperty.setter
+    def otherProperty(self, value):
+        # Setter don't need a docstring as most of the time is a duplicate of
+        # the getter docstring.
+        pass
+
+
     def f(self):
         """
         A method returns nothing.
@@ -64,8 +94,15 @@ class foo:
         return
 
 
+    def test_someTest(self):
+        """
+        Test methods in trial should not document their return value.
+        """
+        return 'deferred'
 
-class Bar(self):
+
+
+class Bar(object):
     """
     A cvar is recognized as being the start of epytext markup.
 
@@ -89,10 +126,22 @@ class Bar(self):
         @raise BarException: Another exception.
         @returns: C{int}
         """
+        def callback(result):
+            pass
 
 
 
-class Baz(self):
+
+def topLevel():
+    """
+    A top-level function.
+    """
+    class Inner(object):
+        def innerInner(self):
+            pass
+
+
+class Baz(object):
     """
     An ivar is recognized as being the start of epytext markup.
 

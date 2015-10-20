@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# -*- test-case-name: twistedchecker -*-
 # Copyright (c) Twisted Matrix Laboratories.
 # See LICENSE for details.
 
@@ -9,7 +9,7 @@ from setuptools import find_packages, setup
 setup(
     name='TwistedChecker',
     description='A Twisted coding standard compliance checker.',
-    version='0.2.0',
+    version='0.4.0',
     author='Twisted Matrix Laboratories',
     author_email='twisted-python@twistedmatrix.com',
     url='https://github.com/twisted/twistedchecker',
@@ -17,9 +17,11 @@ setup(
     package_data={
         "twistedchecker": ["configuration/pylintrc"]
     },
-    scripts=[
-        'bin/twistedchecker'
-    ],
+    entry_points={
+      "console_scripts": [
+          "twistedchecker = twistedchecker.core.runner:main"
+      ]
+    },
     license='MIT',
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -38,7 +40,13 @@ setup(
     install_requires=[
         "pylint == 0.26.0",
         "logilab-common == 0.62.0",
-        "pep8 == 1.5.6"
+        "pep8 == 1.5.7"
     ],
+    extras_require = {
+        'dev':  [
+            'twisted>=15.0.0',
+            'pyflakes==0.8.1',
+            ],
+    },
     long_description=file('README.rst').read()
 )

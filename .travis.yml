@@ -3,13 +3,17 @@ language: python
 python:
   - "2.7"
 
-# Twisted is required for trial.
 install:
-  - pip install --upgrade twisted==13.2.0 pyflakes==0.8.1 .
+  - pip install --upgrade -e '.[dev]'
 
 script:
   - trial twistedchecker
   - python ./check_pyflakes.py ./twistedchecker setup.py
+
+  # Ensure the script was installed on $PATH
+  - python setup.py install
+  - cd /
+  - twistedchecker -h
 
 # Dump trial log on failure.
 after_failure: "cat _trial_temp/test.log"

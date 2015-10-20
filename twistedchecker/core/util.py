@@ -7,7 +7,8 @@ def isTestModule(modulename):
     Determine whether a module is a test module
     by given module name.
     """
-    return ".test." in modulename
+    filename = modulename.split('.')[-1]
+    return ".test." in modulename and filename.startswith('test')
 
 
 

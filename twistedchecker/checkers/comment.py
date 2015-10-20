@@ -1,6 +1,6 @@
 from pylint.interfaces import IASTNGChecker
 from pylint.checkers import BaseChecker
-from pylint.checkers.format import STRING_RGX, COMMENT_RGX
+from pylint.checkers.format import COMMENT_RGX
 
 
 
@@ -8,7 +8,7 @@ class CommentChecker(BaseChecker):
     """
     A checker for checking comment issues.
 
-    A good comment should begin with one whiespace and
+    A good comment should begin with one whitespace and
     with first letter capitalized.
     """
     msgs = {
@@ -31,9 +31,20 @@ class CommentChecker(BaseChecker):
             # Failed to open the module
             return
         isFirstLineOfComment = True
+        isDocString = False
         lines = node.file_stream.readlines()
         for linenum, line in enumerate(lines):
-            matchedComment = COMMENT_RGX.search(STRING_RGX.sub('', line))
+            if line.strip().startswith('"""'):
+                # This is a simple assumption than docstring are delimited
+                # with triple double quotes on a single line.
+                # Should do the job for Twisted code.
+                isDocString = not isDocString
+
+            if isDocString:
+                # We ignore comments in docstrings.
+                continue
+
+            matchedComment = COMMENT_RGX.search(line)
             if matchedComment:
                 if isFirstLineOfComment:
                     # Check for W9401

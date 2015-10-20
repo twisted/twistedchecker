@@ -14,6 +14,8 @@ from logilab.common.modutils import file_from_modpath
 import twistedchecker
 from twistedchecker.reporters.limited import LimitedReporter
 from twistedchecker.core.exceptionfinder import findAllExceptions
+from twistedchecker.checkers import patch_pylint_format
+
 
 class Runner():
     """
@@ -28,7 +30,8 @@ class Runner():
                 "pep8format.PEP8Checker",
                 "docstring.DocstringChecker",
                 "formattingoperation.FormattingOperationChecker",
-                "comment.CommentChecker")
+                "comment.CommentChecker",
+                "testclassname.TestClassNameChecker")
     allowedMessagesFromPylint = ("F0001",
                                  "C0103",
                                  "C0301",
@@ -125,6 +128,9 @@ class Runner():
 
         @return: a list of allowed messages
         """
+        # We patch the default pylint format checker.
+        patch_pylint_format.patch()
+
         # add checkers for python 3
         cfgfile = self.linter.cfgfile_parser
         if (cfgfile.has_option("TWISTEDCHECKER", "check-python3") and
@@ -316,6 +322,8 @@ class Runner():
             exitCode = 1 if diffCount else 0
             sys.exit(exitCode)
 
+        sys.exit(self.linter.msg_status)
+
 
     def prepareDiff(self):
         """
@@ -420,3 +428,11 @@ class Runner():
             lines.extend(warnings[modulename])
 
         return "\n".join(lines)
+
+
+def main():
+    """
+    An entry point used in the setup.py to create a runnable script.
+    """
+    runner = Runner()
+    runner.run(sys.argv[1:])
