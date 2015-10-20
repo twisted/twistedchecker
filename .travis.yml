@@ -18,6 +18,11 @@ script:
 # Dump trial log on failure.
 after_failure: "cat _trial_temp/test.log"
 
+# Travis is a bit "simple" and will not automatically switch to the
+# deployment directory before running its own deploy code.
+before_deploy:
+    - cd $TRAVIS_BUILD_DIR
+
 # Do an automatic PyPi release when a tag is created.
 # http://docs.travis-ci.com/user/deployment/pypi/
 deploy:
@@ -28,7 +33,7 @@ deploy:
   password:
     secure: VS3uq3pdprwQUQmMFlS0ieXTX7UKvNjAQi/6CXfxqcJVlExVojsiSwOIgE76r74TuLRKDzlYD+G6dGkvaRmlfV2GVMhChUCN71Y0QtFPB68M9MuFyf/ICHb0zhs2f53/86m+ThphCOQwnOYxDeramR4TAsQR95buDO2Ko590vnQ=
   on:
-    tags: true
+    # tags: true
     # All branches is still required.
     # https://github.com/travis-ci/travis-ci/issues/1675
     all_branches: true
