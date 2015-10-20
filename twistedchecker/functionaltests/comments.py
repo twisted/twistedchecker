@@ -41,3 +41,10 @@ class SomeClass(object):
     Also triggered with url fragments U{https://example.com/test#fragment}
     """
     #But this comment should be reported.
+
+# '\r\n\t' a comment can start with a new lines characters.
+
+var = 1 + 2  # \r\n same for inline comments.
+
+# `literal` is fine at the start.
+
