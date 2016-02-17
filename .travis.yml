@@ -22,6 +22,7 @@ after_failure: "cat _trial_temp/test.log"
 branches:
   only:
     - master
+    - \d+\.\d+\.\d+
 
 # Travis is a bit "simple" and will not automatically switch to the
 # deployment directory before running its own deploy code.
