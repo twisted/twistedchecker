@@ -48,3 +48,18 @@ var = 1 + 2  # \r\n same for inline comments.
 
 # `literal` is fine at the start.
 
+# Hash characters in comments should be fine.
+test("#Just after another comment.")
+
+
+test("#Test")
+
+test(
+    'More " comlicated#Test')
+
+
+test("""
+    More  complicated
+    #Test
+    """
+    )
