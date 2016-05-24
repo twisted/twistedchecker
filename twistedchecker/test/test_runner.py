@@ -80,7 +80,7 @@ class RunnerTestCase(unittest.TestCase):
         Test for method findUselessCheckers
         """
         runner = Runner()
-        registeredCheckers = sum(runner.linter._checkers.values(), [])
+        registeredCheckers = sum(list(runner.linter._checkers.values()), [])
         # remove checkers other than header checker
         headerCheckerList = [ckr
                              for ckr in registeredCheckers
@@ -101,7 +101,7 @@ class RunnerTestCase(unittest.TestCase):
         and make sure it was removed.
         """
         runner = Runner()
-        registeredCheckers = sum(runner.linter._checkers.values(), [])
+        registeredCheckers = sum(list(runner.linter._checkers.values()), [])
         # Make sure an instance of HeaderChecker in registered checkers
         headerCheckerList = [ckr
                              for ckr in registeredCheckers
@@ -112,7 +112,7 @@ class RunnerTestCase(unittest.TestCase):
         self.assertTrue(headerChecker in runner.linter.options_providers)
         runner.unregisterChecker(headerChecker)
         # Make sure the instance of HeaderChecker was removed
-        registeredCheckers = sum(runner.linter._checkers.values(), [])
+        registeredCheckers = sum(list(runner.linter._checkers.values()), [])
         self.assertFalse(headerChecker in registeredCheckers)
         # Could not check reports because HeaderChecker is not be
         # recorded in that list
@@ -132,7 +132,7 @@ class RunnerTestCase(unittest.TestCase):
         runner.restrictCheckers(list(HeaderChecker.msgs.keys())[:1])
         # After run it, only HeaderChecker should be left in
         # registered checkers
-        registeredCheckers = sum(runner.linter._checkers.values(), [])
+        registeredCheckers = sum(list(runner.linter._checkers.values()), [])
         self.assertEqual(len(registeredCheckers), 1)
         self.assertEqual(type(registeredCheckers[0]), HeaderChecker)
 

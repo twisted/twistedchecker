@@ -10,10 +10,10 @@ Twisted Coding Standard.
 import sys
 import re
 
-from pylint.interfaces import IASTNGChecker
-from pylint.checkers import BaseChecker
+from io import StringIO
 
-from twisted.python.compat import NativeStringIO
+from pylint.interfaces import IAstroidChecker
+from pylint.checkers import BaseChecker
 
 import pep8
 
@@ -73,7 +73,7 @@ class PEP8WarningRecorder(pep8.Checker):
         """
         # Set a stream to replace stdout, and get results in it
         stdoutBak = sys.stdout
-        streamResult = NativeStringIO()
+        streamResult = StringIO()
         sys.stdout = streamResult
         try:
             pep8.Checker.check_all(self)
@@ -132,7 +132,7 @@ class PEP8Checker(BaseChecker):
     }
     standardPEP8Messages = ['W%d' % (id,) for id in range(9017,9027)]
     pep8Enabled = None
-    __implements__ = IASTNGChecker
+    __implements__ = IAstroidChecker
     name = 'pep8'
     # Map pep8 messages to messages in pylint.
     # The format should look like this:

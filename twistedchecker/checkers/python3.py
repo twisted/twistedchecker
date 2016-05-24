@@ -3,10 +3,10 @@ Checker for python3 compatibility issues.
 """
 import re
 
-import logilab.astng.node_classes
-from logilab.astng.exceptions import ASTNGError
+import asteroid.node_classes
+from asteroid.exceptions import AsteroidError
 
-from pylint.interfaces import IASTNGChecker
+from pylint.interfaces import IAsteroidChecker
 from pylint.checkers import BaseChecker
 
 
@@ -16,7 +16,7 @@ class Python3Checker(BaseChecker):
     Checker for python3 compatibility issues.
     """
 
-    __implements__ = (IASTNGChecker,)
+    __implements__ = (IAsteroidChecker,)
     name = 'python3'
     msgs = {
      'W9601': ('For compatibility with python 3,'
@@ -120,7 +120,7 @@ class Python3Checker(BaseChecker):
         if not hasattr(node.func, "name"):
             return
         if (node.func.name != "apply" or
-            type(node.func) != logilab.astng.node_classes.Name):
+            type(node.func) != asteroid.node_classes.Name):
             return
         if not hasattr(node, "infered"):
             return
@@ -156,8 +156,8 @@ class Python3Checker(BaseChecker):
             return
         # now get the object which is called
         # it should be the first child of the method node
-        objCalled = func.get_children().next()
-        if isinstance(objCalled, logilab.astng.node_classes.Dict):
+        objCalled = next(func.get_children())
+        if isinstance(objCalled, asteroid.node_classes.Dict):
             # in this case, the statement should like
             # {}.has_key()
             issueFound = True
@@ -172,7 +172,7 @@ class Python3Checker(BaseChecker):
                 return
             try:
                 objInferedList = nodeArgument.infered()
-            except ASTNGError:
+            except AsteroidError:
                 # may be the name is unresolvable,
                 # or definition is unreachable
                 return
@@ -180,7 +180,7 @@ class Python3Checker(BaseChecker):
                 # no infered node is found
                 return
             objInfered = objInferedList[0]
-            if isinstance(objInfered, logilab.astng.node_classes.Dict):
+            if isinstance(objInfered, asteroid.node_classes.Dict):
                 issueFound = True
 
         if issueFound:

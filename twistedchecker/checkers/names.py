@@ -3,7 +3,7 @@ Checker for naming convention.
 """
 import re
 
-from pylint.interfaces import IASTNGChecker
+from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 
 from twistedchecker.core.util import isTestModule
@@ -14,14 +14,17 @@ class TwistedNamesChecker(BaseChecker):
     A checker for checking Twisted naming convention.
     """
     msgs = {
-     'W9301': ('Test modules should begin with test_',
-               'Used when a test module begins with test_.'),
-     'C9302': ('Method name is invalid',
-               'Used when a method has invalid name.'),
-     'C9303': ('Test method name is invalid',
-               'Used when a test method has invalid name.'),
+        'W9301': ('Test modules should begin with test_',
+                  'Used when a test module begins with test_.',
+                  'testmodule-not-beginning-with-test'),
+        'C9302': ('Method name is invalid',
+                  'Used when a method has invalid name.',
+                  'invalid-method-name'),
+        'C9303': ('Test method name is invalid',
+                  'Used when a test method has invalid name.',
+                  'invalid-test-method-name'),
     }
-    __implements__ = IASTNGChecker
+    __implements__ = IAstroidChecker
     name = 'modulename'
     options = ()
 
@@ -173,5 +176,3 @@ class TwistedNamesChecker(BaseChecker):
         """
         if not modulename.startswith("test_"):
             self.add_message('W9301', node=node)
-
-

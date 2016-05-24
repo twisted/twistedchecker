@@ -1,4 +1,4 @@
-from pylint.interfaces import IASTNGChecker
+from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 from pylint.checkers.format import COMMENT_RGX
 
@@ -17,7 +17,7 @@ class CommentChecker(BaseChecker):
      'W9402': ('The first letter of comment should be capitalized',
                'Used for checking comment format issues.')
     }
-    __implements__ = IASTNGChecker
+    __implements__ = IAstroidChecker
     name = 'comment'
     options = ()
 

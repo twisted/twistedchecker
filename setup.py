@@ -11,7 +11,7 @@ with open('README.rst') as f:
 setup(
     name='twistedchecker',
     description='A Twisted coding standard compliance checker.',
-    version='0.6.0',
+    version='16.0',
     author='Twisted Matrix Laboratories',
     author_email='twisted-python@twistedmatrix.com',
     url='https://github.com/twisted/twistedchecker',
@@ -30,17 +30,18 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
         "Topic :: Software Development :: Quality Assurance"
     ],
     keywords=[
         "twisted", "checker", "compliance", "pep8"
     ],
     install_requires=[
-        "pylint == 0.26.0",
-        "logilab-common == 0.62.0",
-        "pep8 == 1.5.7"
+        "pylint == 1.5.5",
+        "pep8 == 1.7.0"
     ],
     extras_require = {
         'dev':  [

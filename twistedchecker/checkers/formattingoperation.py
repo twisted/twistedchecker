@@ -1,4 +1,4 @@
-from pylint.interfaces import IASTNGChecker
+from pylint.interfaces import IAstroidChecker
 from pylint.checkers.string_format import StringFormatChecker
 
 
@@ -13,7 +13,7 @@ class FormattingOperationChecker(StringFormatChecker):
                'for non-mapping values',
                'Checking string formatting operations.'),
     }
-    __implements__ = IASTNGChecker
+    __implements__ = IAstroidChecker
     name = 'formattingoperation'
     options = ()
 
