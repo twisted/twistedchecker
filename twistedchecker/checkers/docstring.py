@@ -8,16 +8,13 @@ Checks for docstrings.
 
 import re
 import astroid
-import sys
 
-from astroid import node_classes
-from astroid import scoped_nodes
-from astroid.exceptions import InferenceError
+from astroid import node_classes, scoped_nodes
 
-from pylint.interfaces import IAstroidChecker, INFERENCE
-from pylint.checkers.base import DocStringChecker as PylintDocStringChecker
-from pylint.checkers.base import NO_REQUIRED_DOC_RGX
-from pylint.checkers.utils import (has_known_bases,)
+from pylint.interfaces import IAstroidChecker, INFERENCE, INFERENCE_FAILURE
+from pylint.checkers.base import (DocStringChecker as PylintDocStringChecker,
+                                  NO_REQUIRED_DOC_RGX)
+from pylint.checkers.utils import has_known_bases
 
 
 def _isInner(node):

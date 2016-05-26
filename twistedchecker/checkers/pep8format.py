@@ -9,6 +9,7 @@ Twisted Coding Standard.
 
 import sys
 import re
+import io
 
 from io import StringIO
 
