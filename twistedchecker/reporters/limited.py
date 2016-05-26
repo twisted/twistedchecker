@@ -1,10 +1,11 @@
+from __future__ import print_function
+
 import os
 import sys
 
 from pylint.interfaces import IReporter
 from pylint.reporters.text import TextReporter
 import twistedchecker
-
 
 
 class LimitedReporter(TextReporter):
@@ -32,5 +33,6 @@ class LimitedReporter(TextReporter):
         """
         Manage message of different type and in the context of path.
         """
+        print(msg_id, location, msg, file=sys.__stdout__)
         if msg_id in self.messagesAllowed:
             TextReporter.add_message(self, msg_id, location, msg)

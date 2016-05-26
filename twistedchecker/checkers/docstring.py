@@ -7,8 +7,10 @@ Checks for docstrings.
 """
 
 import re
+import sys
 
-from logilab.astng import node_classes, scoped_nodes, YES
+from logilab.astng import node_classes
+from astroid import scoped_nodes
 from logilab.astng.exceptions import InferenceError
 
 from pylint.interfaces import IAstroidChecker
@@ -29,7 +31,7 @@ def _isInner(node):
     """
     while node:
         node = node.parent
-        if isinstance(node, scoped_nodes.Function):
+        if isinstance(node, scoped_nodes.FunctionDef):
             return True
     return False
 
@@ -76,6 +78,9 @@ def _isSetter(node_type, node):
     return False
 
 
+_counter = iter(range(100))
+
+
 class DocstringChecker(PylintDocStringChecker):
     """
     A checker for checking docstrings.
@@ -83,25 +88,25 @@ class DocstringChecker(PylintDocStringChecker):
     msgs = {
      'W9201': ('The opening/closing of docstring should be on a line '
                'by themselves',
-               'Check the opening/closing of a docstring.'),
+               'Check the opening/closing of a docstring.', 'docstring' + str(next(_counter))),
      'W9202': ('Missing epytext markup @param for argument "%s"',
-               'Check the epytext markup @param.'),
+               'Check the epytext markup @param.', 'docstring' + str(next(_counter))),
      'W9203': ('Missing epytext markup @type for argument "%s"',
-               'Check the epytext markup @type.'),
+               'Check the epytext markup @type.', 'docstring' + str(next(_counter))),
      'W9204': ('Missing epytext markup @return for return value',
-               'Check the epytext markup @return.'),
+               'Check the epytext markup @return.', 'docstring' + str(next(_counter))),
      'W9205': ('Missing epytext markup @rtype for return value',
-               'Check the epytext markup @rtype.'),
+               'Check the epytext markup @rtype.', 'docstring' + str(next(_counter))),
      'W9206': ('Docstring should have consistent indentations',
-               'Check indentations of docstring.'),
+               'Check indentations of docstring.', 'docstring' + str(next(_counter))),
      'W9207': ('Missing a blank line before epytext markups',
-               'Check the blank line before epytext markups.'),
+               'Check the blank line before epytext markups.', 'docstring' + str(next(_counter))),
      'W9208': ('Missing docstring',
                'Used when a module, function, class or method '
-               'has no docstring.'),
+               'has no docstring.', 'docstring' + str(next(_counter))),
      'W9209': ('Empty docstring',
                'Used when a module, function, class or method '
-               'has an empty docstring.'),
+               'has an empty docstring.', 'docstring' + str(next(_counter))),
     }
     __implements__ = IAstroidChecker
     name = 'docstring'
@@ -143,7 +148,8 @@ class DocstringChecker(PylintDocStringChecker):
         return linenoDocstring
 
 
-    def _check_docstring(self, node_type, node):
+    def _check_docstring(self, node_type, node, report_missing=True,
+                         confidence=None):
         """
         Check whether the opening and the closing of docstring
         on a line by themselves.

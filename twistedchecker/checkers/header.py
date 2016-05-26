@@ -28,10 +28,10 @@ class HeaderChecker(BaseChecker):
     __implements__ = IAstroidChecker
     name = 'header'
     options = ()
-    commentsCopyright = (r"# Copyright \(c\) Twisted Matrix Laboratories\.",
-                         r"# See LICENSE for details\.")
-    patternTestReference = (r"# -\*- test-case-name:"
-                            r" (([a-z_][a-z0-9_]*)\.)*[a-z_][a-z0-9_]* -\*-")
+    commentsCopyright = (br"# Copyright \(c\) Twisted Matrix Laboratories\.",
+                         br"# See LICENSE for details\.")
+    patternTestReference = (br"# -\*- test-case-name:"
+                            br" (([a-z_][a-z0-9_]*)\.)*[a-z_][a-z0-9_]* -\*-")
 
 
     def visit_module(self, node):
@@ -56,7 +56,7 @@ class HeaderChecker(BaseChecker):
         @param text: codes of the module
         @param node: node of the module
         """
-        if not re.search(r"%s\s*\n\s*%s" % self.commentsCopyright, text):
+        if not re.search(br"%s\s*\n\s*%s" % self.commentsCopyright, text):
             self.add_message('W9001', node=node)
 
 

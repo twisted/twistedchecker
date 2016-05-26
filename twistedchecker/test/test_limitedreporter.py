@@ -39,6 +39,7 @@ class LimitedReporterTestCase(unittest.TestCase):
 
         # check the results to see only W0311 is reported
         resultTest = streamTestResult.getvalue()
+        print(resultTest)
         self.assertTrue("W0311" in resultTest)
         self.assertTrue("W0312" not in resultTest)
         self.assertEqual(4, exitResult.code)

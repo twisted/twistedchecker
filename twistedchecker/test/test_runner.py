@@ -62,7 +62,7 @@ class RunnerTestCase(unittest.TestCase):
         """
         pathTests = os.path.join(twistedchecker.abspath, "functionaltests")
         testfiles = reduce(operator.add,
-                           [[os.path.join(pathDir, f) for f in files]
+                           [[os.path.join(pathDir, f) for f in files if f.endswith(".py")]
                             for pathDir, _, files in os.walk(pathTests)])
         messagesAllowed = set(Runner.allowedMessagesFromPylint)
         for testfile in testfiles:

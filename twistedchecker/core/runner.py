@@ -64,12 +64,8 @@ class Runner():
                            .cfgfile_parser.get("TWISTEDCHECKER", "disable")
                            .replace(" ", "").split(","))
         if disabledMessages != {""}:
-<<<<<<< HEAD
             for msg in disabledMessages:
                 self.linter.disable(msg)
-=======
-            list(map(self.linter.disable, disabledMessages))
->>>>>>> some initial porting
             allowedMessages -= disabledMessages
         # set default output stream to stdout
         self.setOutput(sys.stdout)
@@ -137,11 +133,6 @@ class Runner():
         # We patch the default pylint format checker.
         patch_pylint_format.patch()
 
-        # add checkers for python 3
-        cfgfile = self.linter.cfgfile_parser
-        if (cfgfile.has_option("TWISTEDCHECKER", "check-python3") and
-            cfgfile.getboolean("TWISTEDCHECKER", "check-python3")):
-            self.checkers += ("python3.Python3Checker",)
         # register checkers
         allowedMessages = list(self.allowedMessagesFromPylint)
         for strChecker in self.checkers:
@@ -152,10 +143,6 @@ class Runner():
                              classname)
             instanceChecker = checker(self.linter)
             allowedMessages += list(instanceChecker.msgs.keys())
-<<<<<<< HEAD
-=======
-            print(instanceChecker)
->>>>>>> some initial porting
             self.linter.register_checker(instanceChecker)
 
         self.restrictCheckers(allowedMessages)
@@ -310,12 +297,8 @@ class Runner():
             self.displayHelp()
         # Check for 'strict-epydoc' option.
         if self.allowOptions and not self.linter.option_value("strict-epydoc"):
-<<<<<<< HEAD
             for msg in ["W9203", "W9205"]:
                 self.linter.disable(msg)
-=======
-            list(map(self.linter.disable, ["W9203", "W9205"]))
->>>>>>> some initial porting
 
         # insert current working directory to the python path to have a correct
         # behaviour.

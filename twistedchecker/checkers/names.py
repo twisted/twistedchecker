@@ -34,7 +34,7 @@ class TwistedNamesChecker(BaseChecker):
 
         @param node: node of given module
         """
-        patternTestCase = r"class\s+[a-zA-Z0-9]+\s*\(.*TestCase\)"
+        patternTestCase = br"class\s+[a-zA-Z0-9]+\s*\(.*TestCase\)"
         return re.search(patternTestCase, node.file_stream.read()) \
                and True or False
 

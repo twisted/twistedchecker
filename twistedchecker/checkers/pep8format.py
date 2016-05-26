@@ -81,6 +81,8 @@ class PEP8WarningRecorder(pep8.Checker):
             sys.stdout = stdoutBak
 
 
+_counter = iter(range(100))
+
 
 class PEP8Checker(BaseChecker):
     """
@@ -89,46 +91,46 @@ class PEP8Checker(BaseChecker):
     """
     msgs = {
         'W9010': ('Trailing whitespace found in the end of line',
-                  'Used when a line contains a trailing space.'),
+                  'Used when a line contains a trailing space.', "pep8" + str(next(_counter))),
         'W9011': ('Blank line contains whitespace',
-                  'Used when found a line contains whitespace.'),
+                  'Used when found a line contains whitespace.', "pep8" + str(next(_counter))),
         # Messages for checking blank lines
         'W9012': ('Expected 2 blank lines, found %s',
                   'Class-level functions should be separated '
-                  'with 2 blank lines.'),
+                  'with 2 blank lines.', "pep8" + str(next(_counter))),
         'W9013': ('Expected 3 blank lines, found %s',
                   'Top-level functions should be separated '
-                  'with 3 blank lines.'),
+                  'with 3 blank lines.', "pep8" + str(next(_counter))),
         'W9015': ('Too many blank lines, found %s',
-                  'Used when too many blank lines are found.'),
+                  'Used when too many blank lines are found.', "pep8" + str(next(_counter))),
         'W9016': ('Too many blank lines after docstring, found %s',
-                  'Used when too many blank lines after docstring are found.'),
+                  'Used when too many blank lines after docstring are found.', "pep8" + str(next(_counter))),
         'W9027': ("Blank lines found after a function decorator",
-                  "Function decorators should be followed with blank lines."),
+                  "Function decorators should be followed with blank lines.", "pep8" + str(next(_counter))),
         # General pep8 warnings
         'W9017': ('Blank line at end of file',
-                  'More than one blank line found at EOF (W391 in pep8).'),
+                  'More than one blank line found at EOF (W391 in pep8).', "pep8" + str(next(_counter))),
         'W9018': ('No newline at end of file',
-                  'No blank line is found at end of file (W292 in pep8).'),
+                  'No blank line is found at end of file (W292 in pep8).', "pep8" + str(next(_counter))),
         'W9019': ("Whitespace after '%s'",
-                  'Redundant whitespace found after a symbol (E201 in pep8).'),
+                  'Redundant whitespace found after a symbol (E201 in pep8).', "pep8" + str(next(_counter))),
         'W9020': ("Whitespace before '%s'",
                   'Redundant whitespace found before a symbol '
-                  '(E202 in pep8).'),
+                  '(E202 in pep8).', "pep8" + str(next(_counter))),
         'W9021': ("Missing whitespace after '%s'",
-                  "Expect a whitespace after a symbol (E231 in pep8)."),
+                  "Expect a whitespace after a symbol (E231 in pep8).", "pep8" + str(next(_counter))),
         'W9022': ("Multiple spaces after operator",
-                  "Found multiple spaces after an operator (E222 in pep8)."),
+                  "Found multiple spaces after an operator (E222 in pep8).", "pep8" + str(next(_counter))),
         'W9023': ("Multiple spaces before operator",
-                  "Found multiple spaces before an operator (E221 in pep8)."),
+                  "Found multiple spaces before an operator (E221 in pep8).", "pep8" + str(next(_counter))),
         'W9024': ("Missing whitespace around operator",
-                  "No space found around an operator (E225 in pep8)."),
+                  "No space found around an operator (E225 in pep8).", "pep8" + str(next(_counter))),
         'W9025': ("No spaces should be around keyword / parameter equals",
                   "Spaces found around keyword or parameter equals "
-                  "(E251 in pep8)."),
+                  "(E251 in pep8).", "pep8" + str(next(_counter))),
         'W9026': ("At least two spaces before inline comment",
                   "Found less than two spaces before inline comment "
-                  "(E261 in pep8)."),
+                  "(E261 in pep8).", "pep8" + str(next(_counter))),
     }
     standardPEP8Messages = ['W%d' % (id,) for id in range(9017,9027)]
     pep8Enabled = None
@@ -177,20 +179,11 @@ class PEP8Checker(BaseChecker):
 
         @param node: The module node to check.
         """
-        self._runPEP8Checker(node.file)
+        recorder = PEP8WarningRecorder(node.file)
+        self._outputMessages(recorder.warnings, node)
 
 
-    def _runPEP8Checker(self, file):
-        """
-        Call the checker of pep8
-
-        @param file: path of module to check
-        """
-        recorder = PEP8WarningRecorder(file)
-        self._outputMessages(recorder.warnings)
-
-
-    def _outputMessages(self, warnings):
+    def _outputMessages(self, warnings, node):
         """
         Map pep8 results to messages in pylint, then output them.
 
@@ -218,7 +211,7 @@ class PEP8Checker(BaseChecker):
                     matchResult = re.search(patternArguments, text)
                     if matchResult:
                         arguments = matchResult.groups()
-                self.add_message(msgid, line=linenum, args=arguments)
+                self.add_message(msgid, line=linenum, args=arguments, node=node)
 
 
 

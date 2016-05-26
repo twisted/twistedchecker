@@ -7,9 +7,9 @@ L{twistedchecker.functionaltests}.
 """
 
 from functools import update_wrapper
-import io
 import itertools
 import os
+import sys
 
 from twisted.python.reflect import filenameToModuleName
 from twisted.trial import unittest
@@ -76,9 +76,9 @@ def _formatResults(moduleName, expectedResult, actualResult):
         headings.
     @rtype: L{str}
     """
-    i = itertools.zip_longest(
-        ['= Expected ='] + expectedResult.splitlines(),
-        ['= Actual ='] + actualResult.splitlines(),
+    i = zip_longest(
+        ['= Expected ='] + expectedResult,
+        ['= Actual ='] + actualResult,
         fillvalue='')
 
     output = ['', moduleName]
@@ -171,7 +171,7 @@ def _runTest(testCase, testFilePath):
     """
     pathResultFile = testFilePath.replace(".py", ".result")
     moduleName = filenameToModuleName(testFilePath)
-    outputStream = io.BytesIO()
+    outputStream = StringIO()
 
     runner = Runner()
     runner.allowOptions = False

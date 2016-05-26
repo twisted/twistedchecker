@@ -1,8 +1,8 @@
 import operator
 
-from pylint.interfaces import IAsteroid
+from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
-from logilab.astng.scoped_nodes import Class
+from astroid.scoped_nodes import ClassDef
 
 from twistedchecker.core.util import isTestModule
 
@@ -16,9 +16,10 @@ class TestClassNameChecker(BaseChecker):
     """
     msgs = {
         'W9701': ('Test class names should end with Tests',
-                  'Used for checking test class names.'),
+                  'Used for checking test class names.',
+                  'test-class-end-with-Tests'),
     }
-    __implements__ = IAsteroid
+    __implements__ = IAstroidChecker
     name = 'testclassname'
     options = ()
 
@@ -30,13 +31,12 @@ class TestClassNameChecker(BaseChecker):
         """
         if not isTestModule(node.name):
             return
-
         objects = list(node.values())
         objects.sort(key=operator.attrgetter('lineno'))
         for obj in objects:
-            if (isinstance(obj, Class) and self._isTestClass(obj) and
+            if (isinstance(obj, ClassDef) and self._isTestClass(obj) and
                     not obj.name.endswith('Tests')):
-                self.add_message('W9701', line=obj.lineno)
+                self.add_message('W9701', line=obj.lineno, node=obj)
 
 
     def _isTestClass(self, klass):
