@@ -7,15 +7,17 @@ Checks for docstrings.
 """
 
 import re
+import astroid
 import sys
 
-from logilab.astng import node_classes
+from astroid import node_classes
 from astroid import scoped_nodes
-from logilab.astng.exceptions import InferenceError
+from astroid.exceptions import InferenceError
 
-from pylint.interfaces import IAstroidChecker
+from pylint.interfaces import IAstroidChecker, INFERENCE
 from pylint.checkers.base import DocStringChecker as PylintDocStringChecker
 from pylint.checkers.base import NO_REQUIRED_DOC_RGX
+from pylint.checkers.utils import (has_known_bases,)
 
 
 def _isInner(node):
@@ -43,18 +45,11 @@ def _getDecoratorsName(node):
 
     @param node: current node of pylint
     """
-    try:
-        names = node.decoratornames()
-    except InferenceError:
-        # Sometimes astng fails by raising this kind of error.
-        pass
-    else:
-        # Whereas sometimes it fails by returning this magic token.
-        if YES not in names:
-            return names
-    # If pylint's attempt to discover the decorator's names has failed, fall
-    # back to our own logic.
+    # For setter properties pylint fails so we use a custom code.
     decorators = []
+    if not node.decorators:
+        return decorators
+
     for decorator in node.decorators.nodes:
         decorators.append(decorator.as_string())
     return decorators
@@ -146,6 +141,36 @@ class DocstringChecker(PylintDocStringChecker):
             # Module starts from line 0.
             linenoDocstring += 1
         return linenoDocstring
+
+    def visit_module(self, node):
+        self._check_docstring('module', node)
+
+    def visit_classdef(self, node):
+        if self.config.no_docstring_rgx.match(node.name) is None:
+            self._check_docstring('class', node)
+
+    def visit_functiondef(self, node):
+        if self.config.no_docstring_rgx.match(node.name) is None:
+            ftype = node.is_method() and 'method' or 'function'
+
+            if isinstance(node.parent.frame(), astroid.ClassDef):
+                overridden = False
+                confidence = (INFERENCE if has_known_bases(node.parent.frame())
+                              else INFERENCE_FAILURE)
+                # check if node is from a method overridden by its ancestor
+                for ancestor in node.parent.frame().ancestors():
+                    if node.name in ancestor and \
+                       isinstance(ancestor[node.name], astroid.FunctionDef):
+                        overridden = True
+                        break
+                self._check_docstring(ftype, node,
+                                      report_missing=not overridden,
+                                      confidence=confidence)
+            else:
+                self._check_docstring(ftype, node)
+
+
+    visit_asyncfunctiondef = visit_functiondef
 
 
     def _check_docstring(self, node_type, node, report_missing=True,
@@ -262,7 +287,7 @@ class DocstringChecker(PylintDocStringChecker):
                     else node.argnames())
 
         if _isSetter(node_type, node):
-           # For setter methods we remove the `value` argument as it
+            # For setter methods we remove the `value` argument as it
             # does not need to be documented.
             try:
                 argnames.remove('value')
@@ -290,7 +315,7 @@ class DocstringChecker(PylintDocStringChecker):
         """
         # Getter properties don't need to document their return value,
         # but then need to have a return value.
-        if '__builtin__.property' in _getDecoratorsName(node):
+        if 'property' in _getDecoratorsName(node):
             if self._hasReturnValue(node):
                 # Getter properties don't need a docstring.
                 return
