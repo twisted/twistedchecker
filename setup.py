@@ -41,7 +41,7 @@ setup(
     ],
     install_requires=[
         "pylint == 1.5.5",
-        "pep8"
+        "pep8 == 1.7.0"
     ],
     extras_require = {
         'dev':  [

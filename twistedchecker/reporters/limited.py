@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import os
 import sys
 
@@ -29,10 +27,9 @@ class LimitedReporter(TextReporter):
         self.messagesAllowed = messagesAllowed
 
 
-    def add_message(self, msg_id, location, msg):
+    def handle_message(self, msg):
         """
         Manage message of different type and in the context of path.
         """
-        print(msg_id, location, msg, file=sys.__stdout__)
-        if msg_id in self.messagesAllowed:
-            TextReporter.add_message(self, msg_id, location, msg)
+        if msg.msg_id in self.messagesAllowed:
+            super().handle_message(msg)
