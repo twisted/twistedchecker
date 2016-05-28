@@ -345,11 +345,11 @@ W9001:  2,0: Missing copyright header
         }
 
         resultCorrect = """
-************* Module foo
-W9001:  1,0: Missing copyright header
 ************* Module bar
 W9002:  1,0: Missing a reference to test module in header
 C0111:  10,0: Missing docstring
+************* Module foo
+W9001:  1,0: Missing copyright header
         """.strip()
 
         result = Runner().formatWarnings(warnings)
