@@ -1,35 +1,28 @@
+language: python
 sudo: false
 
-language: python
-
-python:
-  - "2.7"
-
 install:
-  - pip install --upgrade -e '.[dev]'
+  - pip install tox codecov
 
-script:
-  - trial twistedchecker
-  - python ./check_pyflakes.py ./twistedchecker setup.py
-
-  # Ensure the script was installed on $PATH
-  - python setup.py install
-  - cd /
-  - twistedchecker -h
+env:
+  - TOX_ENV=pyflakes
+  - TOX_ENV=check-manifest
+  - TOX_ENV=py27-tests
 
 # Dump trial log on failure.
 after_failure: "cat _trial_temp/test.log"
+
+script:
+  - tox -c tox.ini -e $TOX_ENV
+
+after_script:
+  - codecov
 
 # Only run test when committing to master branch.
 branches:
   only:
     - master
     - \d+\.\d+\.\d+
-
-# Travis is a bit "simple" and will not automatically switch to the
-# deployment directory before running its own deploy code.
-before_deploy:
-    - cd $TRAVIS_BUILD_DIR
 
 # Do an automatic PyPi release when a tag is created.
 # http://docs.travis-ci.com/user/deployment/pypi/
