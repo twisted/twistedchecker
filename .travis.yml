@@ -9,7 +9,6 @@ matrix:
       env: TOXENV=check-manifest
     - python: 2.7
       env: TOXENV=py27-tests
-  allow_failures:
     - python: 3.5
       env: TOXENV=py35-tests
 
