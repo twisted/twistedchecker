@@ -423,9 +423,10 @@ class Runner():
         @return: a list of warnings in string
         """
         lines = []
-        for modulename in warnings:
+        for modulename in sorted(warnings):
             lines.append(self.prefixModuleName + modulename)
-            lines.extend(warnings[modulename])
+            lines.extend(sorted(warnings[modulename],
+                         key=lambda x: x.split(":")[1]))
 
         return "\n".join(lines)
 

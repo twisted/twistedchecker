@@ -1,0 +1,5 @@
+include *.py
+include LICENSE
+include .coveragerc
+include tox.ini
+recursive-include twistedchecker *.result

@@ -18,6 +18,13 @@ import twistedchecker
 from twistedchecker.core.runner import Runner
 from twistedchecker.reporters.test import TestReporter
 
+try:
+    from itertools import zip_longest
+    from io import StringIO
+except:
+    from itertools import izip_longest as zip_longest
+    from StringIO import StringIO
+
 
 
 def _partial2(wrapped, *partialArgs, **partialKwargs):
@@ -69,9 +76,9 @@ def _formatResults(moduleName, expectedResult, actualResult):
         headings.
     @rtype: L{str}
     """
-    i = itertools.izip_longest(
-        ['= Expected ='] + expectedResult.splitlines(),
-        ['= Actual ='] + actualResult.splitlines(),
+    i = zip_longest(
+        ['= Expected ='] + expectedResult,
+        ['= Actual ='] + actualResult,
         fillvalue='')
 
     output = ['', moduleName]
@@ -184,8 +191,10 @@ def _runTest(testCase, testFilePath):
         exitCode = error.code
 
     # Check the results
-    expectedResult = open(pathResultFile).read().strip()
-    outputResult = outputStream.getvalue().strip()
+    with open(pathResultFile) as f:
+        expectedResult = sorted(f.read().strip().splitlines())
+
+    outputResult = sorted(outputStream.getvalue().strip().splitlines())
 
     try:
         testCase.assertEqual(expectedResult, outputResult)
