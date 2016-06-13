@@ -3,26 +3,25 @@
 # See LICENSE for details.
 
 """
-Checks the code using pep8.py and a custom blank line checker that matches the
-Twisted Coding Standard.
+Checks the code using pycodestyle.py and a custom blank line checker that
+matches the Twisted Coding Standard.
 """
 
 import sys
 import re
-import io
 
 from io import StringIO
 
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 
-import pep8
+import pycodestyle
 
 
 
-class PEP8WarningRecorder(pep8.Checker):
+class PyCodeStyleWarningRecorder(pycodestyle.Checker):
     """
-    A subclass of pep8's checker that records warnings.
+    A subclass of pycodestyle's checker that records warnings.
     """
 
     def __init__(self, file):
@@ -31,7 +30,7 @@ class PEP8WarningRecorder(pep8.Checker):
 
         @param file: file to be checked
         """
-        pep8.Checker.__init__(self, file)
+        pycodestyle.Checker.__init__(self, file)
 
         for item in self._logical_checks:
             # This cycles through all of the logical checks that the Checker
@@ -53,13 +52,13 @@ class PEP8WarningRecorder(pep8.Checker):
 
     def errorRecorder(self, lineNumber, offset, text, check):
         """
-        A function to override report_error in pep8.
+        A function to override report_error in pycodestyle.
         And record output warnings.
 
         @param lineNumber: line number
         @param offset: column offset
         @param text: warning message
-        @param check: check object in pep8
+        @param check: check object in pycodestyle
         """
         code = text.split(" ")[0]
         lineOffset = self.report.line_offset
@@ -70,14 +69,14 @@ class PEP8WarningRecorder(pep8.Checker):
 
     def run(self):
         """
-        Run pep8 checker and record warnings.
+        Run pycodestyle checker and record warnings.
         """
         # Set a stream to replace stdout, and get results in it
         stdoutBak = sys.stdout
         streamResult = StringIO()
         sys.stdout = streamResult
         try:
-            pep8.Checker.check_all(self)
+            pycodestyle.Checker.check_all(self)
         finally:
             sys.stdout = stdoutBak
 
@@ -85,62 +84,62 @@ class PEP8WarningRecorder(pep8.Checker):
 _counter = iter(range(100))
 
 
-class PEP8Checker(BaseChecker):
+class PyCodeStyleChecker(BaseChecker):
     """
-    A checker for checking pep8 issues.
-    Need pep8 installed.
+    A checker for checking pycodestyle issues.
+    Need pycodestyle installed.
     """
     msgs = {
         'W9010': ('Trailing whitespace found in the end of line',
-                  'Used when a line contains a trailing space.', "pep8" + str(next(_counter))),
+                  'Used when a line contains a trailing space.', "pycodestyle" + str(next(_counter))),
         'W9011': ('Blank line contains whitespace',
-                  'Used when found a line contains whitespace.', "pep8" + str(next(_counter))),
+                  'Used when found a line contains whitespace.', "pycodestyle" + str(next(_counter))),
         # Messages for checking blank lines
         'W9012': ('Expected 2 blank lines, found %s',
                   'Class-level functions should be separated '
-                  'with 2 blank lines.', "pep8" + str(next(_counter))),
+                  'with 2 blank lines.', "pycodestyle" + str(next(_counter))),
         'W9013': ('Expected 3 blank lines, found %s',
                   'Top-level functions should be separated '
-                  'with 3 blank lines.', "pep8" + str(next(_counter))),
+                  'with 3 blank lines.', "pycodestyle" + str(next(_counter))),
         'W9015': ('Too many blank lines, found %s',
-                  'Used when too many blank lines are found.', "pep8" + str(next(_counter))),
+                  'Used when too many blank lines are found.', "pycodestyle" + str(next(_counter))),
         'W9016': ('Too many blank lines after docstring, found %s',
-                  'Used when too many blank lines after docstring are found.', "pep8" + str(next(_counter))),
+                  'Used when too many blank lines after docstring are found.', "pycodestyle" + str(next(_counter))),
         'W9027': ("Blank lines found after a function decorator",
-                  "Function decorators should be followed with blank lines.", "pep8" + str(next(_counter))),
-        # General pep8 warnings
+                  "Function decorators should be followed with blank lines.", "pycodestyle" + str(next(_counter))),
+        # General pycodestyle warnings
         'W9017': ('Blank line at end of file',
-                  'More than one blank line found at EOF (W391 in pep8).', "pep8" + str(next(_counter))),
+                  'More than one blank line found at EOF (W391 in pycodestyle).', "pycodestyle" + str(next(_counter))),
         'W9018': ('No newline at end of file',
-                  'No blank line is found at end of file (W292 in pep8).', "pep8" + str(next(_counter))),
+                  'No blank line is found at end of file (W292 in pycodestyle).', "pycodestyle" + str(next(_counter))),
         'W9019': ("Whitespace after '%s'",
-                  'Redundant whitespace found after a symbol (E201 in pep8).', "pep8" + str(next(_counter))),
+                  'Redundant whitespace found after a symbol (E201 in pycodestyle).', "pycodestyle" + str(next(_counter))),
         'W9020': ("Whitespace before '%s'",
                   'Redundant whitespace found before a symbol '
-                  '(E202 in pep8).', "pep8" + str(next(_counter))),
+                  '(E202 in pycodestyle).', "pycodestyle" + str(next(_counter))),
         'W9021': ("Missing whitespace after '%s'",
-                  "Expect a whitespace after a symbol (E231 in pep8).", "pep8" + str(next(_counter))),
+                  "Expect a whitespace after a symbol (E231 in pycodestyle).", "pycodestyle" + str(next(_counter))),
         'W9022': ("Multiple spaces after operator",
-                  "Found multiple spaces after an operator (E222 in pep8).", "pep8" + str(next(_counter))),
+                  "Found multiple spaces after an operator (E222 in pycodestyle).", "pycodestyle" + str(next(_counter))),
         'W9023': ("Multiple spaces before operator",
-                  "Found multiple spaces before an operator (E221 in pep8).", "pep8" + str(next(_counter))),
+                  "Found multiple spaces before an operator (E221 in pycodestyle).", "pycodestyle" + str(next(_counter))),
         'W9024': ("Missing whitespace around operator",
-                  "No space found around an operator (E225 in pep8).", "pep8" + str(next(_counter))),
+                  "No space found around an operator (E225 in pycodestyle).", "pycodestyle" + str(next(_counter))),
         'W9025': ("No spaces should be around keyword / parameter equals",
                   "Spaces found around keyword or parameter equals "
-                  "(E251 in pep8).", "pep8" + str(next(_counter))),
+                  "(E251 in pycodestyle).", "pycodestyle" + str(next(_counter))),
         'W9026': ("At least two spaces before inline comment",
                   "Found less than two spaces before inline comment "
-                  "(E261 in pep8).", "pep8" + str(next(_counter))),
+                  "(E261 in pycodestyle).", "pycodestyle" + str(next(_counter))),
     }
-    standardPEP8Messages = ['W%d' % (id,) for id in range(9017,9027)]
-    pep8Enabled = None
+    standardPyCodeStyleMessages = ['W%d' % (id,) for id in range(9017,9027)]
+    pycodestyleEnabled = None
     __implements__ = IAstroidChecker
-    name = 'pep8'
-    # Map pep8 messages to messages in pylint.
+    name = 'pycodestyle'
+    # Map pycodestyle messages to messages in pylint.
     # The format should look like this:
-    # 'msgid in pep8' : ('msgid in pylint','a string to extract arguments')
-    mapPEP8Messages = {
+    # 'msgid in pycodestyle' : ('msgid in pylint','a string to extract arguments')
+    mapPyCodeStyleMessages = {
         'W291': ('W9010', ''),
         'W293': ('W9011', ''),
         'E301': ('W9012', r'expected 2 blank lines, found (\d+)'),
@@ -162,16 +161,16 @@ class PEP8Checker(BaseChecker):
         'E261': ('W9026', ''),
     }
     warnings = None
-    pep8Checker = None
+    pycodestyleChecker = None
 
     def __init__(self, linter):
         """
-        Change function of processing blank lines in pep8.
+        Change function of processing blank lines in pycodestyle.
 
         @param linter: current C{PyLinter} object.
         """
         BaseChecker.__init__(self, linter)
-        self.pep8Enabled = self.linter.option_value("pep8")
+        self.pycodestyleEnabled = self.linter.option_value("pycodestyle")
 
 
     def visit_module(self, node):
@@ -180,13 +179,13 @@ class PEP8Checker(BaseChecker):
 
         @param node: The module node to check.
         """
-        recorder = PEP8WarningRecorder(node.file)
+        recorder = PyCodeStyleWarningRecorder(node.file)
         self._outputMessages(recorder.warnings, node)
 
 
     def _outputMessages(self, warnings, node):
         """
-        Map pep8 results to messages in pylint, then output them.
+        Map pycodestyle results to messages in pylint, then output them.
 
         @param warnings: it should be a list of tuple including
         line number and message id
@@ -195,16 +194,16 @@ class PEP8Checker(BaseChecker):
             # No warnings were found
             return
         for warning in warnings:
-            linenum, offset, msgidInPEP8, text = warning
+            linenum, offset, msgidInPyCodeStyle, text = warning
 
-            if text.startswith(msgidInPEP8):
-                # If the PEP8 code is at the start of the text, trim it out
-                text = text[len(msgidInPEP8) + 1:]
+            if text.startswith(msgidInPyCodeStyle):
+                # If the PyCodeStyle code is at the start of the text, trim it out
+                text = text[len(msgidInPyCodeStyle) + 1:]
 
-            if msgidInPEP8 in self.mapPEP8Messages:
-                msgid, patternArguments = self.mapPEP8Messages[msgidInPEP8]
-                if (not self.pep8Enabled and
-                    msgid in self.standardPEP8Messages):
+            if msgidInPyCodeStyle in self.mapPyCodeStyleMessages:
+                msgid, patternArguments = self.mapPyCodeStyleMessages[msgidInPyCodeStyle]
+                if (not self.pycodestyleEnabled and
+                    msgid in self.standardPyCodeStyleMessages):
                     continue
 
                 arguments = []
@@ -219,8 +218,8 @@ class PEP8Checker(BaseChecker):
 def modifiedBlankLines(logical_line, blank_lines, indent_level, line_number,
                        blank_before, previous_logical, previous_indent_level):
     """
-    This function is copied from a modified pep8 checker for Twisted.
-    See https://github.com/cyli/TwistySublime/blob/master/twisted_pep8.py
+    This function is copied from a modified pycodestyle checker for Twisted.
+    See https://github.com/cyli/TwistySublime/blob/master/twisted_pycodestyle.py
     Twisted Coding Standard:
 
     Separate top-level function and class definitions with three blank lines.
@@ -244,13 +243,13 @@ def modifiedBlankLines(logical_line, blank_lines, indent_level, line_number,
     E305: "comment"\n\n\ndef a():\n    pass
     E306: variable="value"\ndef a():   pass
 
-    @param logical_line: Supplied by PEP8. The content of the line it is dealing with.
-    @param blank_lines: Supplied by PEP8.
-    @param indent_level: Supplied by PEP8. The current indent level.
-    @param line_number: Supplied by PEP8. The current line number.
-    @param blank_before: Supplied by PEP8. The number of blank lines before this one.
-    @param previous_logical: Supplied by PEP8. The previous logical line.
-    @param previous_indent_level: Supplied by PEP8. The indent level of the previous line.
+    @param logical_line: Supplied by PyCodeStyle. The content of the line it is dealing with.
+    @param blank_lines: Supplied by PyCodeStyle.
+    @param indent_level: Supplied by PyCodeStyle. The current indent level.
+    @param line_number: Supplied by PyCodeStyle. The current line number.
+    @param blank_before: Supplied by PyCodeStyle. The number of blank lines before this one.
+    @param previous_logical: Supplied by PyCodeStyle. The previous logical line.
+    @param previous_indent_level: Supplied by PyCodeStyle. The indent level of the previous line.
     """
     def isClassDefDecorator(thing):
         return (thing.startswith('def ') or
@@ -261,7 +260,7 @@ def modifiedBlankLines(logical_line, blank_lines, indent_level, line_number,
     if line_number == 1:
         return
 
-    previous_is_comment = pep8.DOCSTRING_REGEX.match(previous_logical)
+    previous_is_comment = pycodestyle.DOCSTRING_REGEX.match(previous_logical)
 
     # Check blank lines after a decorator,
     if previous_logical.startswith('@'):

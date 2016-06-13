@@ -29,8 +29,9 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.5",
         "Topic :: Software Development :: Quality Assurance"
     ],
@@ -38,14 +39,15 @@ setup(
         "twisted", "checker", "compliance", "pep8"
     ],
     install_requires=[
-        "pylint == 1.5.5",
+        "pylint == 1.5.6",
         "logilab-common == 1.2.1",
-        "pep8 == 1.7.0",
+        "pycodestyle == 2.0.0",
     ],
     extras_require = {
         'dev':  [
             'twisted>=15.0.0',
-            'pyflakes==0.8.1',
+            'pyflakes',
+            'coverage'
             ],
     },
     long_description=longDescription
