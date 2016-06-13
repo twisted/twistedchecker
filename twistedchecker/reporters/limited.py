@@ -32,4 +32,4 @@ class LimitedReporter(TextReporter):
         Manage message of different type and in the context of path.
         """
         if msg.msg_id in self.messagesAllowed:
-            super().handle_message(msg)
+            super(LimitedReporter, self).handle_message(msg)
