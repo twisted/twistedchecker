@@ -28,7 +28,7 @@ class Runner():
     # Customized checkers.
     checkers = ("header.HeaderChecker",
                 "names.TwistedNamesChecker",
-                "pycodestyleformat.PEP8Checker",
+                "pycodestyleformat.PyCodeStyleChecker",
                 "docstring.DocstringChecker",
                 "formattingoperation.FormattingOperationChecker",
                 "comment.CommentChecker",

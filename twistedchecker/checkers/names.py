@@ -50,7 +50,7 @@ class TwistedNamesChecker(BaseChecker):
             self._checkTestModuleName(modulename, node)
 
 
-    def visit_function(self, node):
+    def visit_functiondef(self, node):
         """
         A interface will be called when visiting a function or a method.
 

@@ -170,7 +170,7 @@ class PyCodeStyleChecker(BaseChecker):
         @param linter: current C{PyLinter} object.
         """
         BaseChecker.__init__(self, linter)
-        self.pycodestyleEnabled = self.linter.option_value("pycodestyle")
+        self.pycodestyleEnabled = True # yes of course
 
 
     def visit_module(self, node):

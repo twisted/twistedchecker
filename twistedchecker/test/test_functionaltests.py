@@ -141,24 +141,6 @@ def _setLinterLimits(linter, action, messages):
 
 
 
-def _enablePEP8Checker(linter):
-    """
-    Enable PEP8 checking on the twistedchecker linter.
-
-    @param linter: The linter whose
-        L{twistedchecker.checkers.pep8format.PEP8Checker} will be enabled.
-    @type linter: L{pylint.lint.PyLinter}
-    """
-    checkers = linter.get_checkers()
-    for checker in checkers:
-        if getattr(checker, "name", None) == "pep8":
-            checker.pep8Enabled = True
-            return
-    else:
-        raise RuntimeError('pep8 checker not found in ', checkers)
-
-
-
 def _runTest(testCase, testFilePath):
     """
     Run a functional test.
@@ -182,8 +164,6 @@ def _runTest(testCase, testFilePath):
     if limits is not None:
         action, messages = limits
         _setLinterLimits(runner.linter, action, messages)
-
-    _enablePEP8Checker(runner.linter)
 
     exitCode = None
     try:
