@@ -47,11 +47,8 @@ def _getDecoratorsName(node):
         # Sometimes astng fails by raising this kind of error.
         pass
     else:
-        for name in names:
-            if name is YES:
-                # Whereas sometimes it fails by returning this magic token.
-                break
-        else:
+        # Whereas sometimes it fails by returning this magic token.
+        if YES not in names:
             return names
     # If pylint's attempt to discover the decorator's names has failed, fall
     # back to our own logic.
