@@ -5,6 +5,8 @@ A docstring with a wrong indentation.
 Docstring should have consistent indentations.
 """
 
+from elsewhere import aliasForProperty
+
 class foo:
     """
     The opening/closing of docstring should be on a line by themselves.
@@ -84,6 +86,11 @@ class foo:
     def otherProperty(self, value):
         # Setter don't need a docstring as most of the time is a duplicate of
         # the getter docstring.
+        pass
+
+
+    @aliasForProperty.setter
+    def decorated(self):
         pass
 
 
