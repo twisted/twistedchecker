@@ -91,6 +91,9 @@ class foo:
 
     @aliasForProperty.setter
     def decorated(self):
+        # If we have a decorator which *might* be a property, but is imported
+        # from elsewhere (somewhere that pylint's parser can't see) then we
+        # also don't need a docstring for its setter.
         pass
 
 
