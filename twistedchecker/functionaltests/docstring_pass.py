@@ -131,7 +131,6 @@ class Bar(object):
 
 
 
-
 def topLevel():
     """
     A top-level function.
@@ -139,6 +138,7 @@ def topLevel():
     class Inner(object):
         def innerInner(self):
             pass
+
 
 
 class Baz(object):
