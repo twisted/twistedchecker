@@ -8,8 +8,7 @@ Checks for docstrings.
 
 import re
 
-from logilab.astng import node_classes
-from logilab.astng import scoped_nodes
+from logilab.astng import node_classes, scoped_nodes, YES
 from logilab.astng.exceptions import InferenceError
 
 from pylint.interfaces import IASTNGChecker
@@ -43,13 +42,23 @@ def _getDecoratorsName(node):
     @param node: current node of pylint
     """
     try:
-        return node.decoratornames()
+        names = node.decoratornames()
     except InferenceError:
-        # For setter properties pylint fails so we use a custom code.
-        decorators = []
-        for decorator in node.decorators.nodes:
-            decorators.append(decorator.as_string())
-        return decorators
+        # Sometimes astng fails by raising this kind of error.
+        pass
+    else:
+        for name in names:
+            if name is YES:
+                # Whereas sometimes it fails by returning this magic token.
+                break
+        else:
+            return names
+    # If pylint's attempt to discover the decorator's names has failed, fall
+    # back to our own logic.
+    decorators = []
+    for decorator in node.decorators.nodes:
+        decorators.append(decorator.as_string())
+    return decorators
 
 
 def _isSetter(node_type, node):
