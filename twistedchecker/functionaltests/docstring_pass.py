@@ -5,6 +5,8 @@ A docstring with a wrong indentation.
 Docstring should have consistent indentations.
 """
 
+from elsewhere import aliasForProperty
+
 class foo:
     """
     The opening/closing of docstring should be on a line by themselves.
@@ -87,6 +89,14 @@ class foo:
         pass
 
 
+    @aliasForProperty.setter
+    def decorated(self):
+        # If we have a decorator which *might* be a property, but is imported
+        # from elsewhere (somewhere that pylint's parser can't see) then we
+        # also don't need a docstring for its setter.
+        pass
+
+
     def f(self):
         """
         A method returns nothing.
@@ -131,7 +141,6 @@ class Bar(object):
 
 
 
-
 def topLevel():
     """
     A top-level function.
@@ -139,6 +148,7 @@ def topLevel():
     class Inner(object):
         def innerInner(self):
             pass
+
 
 
 class Baz(object):
