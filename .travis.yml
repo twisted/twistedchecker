@@ -18,14 +18,10 @@ script:
 after_script:
   - codecov
 
-# Only run test when committing to master branch.
-branches:
-  only:
-    - master
-    - \d+\.\d+\.\d+
-
 # Do an automatic PyPi release when a tag is created.
 # http://docs.travis-ci.com/user/deployment/pypi/
+# Make sure builds are triggered for any push so that the tag push will also
+# trigger a build.
 deploy:
   provider: pypi
   # twistedchecker-robot is associated with adi.roiban email address from
