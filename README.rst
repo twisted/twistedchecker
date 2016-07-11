@@ -32,3 +32,10 @@ Check pyflakes status ignoring functional tests
 (#68 some day we might use twistedchecker on itself)::
 
     python check_pyflakes.py twistedchecker/
+
+Releasing a new version is done via Travis-CI.
+First commit the version update in a master and wait for test to pass.
+Create a tag on local branch and then push it::
+
+    git tag 1.2.3
+    git push --tags

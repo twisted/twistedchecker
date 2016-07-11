@@ -28,9 +28,11 @@ deploy:
   # Gmail. It uses a random password which was not recorded in plain text.
   user: twistedchecker-robot
   password:
-    secure: VS3uq3pdprwQUQmMFlS0ieXTX7UKvNjAQi/6CXfxqcJVlExVojsiSwOIgE76r74TuLRKDzlYD+G6dGkvaRmlfV2GVMhChUCN71Y0QtFPB68M9MuFyf/ICHb0zhs2f53/86m+ThphCOQwnOYxDeramR4TAsQR95buDO2Ko590vnQ=
+    secure: Ah71pNOKdOqiL4OuNW3R0XM4lz4wpqHVM5xLFr+rrHNjM4jEh+ZjSmkOH8HiWmE1rCWUFBomap0vuEL8de5lucHcPwpA9fXmXGlUrKcJfjEA7Qp/oSP5nmf8cLb1zS62e/SYoxC5jTRGpCAXd0PZd5Mu4QG7MJFmT5l1xz0q2eQ=
   on:
     tags: true
+    # Only replease from a single job.
+    condition: "$TOX_ENV = py27-tests"
     # All branches is still required.
     # https://github.com/travis-ci/travis-ci/issues/1675
     all_branches: true
