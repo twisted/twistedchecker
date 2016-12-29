@@ -46,5 +46,5 @@ setup(
             'pyflakes==0.8.1',
             ],
     },
-    long_description=file('README.rst').read()
+    long_description=open('README.rst').read()
 )
