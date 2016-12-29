@@ -31,7 +31,7 @@ class TestClassNameChecker(BaseChecker):
         if not isTestModule(node.name):
             return
 
-        objects = node.values()
+        objects = list(node.values())
         objects.sort(key=operator.attrgetter('lineno'))
         for obj in objects:
             if (isinstance(obj, Class) and self._isTestClass(obj) and
