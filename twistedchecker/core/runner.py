@@ -293,7 +293,7 @@ class Runner():
             self.linter.reporter.set_output(self.outputStream)
         try:
             args = self.linter.load_command_line_configuration(args)
-        except SystemExit, exc:
+        except SystemExit as exc:
             if exc.code == 2:  # bad options
                 exc.code = 32
             raise
