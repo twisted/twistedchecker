@@ -5,6 +5,8 @@
 
 from setuptools import find_packages, setup
 
+with open('README.rst') as f:
+    longDescription = f.read()
 
 setup(
     name='twistedchecker',
@@ -46,5 +48,5 @@ setup(
             'pyflakes==0.8.1',
             ],
     },
-    long_description=open('README.rst').read()
+    long_description=longDescription
 )
