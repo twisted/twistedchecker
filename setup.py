@@ -14,9 +14,7 @@ setup(
     author_email='twisted-python@twistedmatrix.com',
     url='https://github.com/twisted/twistedchecker',
     packages=find_packages(),
-    package_data={
-        "twistedchecker": ["configuration/pylintrc"]
-    },
+    include_package_data=True,  # use MANIFEST.in during install
     entry_points={
       "console_scripts": [
           "twistedchecker = twistedchecker.core.runner:main"

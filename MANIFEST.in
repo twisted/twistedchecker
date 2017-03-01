@@ -2,4 +2,4 @@ include *.py
 include LICENSE
 include .coveragerc
 include tox.ini
-recursive-include twistedchecker *.result
+recursive-include twistedchecker *.result configuration
