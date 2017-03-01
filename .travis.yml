@@ -1,19 +1,26 @@
 language: python
 sudo: false
 
+matrix:
+  include:
+  - python: 2.7
+    env: TOX_ENV=pyflakes
+  - python: 2.7
+    env: TOX_ENV=check-manifest
+  - python: 2.7
+    env: TOX_ENV=py27-tests
+
+matrix:
+  allow_failures:
+  - python: 3.5
+    env: TOX_ENV=py35-tests
+
+
 install:
-  - pip install tox codecov
-
-env:
-  - TOX_ENV=pyflakes
-  - TOX_ENV=check-manifest
-  - TOX_ENV=py27-tests
-
-# Dump trial log on failure.
-after_failure: "cat _trial_temp/test.log"
+  - python -m pip install tox codecov
 
 script:
-  - tox -c tox.ini -e $TOX_ENV
+  - python -m tox -c tox.ini -e $TOX_ENV
 
 after_script:
   - codecov
