@@ -4,23 +4,23 @@ sudo: false
 matrix:
   include:
   - python: 2.7
-    env: TOX_ENV=pyflakes
+    env: TOXENV=pyflakes
   - python: 2.7
-    env: TOX_ENV=check-manifest
+    env: TOXENV=check-manifest
   - python: 2.7
-    env: TOX_ENV=py27-tests
+    env: TOXENV=py27-tests
 
 matrix:
   allow_failures:
   - python: 3.5
-    env: TOX_ENV=py35-tests
+    env: TOXENV=py35-tests
 
 
 install:
   - python -m pip install tox codecov
 
 script:
-  - python -m tox -c tox.ini -e $TOX_ENV
+  - python -m tox -c tox.ini -e $TOXENV
 
 after_script:
   - codecov
@@ -39,7 +39,7 @@ deploy:
   on:
     tags: true
     # Only replease from a single job.
-    condition: "$TOX_ENV = py27-tests"
+    condition: "$TOXENV = py27-tests"
     # All branches is still required.
     # https://github.com/travis-ci/travis-ci/issues/1675
     all_branches: true
