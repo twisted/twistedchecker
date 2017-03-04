@@ -7,16 +7,14 @@ from setuptools import find_packages, setup
 
 
 setup(
-    name='TwistedChecker',
+    name='twistedchecker',
     description='A Twisted coding standard compliance checker.',
     version='0.6.0',
     author='Twisted Matrix Laboratories',
     author_email='twisted-python@twistedmatrix.com',
     url='https://github.com/twisted/twistedchecker',
     packages=find_packages(),
-    package_data={
-        "twistedchecker": ["configuration/pylintrc"]
-    },
+    include_package_data=True,  # use MANIFEST.in during install
     entry_points={
       "console_scripts": [
           "twistedchecker = twistedchecker.core.runner:main"
