@@ -85,7 +85,7 @@ class RunnerTestCase(unittest.TestCase):
         self.assertTrue(headerCheckerList)
         headerChecker = headerCheckerList[0]
         uselessCheckers = runner.findUselessCheckers(
-                            headerChecker.msgs.keys()[:1])
+                            list(headerChecker.msgs.keys())[:1])
         self.assertEqual(len(uselessCheckers) + 1, len(registeredCheckers))
         self.assertTrue(headerChecker not in uselessCheckers)
 
@@ -126,7 +126,7 @@ class RunnerTestCase(unittest.TestCase):
         after run this method.
         """
         runner = Runner()
-        runner.restrictCheckers(HeaderChecker.msgs.keys()[:1])
+        runner.restrictCheckers(list(HeaderChecker.msgs.keys())[:1])
         # After run it, only HeaderChecker should be left in
         # registered checkers
         registeredCheckers = sum(runner.linter._checkers.values(), [])
