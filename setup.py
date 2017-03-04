@@ -7,7 +7,7 @@ from setuptools import find_packages, setup
 
 
 setup(
-    name='TwistedChecker',
+    name='twistedchecker',
     description='A Twisted coding standard compliance checker.',
     version='0.6.0',
     author='Twisted Matrix Laboratories',
