@@ -9,6 +9,8 @@ import sys
 import os
 import operator
 
+from functools import reduce
+
 from twisted.python.compat import NativeStringIO
 from twisted.trial import unittest
 
