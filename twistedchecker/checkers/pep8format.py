@@ -8,11 +8,12 @@ Twisted Coding Standard.
 """
 
 import sys
-import StringIO
 import re
 
 from pylint.interfaces import IASTNGChecker
 from pylint.checkers import BaseChecker
+
+from twisted.python.compat import NativeStringIO
 
 import pep8
 
@@ -72,7 +73,7 @@ class PEP8WarningRecorder(pep8.Checker):
         """
         # Set a stream to replace stdout, and get results in it
         stdoutBak = sys.stdout
-        streamResult = StringIO.StringIO()
+        streamResult = NativeStringIO()
         sys.stdout = streamResult
         try:
             pep8.Checker.check_all(self)

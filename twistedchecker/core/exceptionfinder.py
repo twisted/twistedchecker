@@ -73,12 +73,14 @@ def findAllExceptions(pathToCheck):
     """
     finder = PatternFinder()
     if os.path.isfile(pathToCheck):
-        findPatternsInFile(open(pathToCheck).read(), finder)
+        with open(pathToCheck) as f:
+            findPatternsInFile(f.read(), finder)
     else:
         for path, dirs, files in os.walk(pathToCheck):
             for file in files:
                 _, extname = os.path.splitext(file)
                 if extname == ".py":
                     pathFile = os.path.join(path, file)
-                    findPatternsInFile(open(pathFile).read(), finder)
+                    with open(pathFile) as f:
+                        findPatternsInFile(f.read(), finder)
     return finder.patternsFunc, finder.patternsClass

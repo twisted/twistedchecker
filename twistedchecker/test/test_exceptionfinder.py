@@ -51,10 +51,10 @@ def createTestFiles(tempPath):
     tempDir = FilePath(tempPath)
     tempDir.createDirectory()
     moduleInit = tempDir.child('__init__.py')
-    moduleInit.setContent("")
+    moduleInit.setContent(b"")
     # A module declares exception for function names.
     moduleA = tempDir.child('a.py')
-    moduleA.setContent("""
+    moduleA.setContent(b"""
 obj, something = None, None
 
 func = getattr(obj, "foo_" + something)
@@ -62,14 +62,14 @@ getattr(obj, "baz_%s" % something)()
     """)
     # A module declares exception for class names.
     moduleB = tempDir.child('b.py')
-    moduleB.setContent("""
+    moduleB.setContent(b"""
 obj, something = None, None
 
 className = getattr(obj, "Bar_%s" % something)
     """)
     # A module contains invalid names.
     moduleTest = tempDir.child('test.py')
-    moduleTest.setContent("""
+    moduleTest.setContent(b"""
 # Not invalid names.
 def foo_SOMETHING():
     pass

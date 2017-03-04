@@ -4,17 +4,18 @@
 
 import sys
 import os
-import StringIO
 import re
 
 from pylint.checkers.base import NameChecker
 from pylint.lint import PyLinter
 from logilab.common.modutils import file_from_modpath
 
+from twisted.python.compat import NativeStringIO
+
 import twistedchecker
-from twistedchecker.reporters.limited import LimitedReporter
-from twistedchecker.core.exceptionfinder import findAllExceptions
 from twistedchecker.checkers import patch_pylint_format
+from twistedchecker.core.exceptionfinder import findAllExceptions
+from twistedchecker.reporters.limited import LimitedReporter
 
 
 class Runner():
@@ -63,7 +64,8 @@ class Runner():
                            .cfgfile_parser.get("TWISTEDCHECKER", "disable")
                            .replace(" ", "").split(","))
         if disabledMessages != {""}:
-            map(self.linter.disable, disabledMessages)
+            for msg in disabledMessages:
+                self.linter.disable(msg)
             allowedMessages -= disabledMessages
         # set default output stream to stdout
         self.setOutput(sys.stdout)
@@ -145,7 +147,7 @@ class Runner():
                                         fromlist=["twistedchecker.checkers"]),
                              classname)
             instanceChecker = checker(self.linter)
-            allowedMessages += instanceChecker.msgs.keys()
+            allowedMessages += list(instanceChecker.msgs.keys())
             self.linter.register_checker(instanceChecker)
 
         self.restrictCheckers(allowedMessages)
@@ -199,7 +201,7 @@ class Runner():
 
         @checkerType: type of the checker
         """
-        for checker in sum(self.linter._checkers.values(), []):
+        for checker in sum(list(self.linter._checkers.values()), []):
             if isinstance(checker, checkerType):
                 return checker
         return None
@@ -292,7 +294,7 @@ class Runner():
             self.linter.reporter.set_output(self.outputStream)
         try:
             args = self.linter.load_command_line_configuration(args)
-        except SystemExit, exc:
+        except SystemExit as exc:
             if exc.code == 2:  # bad options
                 exc.code = 32
             raise
@@ -300,7 +302,8 @@ class Runner():
             self.displayHelp()
         # Check for 'strict-epydoc' option.
         if self.allowOptions and not self.linter.option_value("strict-epydoc"):
-            map(self.linter.disable, ["W9203", "W9205"])
+            for msg in ["W9203", "W9205"]:
+                self.linter.disable(msg)
 
         # insert current working directory to the python path to have a correct
         # behaviour.
@@ -329,7 +332,7 @@ class Runner():
         """
         Prepare to run the checker and get diff results.
         """
-        self.streamForDiff = StringIO.StringIO()
+        self.streamForDiff = NativeStringIO()
         self.linter.reporter.set_output(self.streamForDiff)
 
 
@@ -363,7 +366,9 @@ class Runner():
         @return: File content.
         @rtype: c{str}
         """
-        return open(self.diffOption).read()
+        with open(self.diffOption) as f:
+            content = f.read()
+        return content
 
     def generateDiff(self, oldWarnings, newWarnings):
         """
