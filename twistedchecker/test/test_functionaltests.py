@@ -103,7 +103,8 @@ def _parseLimitMessages(testFilePath):
         I{twistedchecker} message IDs.
     @rtype: L{tuple}
     """
-    firstline = open(testFilePath).readline()
+    with open(testFilePath) as f:
+        firstline = f.readline()
     if "enable" not in firstline and "disable" not in firstline:
         # Could not find enable or disable messages
         return

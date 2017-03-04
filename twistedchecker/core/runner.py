@@ -366,7 +366,9 @@ class Runner():
         @return: File content.
         @rtype: c{str}
         """
-        return open(self.diffOption).read()
+        with open(self.diffOption) as f:
+            content = f.read()
+        return content
 
     def generateDiff(self, oldWarnings, newWarnings):
         """

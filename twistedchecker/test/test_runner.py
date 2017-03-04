@@ -66,7 +66,8 @@ class RunnerTestCase(unittest.TestCase):
                             for pathDir, _, files in os.walk(pathTests)])
         messagesAllowed = set(Runner.allowedMessagesFromPylint)
         for testfile in testfiles:
-            firstline = open(testfile).readline().strip()
+            with open(testfile) as f:
+                firstline = f.readline().strip()
             if (firstline.startswith("#") and "enable" in firstline
                                           and ":" in firstline):
                 messages = firstline.split(":")[1].strip().split(",")
