@@ -79,8 +79,9 @@ class RunnerTestCase(unittest.TestCase):
         runner = Runner()
         registeredCheckers = sum(runner.linter._checkers.values(), [])
         # remove checkers other than header checker
-        headerCheckerList = filter(lambda ckr: type(ckr) == HeaderChecker,
-                                   registeredCheckers)
+        headerCheckerList = [ckr
+                             for ckr in registeredCheckers
+                             if type(ckr) == HeaderChecker]
         self.assertTrue(headerCheckerList)
         headerChecker = headerCheckerList[0]
         uselessCheckers = runner.findUselessCheckers(
@@ -99,8 +100,9 @@ class RunnerTestCase(unittest.TestCase):
         runner = Runner()
         registeredCheckers = sum(runner.linter._checkers.values(), [])
         # Make sure an instance of HeaderChecker in registered checkers
-        headerCheckerList = filter(lambda ckr: type(ckr) == HeaderChecker,
-                                   registeredCheckers)
+        headerCheckerList = [ckr
+                             for ckr in registeredCheckers
+                             if type(ckr) == HeaderChecker]
         self.assertTrue(headerCheckerList)
         headerChecker = headerCheckerList[0]
         # Make sure it in option providers
