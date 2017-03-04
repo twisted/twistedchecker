@@ -1,11 +1,11 @@
 [run]
-source =
-       twistedchecker
+include =
+   .tox/*/lib/python*/site-packages/twistedchecker/*
+   .tox/pypy*/site-packages/twistedchecker
 branch = True
 
 
 [paths]
 source =
-   .
    .tox/*/lib/python*/site-packages/twistedchecker
    .tox/pypy*/site-packages/twistedchecker
