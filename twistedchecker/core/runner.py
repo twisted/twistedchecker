@@ -4,17 +4,18 @@
 
 import sys
 import os
-import StringIO
 import re
 
 from pylint.checkers.base import NameChecker
 from pylint.lint import PyLinter
 from logilab.common.modutils import file_from_modpath
 
+from twisted.python.compat import NativeStringIO
+
 import twistedchecker
-from twistedchecker.reporters.limited import LimitedReporter
-from twistedchecker.core.exceptionfinder import findAllExceptions
 from twistedchecker.checkers import patch_pylint_format
+from twistedchecker.core.exceptionfinder import findAllExceptions
+from twistedchecker.reporters.limited import LimitedReporter
 
 
 class Runner():
@@ -331,7 +332,7 @@ class Runner():
         """
         Prepare to run the checker and get diff results.
         """
-        self.streamForDiff = StringIO.StringIO()
+        self.streamForDiff = NativeStringIO()
         self.linter.reporter.set_output(self.streamForDiff)
 
 

@@ -7,15 +7,15 @@ Tests for L{twistedchecker.core.runner}.
 
 import sys
 import os
-import StringIO
 import operator
 
+from twisted.python.compat import NativeStringIO
 from twisted.trial import unittest
 
 import twistedchecker
 from twistedchecker.core.runner import Runner
-from twistedchecker.reporters.test import TestReporter
 from twistedchecker.checkers.header import HeaderChecker
+from twistedchecker.reporters.test import TestReporter
 
 from twistedchecker.test.test_exceptionfinder import (
     createTestFiles as createTestFilesForFindingExceptions)
@@ -32,9 +32,9 @@ class RunnerTestCase(unittest.TestCase):
         """
         Redirect stdout to a temp C{StringIO} stream.
         """
-        self.outputStream = StringIO.StringIO()
+        self.outputStream = NativeStringIO()
         self.patch(sys, "stdout", self.outputStream)
-        self.errorStream = StringIO.StringIO()
+        self.errorStream = NativeStringIO()
         self.patch(sys, "stderr", self.errorStream)
 
 
@@ -42,7 +42,7 @@ class RunnerTestCase(unittest.TestCase):
         """
         A function to clear output stream.
         """
-        self.outputStream = StringIO.StringIO()
+        self.outputStream = NativeStringIO()
 
 
     def makeRunner(self):
