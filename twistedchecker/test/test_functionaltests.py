@@ -12,8 +12,8 @@ import itertools
 import os
 import sys
 
+from twisted.python.compat import _PY3, NativeStringIO
 from twisted.python.reflect import filenameToModuleName
-from twisted.python.compat import _PY3
 from twisted.trial import unittest
 
 import twistedchecker
@@ -22,10 +22,8 @@ from twistedchecker.reporters.test import TestReporter
 
 try:
     from itertools import zip_longest
-    from io import StringIO
 except:
     from itertools import izip_longest as zip_longest
-    from StringIO import StringIO
 
 
 
@@ -155,7 +153,7 @@ def _runTest(testCase, testFilePath):
     """
     pathResultFile = testFilePath.replace(".py", ".result")
     moduleName = filenameToModuleName(testFilePath)
-    outputStream = StringIO()
+    outputStream = NativeStringIO()
 
     runner = Runner()
     runner.allowOptions = False
