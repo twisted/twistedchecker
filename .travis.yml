@@ -3,9 +3,9 @@ sudo: false
 
 matrix:
   include:
-    - python: 2.7
+    - python: 3.5
       env: TOXENV=pyflakes
-    - python: 2.7
+    - python: 3.5
       env: TOXENV=check-manifest
     - python: 2.7
       env: TOXENV=py27-tests
