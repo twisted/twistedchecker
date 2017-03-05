@@ -33,9 +33,10 @@ deploy:
   user: twistedchecker-robot
   password:
     secure: Ah71pNOKdOqiL4OuNW3R0XM4lz4wpqHVM5xLFr+rrHNjM4jEh+ZjSmkOH8HiWmE1rCWUFBomap0vuEL8de5lucHcPwpA9fXmXGlUrKcJfjEA7Qp/oSP5nmf8cLb1zS62e/SYoxC5jTRGpCAXd0PZd5Mu4QG7MJFmT5l1xz0q2eQ=
+  distributions: "sdist bdist_wheel"
   on:
     tags: true
-    # Only replease from a single job.
+    # Only release from a single job.
     condition: "$TOXENV = py27-tests"
     # All branches is still required.
     # https://github.com/travis-ci/travis-ci/issues/1675
