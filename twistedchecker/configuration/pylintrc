@@ -17,7 +17,7 @@ output-format=text
 reports=no
 
 # Include message's id in output
-include-ids=yes
+msg-template={msg_id}:{line} {msg}
 
 [FORMAT]
 
@@ -75,9 +75,7 @@ variable-rgx=([a-z_][a-zA-Z0-9]*)$
 # class names, so just make sure they are valid.
 const-rgx=(([A-Z_][A-Z0-9_]*)|(__.*__)|([a-z_][a-zA-Z0-9]+)|([A-Z][a-zA-Z0-9]+))$
 
-# To prevent generating two warnings when found an invalid
-# argument name, disable argument name checking.
-argument-rgx=.*$
+argument-rgx=([a-z_][a-zA-Z0-9]*)$
 
 
 [SIMILARITIES]

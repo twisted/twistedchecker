@@ -19,7 +19,7 @@ def functiond(foo_bar):
     pass
 
 # Good examples
-def functione(f):   
+def functione(f):
     pass
 
 def functionf(foo):

@@ -1,5 +1,5 @@
-from pylint.interfaces import IASTNGChecker
-from pylint.checkers.string_format import StringFormatChecker
+from pylint.interfaces import IAstroidChecker
+from pylint.checkers.strings import StringFormatChecker
 
 
 
@@ -11,9 +11,9 @@ class FormattingOperationChecker(StringFormatChecker):
     msgs = {
      'W9501': ('String formatting operations should always use a tuple '
                'for non-mapping values',
-               'Checking string formatting operations.'),
+               'Checking string formatting operations.', 'formatting-use-tuple'),
     }
-    __implements__ = IASTNGChecker
+    __implements__ = IAstroidChecker
     name = 'formattingoperation'
     options = ()
 

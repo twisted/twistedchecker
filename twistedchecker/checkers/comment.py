@@ -1,8 +1,8 @@
-from pylint.interfaces import IASTNGChecker
+import re
+from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
-from pylint.checkers.format import COMMENT_RGX
 
-
+COMMENT_RGX = re.compile(b"#.*$", re.M)
 
 class CommentChecker(BaseChecker):
     """
@@ -13,11 +13,13 @@ class CommentChecker(BaseChecker):
     """
     msgs = {
      'W9401': ('Comments should begin with one whitespace',
-               'Used for checking comment format issues.'),
+               'Used for checking comment format issues.',
+                   'comments-one-whitespace'),
      'W9402': ('The first letter of comment should be capitalized',
-               'Used for checking comment format issues.')
+               'Used for checking comment format issues. ',
+                   'comments-capitalized')
     }
-    __implements__ = IASTNGChecker
+    __implements__ = IAstroidChecker
     name = 'comment'
     options = ()
 
@@ -32,9 +34,9 @@ class CommentChecker(BaseChecker):
             return
         isFirstLineOfComment = True
         isDocString = False
-        lines = node.file_stream.readlines()
+        lines = node.stream().readlines()
         for linenum, line in enumerate(lines):
-            if line.strip().startswith('"""'):
+            if line.strip().startswith(b'"""'):
                 # This is a simple assumption than docstring are delimited
                 # with triple double quotes on a single line.
                 # Should do the job for Twisted code.
@@ -49,16 +51,16 @@ class CommentChecker(BaseChecker):
                 if isFirstLineOfComment:
                     # Check for W9401
                     comment = matchedComment.group()
-                    if (comment.startswith("#  ") or
-                        not comment.startswith("# ")):
-                        self.add_message('W9401', line=linenum + 1)
+                    if (comment.startswith(b"#  ") or
+                        not comment.startswith(b"# ")):
+                        self.add_message('W9401', line=linenum + 1, node=node)
                     # Check for W9402
-                    strippedComment = comment.lstrip("#").lstrip()
+                    strippedComment = comment.lstrip(b"#").lstrip()
                     if strippedComment:
-                        firstLetter = strippedComment[0]
+                        firstLetter = strippedComment[0:1]
                         if (firstLetter.isalpha() and
                             not firstLetter.isupper()):
-                            self.add_message('W9402', line=linenum + 1)
+                            self.add_message('W9402', line=linenum + 1, node=node)
                     isFirstLineOfComment = False
             else:
                 isFirstLineOfComment = True

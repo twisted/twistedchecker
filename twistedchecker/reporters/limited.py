@@ -6,7 +6,6 @@ from pylint.reporters.text import TextReporter
 import twistedchecker
 
 
-
 class LimitedReporter(TextReporter):
     """
     A reporter only used by unit tests.
@@ -28,9 +27,9 @@ class LimitedReporter(TextReporter):
         self.messagesAllowed = messagesAllowed
 
 
-    def add_message(self, msg_id, location, msg):
+    def handle_message(self, msg):
         """
         Manage message of different type and in the context of path.
         """
-        if msg_id in self.messagesAllowed:
-            TextReporter.add_message(self, msg_id, location, msg)
+        if msg.msg_id in self.messagesAllowed:
+            super(LimitedReporter, self).handle_message(msg)

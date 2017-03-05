@@ -7,13 +7,14 @@ Checks for docstrings.
 """
 
 import re
+import astroid
 
-from logilab.astng import node_classes, scoped_nodes, YES
-from logilab.astng.exceptions import InferenceError
+from astroid import node_classes, scoped_nodes
 
-from pylint.interfaces import IASTNGChecker
-from pylint.checkers.base import DocStringChecker as PylintDocStringChecker
-from pylint.checkers.base import NO_REQUIRED_DOC_RGX
+from pylint.interfaces import IAstroidChecker, INFERENCE, INFERENCE_FAILURE
+from pylint.checkers.base import (DocStringChecker as PylintDocStringChecker,
+                                  NO_REQUIRED_DOC_RGX)
+from pylint.checkers.utils import has_known_bases
 
 
 def _isInner(node):
@@ -29,7 +30,7 @@ def _isInner(node):
     """
     while node:
         node = node.parent
-        if isinstance(node, scoped_nodes.Function):
+        if isinstance(node, scoped_nodes.FunctionDef):
             return True
     return False
 
@@ -41,18 +42,11 @@ def _getDecoratorsName(node):
 
     @param node: current node of pylint
     """
-    try:
-        names = node.decoratornames()
-    except InferenceError:
-        # Sometimes astng fails by raising this kind of error.
-        pass
-    else:
-        # Whereas sometimes it fails by returning this magic token.
-        if YES not in names:
-            return names
-    # If pylint's attempt to discover the decorator's names has failed, fall
-    # back to our own logic.
+    # For setter properties pylint fails so we use a custom code.
     decorators = []
+    if not node.decorators:
+        return decorators
+
     for decorator in node.decorators.nodes:
         decorators.append(decorator.as_string())
     return decorators
@@ -76,6 +70,9 @@ def _isSetter(node_type, node):
     return False
 
 
+_counter = iter(range(100))
+
+
 class DocstringChecker(PylintDocStringChecker):
     """
     A checker for checking docstrings.
@@ -83,27 +80,27 @@ class DocstringChecker(PylintDocStringChecker):
     msgs = {
      'W9201': ('The opening/closing of docstring should be on a line '
                'by themselves',
-               'Check the opening/closing of a docstring.'),
+               'Check the opening/closing of a docstring.', 'docstring' + str(next(_counter))),
      'W9202': ('Missing epytext markup @param for argument "%s"',
-               'Check the epytext markup @param.'),
+               'Check the epytext markup @param.', 'docstring' + str(next(_counter))),
      'W9203': ('Missing epytext markup @type for argument "%s"',
-               'Check the epytext markup @type.'),
+               'Check the epytext markup @type.', 'docstring' + str(next(_counter))),
      'W9204': ('Missing epytext markup @return for return value',
-               'Check the epytext markup @return.'),
+               'Check the epytext markup @return.', 'docstring' + str(next(_counter))),
      'W9205': ('Missing epytext markup @rtype for return value',
-               'Check the epytext markup @rtype.'),
+               'Check the epytext markup @rtype.', 'docstring' + str(next(_counter))),
      'W9206': ('Docstring should have consistent indentations',
-               'Check indentations of docstring.'),
+               'Check indentations of docstring.', 'docstring' + str(next(_counter))),
      'W9207': ('Missing a blank line before epytext markups',
-               'Check the blank line before epytext markups.'),
+               'Check the blank line before epytext markups.', 'docstring' + str(next(_counter))),
      'W9208': ('Missing docstring',
                'Used when a module, function, class or method '
-               'has no docstring.'),
+               'has no docstring.', 'docstring' + str(next(_counter))),
      'W9209': ('Empty docstring',
                'Used when a module, function, class or method '
-               'has an empty docstring.'),
+               'has an empty docstring.', 'docstring' + str(next(_counter))),
     }
-    __implements__ = IASTNGChecker
+    __implements__ = IAstroidChecker
     name = 'docstring'
     options = ()
 
@@ -142,8 +139,39 @@ class DocstringChecker(PylintDocStringChecker):
             linenoDocstring += 1
         return linenoDocstring
 
+    def visit_module(self, node):
+        self._check_docstring('module', node)
 
-    def _check_docstring(self, node_type, node):
+    def visit_classdef(self, node):
+        if self.config.no_docstring_rgx.match(node.name) is None:
+            self._check_docstring('class', node)
+
+    def visit_functiondef(self, node):
+        if self.config.no_docstring_rgx.match(node.name) is None:
+            ftype = node.is_method() and 'method' or 'function'
+
+            if isinstance(node.parent.frame(), astroid.ClassDef):
+                overridden = False
+                confidence = (INFERENCE if has_known_bases(node.parent.frame())
+                              else INFERENCE_FAILURE)
+                # check if node is from a method overridden by its ancestor
+                for ancestor in node.parent.frame().ancestors():
+                    if node.name in ancestor and \
+                       isinstance(ancestor[node.name], astroid.FunctionDef):
+                        overridden = True
+                        break
+                self._check_docstring(ftype, node,
+                                      report_missing=not overridden,
+                                      confidence=confidence)
+            else:
+                self._check_docstring(ftype, node)
+
+
+    visit_asyncfunctiondef = visit_functiondef
+
+
+    def _check_docstring(self, node_type, node, report_missing=True,
+                         confidence=None):
         """
         Check whether the opening and the closing of docstring
         on a line by themselves.
@@ -256,7 +284,7 @@ class DocstringChecker(PylintDocStringChecker):
                     else node.argnames())
 
         if _isSetter(node_type, node):
-           # For setter methods we remove the `value` argument as it
+            # For setter methods we remove the `value` argument as it
             # does not need to be documented.
             try:
                 argnames.remove('value')
@@ -284,7 +312,7 @@ class DocstringChecker(PylintDocStringChecker):
         """
         # Getter properties don't need to document their return value,
         # but then need to have a return value.
-        if '__builtin__.property' in _getDecoratorsName(node):
+        if 'property' in _getDecoratorsName(node):
             if self._hasReturnValue(node):
                 # Getter properties don't need a docstring.
                 return

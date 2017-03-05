@@ -1,6 +1,6 @@
 import re
 
-from pylint.interfaces import IASTNGChecker
+from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 
 from twistedchecker.core.util import isTestModule, moduleNeedsTests
@@ -18,19 +18,20 @@ class HeaderChecker(BaseChecker):
     # -*- test-case-name: <test module> -*-
     """
     msgs = {
-     'W9001': ('Missing copyright header',
-               'Used when a module of Twisted has no copyright header.'),
-     'W9002': ('Missing a reference to test module in header',
-               'Used when a module does not contain a reference'
-               ' to test module.'),
+        'W9001': ('Missing copyright header',
+                  'Used when a module of Twisted has no copyright header.',
+                  'missing-copyright-header'),
+        'W9002': ('Missing a reference to test module in header',
+                  'Used when a module does not contain a reference'
+                  ' to test module.', 'missing-test-header'),
     }
-    __implements__ = IASTNGChecker
+    __implements__ = IAstroidChecker
     name = 'header'
     options = ()
-    commentsCopyright = (r"# Copyright \(c\) Twisted Matrix Laboratories\.",
-                         r"# See LICENSE for details\.")
-    patternTestReference = (r"# -\*- test-case-name:"
-                            r" (([a-z_][a-z0-9_]*)\.)*[a-z_][a-z0-9_]* -\*-")
+    commentsCopyright = (br"# Copyright \(c\) Twisted Matrix Laboratories\.",
+                         br"# See LICENSE for details\.")
+    patternTestReference = (br"# -\*- test-case-name:"
+                            br" (([a-z_][a-z0-9_]*)\.)*[a-z_][a-z0-9_]* -\*-")
 
 
     def visit_module(self, node):
@@ -55,7 +56,7 @@ class HeaderChecker(BaseChecker):
         @param text: codes of the module
         @param node: node of the module
         """
-        if not re.search(r"%s\s*\n\s*%s" % self.commentsCopyright, text):
+        if not re.search(br"%s\s*\n\s*%s" % self.commentsCopyright, text):
             self.add_message('W9001', node=node)
 
 
