@@ -73,7 +73,7 @@ variable-rgx=([a-z_][a-zA-Z0-9]*)$
 # Constants in principle should named in style of FOO_BAR or FOOBAR.
 # But in Twisted, many constants are named in style of variable names or
 # class names, so just make sure they are valid.
-const-rgx=(([A-Z_][A-Z0-9_]*)|(__.*__)|([a-z_][a-zA-Z0-9]+)|([A-Z][a-zA-Z0-9]+))$
+const-rgx=(([A-Z_][A-Z0-9_]*)|(__.*__)|([a-z_][a-zA-Z0-9_]+)|([A-Z][a-zA-Z0-9]+))$
 
 argument-rgx=([a-z_][a-zA-Z0-9]*)$
 
