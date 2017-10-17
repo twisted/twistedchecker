@@ -7,6 +7,18 @@ Docstring should have consistent indentations.
 
 from elsewhere import aliasForProperty
 
+
+class SomeOptions:
+    """
+    Certain behavior differs for CLI option implementations.
+    """
+    def opt_bar(self, param):
+        """
+        An option docstring need not have param markup.
+        """
+
+
+
 class foo:
     """
     The opening/closing of docstring should be on a line by themselves.
