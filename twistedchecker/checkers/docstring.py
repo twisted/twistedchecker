@@ -293,6 +293,10 @@ class DocstringChecker(PylintDocStringChecker):
                 pass
 
         for argname in argnames:
+            if node.name.startswith('opt_'):
+                # The docstring for option methods is presented as user-facing
+                # documentation.  Avoid requiring epytext in them.
+                return
             if not re.search(r"@param\s+%s\s*:" % argname, node.doc):
                 self.add_message('W9202', line=linenoDocstring,
                                  node=node, args=argname)
