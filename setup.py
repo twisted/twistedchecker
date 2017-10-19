@@ -11,7 +11,7 @@ with open('README.rst') as f:
 setup(
     name='twistedchecker',
     description='A Twisted coding standard compliance checker.',
-    version='0.7.1',
+    version='0.7.2',
     author='Twisted Matrix Laboratories',
     author_email='twisted-python@twistedmatrix.com',
     url='https://github.com/twisted/twistedchecker',
