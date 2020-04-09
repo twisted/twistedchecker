@@ -39,7 +39,6 @@ setup(
     install_requires=[
         "pylint == 1.5.6",
         "logilab-common == 1.2.1",
-        "pycodestyle == 2.0.0",
         'twisted>=15.0.0',
     ],
     extras_require = {
