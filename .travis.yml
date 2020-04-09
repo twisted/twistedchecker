@@ -7,8 +7,6 @@ matrix:
       env: TOXENV=pyflakes
     - python: 3.5
       env: TOXENV=check-manifest
-    - python: 2.7
-      env: TOXENV=py27-tests
     - python: 3.5
       env: TOXENV=py35-tests
 
@@ -37,7 +35,7 @@ deploy:
   on:
     tags: true
     # Only release from a single job.
-    condition: "$TOXENV = py27-tests"
+    condition: "$TOXENV = py35-tests"
     # All branches is still required.
     # https://github.com/travis-ci/travis-ci/issues/1675
     all_branches: true

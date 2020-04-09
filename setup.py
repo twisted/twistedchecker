@@ -29,8 +29,6 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.5",
         "Topic :: Software Development :: Quality Assurance"
@@ -41,7 +39,6 @@ setup(
     install_requires=[
         "pylint == 1.5.6",
         "logilab-common == 1.2.1",
-        "pycodestyle == 2.0.0",
         'twisted>=15.0.0',
     ],
     extras_require = {
