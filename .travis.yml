@@ -26,11 +26,12 @@ after_script:
 # trigger a build.
 deploy:
   provider: pypi
-  # twistedchecker-robot is associated with adi.roiban email address from
-  # Gmail. It uses a random password which was not recorded in plain text.
-  user: twistedchecker-robot
+  # Check the Twisted shared 1password vault for information on this user.  We
+  # are using a user rather than an API token due to this issue:
+  # https://travis-ci.community/t/travis-encrypt-data-too-large-for-pypi-tokens-with-older-repos/5792/11
+  user: releasebot.twistedchecker
   password:
-    secure: Ah71pNOKdOqiL4OuNW3R0XM4lz4wpqHVM5xLFr+rrHNjM4jEh+ZjSmkOH8HiWmE1rCWUFBomap0vuEL8de5lucHcPwpA9fXmXGlUrKcJfjEA7Qp/oSP5nmf8cLb1zS62e/SYoxC5jTRGpCAXd0PZd5Mu4QG7MJFmT5l1xz0q2eQ=
+    secure: mtYdMYMygS91TAQOyIBcwZyOPsza14bupxJmNyv54ia44BDGvonvi6v1cr93VRkkOcxNNh2XrBKRZdnFHUV1be+3veMuUPOPKze1ck7rUmm0b+Z4eSA0AsCTaWMipQKt1Oy7936muc+E8hJDydM1p1Pp5nmOAravOX7NcZ9OkFM=
   distributions: "sdist bdist_wheel"
   on:
     tags: true
