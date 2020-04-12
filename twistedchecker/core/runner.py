@@ -6,9 +6,9 @@ import sys
 import os
 import re
 
+from astroid.modutils import file_from_modpath
 from pylint.checkers.base import NameChecker
 from pylint.lint import PyLinter
-from logilab.common.modutils import file_from_modpath
 
 from twisted.python.compat import NativeStringIO
 
