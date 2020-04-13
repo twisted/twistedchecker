@@ -12,13 +12,16 @@ import itertools
 import os
 import sys
 
-from twisted.python.compat import _PY3, NativeStringIO
+from io import StringIO
+
+from pylint.reporters.text import TextReporter
+
+from twisted.python.compat import _PY3
 from twisted.python.reflect import filenameToModuleName
 from twisted.trial import unittest
 
 import twistedchecker
 from twistedchecker.core.runner import Runner
-from twistedchecker.reporters.test import TestReporter
 
 try:
     from itertools import zip_longest
@@ -153,12 +156,15 @@ def _runTest(testCase, testFilePath):
     """
     pathResultFile = testFilePath.replace(".py", ".result")
     moduleName = filenameToModuleName(testFilePath)
-    outputStream = NativeStringIO()
+    outputStream = StringIO()
 
     runner = Runner()
     runner.allowOptions = False
     runner.setOutput(outputStream)
-    runner.setReporter(TestReporter())
+
+    runner.linter.set_reporter(TextReporter())
+    runner.linter.config.msg_template = "{line}:{msg_id}"
+    runner.linter.open()
 
     limits = _parseLimitMessages(testFilePath)
     if limits is not None:
