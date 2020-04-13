@@ -35,8 +35,10 @@ class TwistedNamesChecker(BaseChecker):
         @param node: node of given module
         """
         patternTestCase = br"class\s+[a-zA-Z0-9]+\s*\(.*TestCase\)"
-        return re.search(patternTestCase, node.file_stream.read()) \
-               and True or False
+        with node.stream() as stream:
+            moduleRaw = stream.read()
+
+        return re.search(patternTestCase, moduleRaw) and True or False
 
 
     def visit_module(self, node):

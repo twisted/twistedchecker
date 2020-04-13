@@ -29,38 +29,36 @@ class CommentChecker(BaseChecker):
 
         @param node: node of current module
         """
-        if not node.file_stream:
-            # Failed to open the module
-            return
         isFirstLineOfComment = True
         isDocString = False
-        lines = node.stream().readlines()
-        for linenum, line in enumerate(lines):
-            if line.strip().startswith(b'"""'):
-                # This is a simple assumption than docstring are delimited
-                # with triple double quotes on a single line.
-                # Should do the job for Twisted code.
-                isDocString = not isDocString
 
-            if isDocString:
-                # We ignore comments in docstrings.
-                continue
+        with node.stream() as stream:
+            for (linenum, line) in enumerate(stream):
+                if line.strip().startswith(b'"""'):
+                    # This is a simple assumption than docstring are delimited
+                    # with triple double quotes on a single line.
+                    # Should do the job for Twisted code.
+                    isDocString = not isDocString
 
-            matchedComment = COMMENT_RGX.search(line)
-            if matchedComment:
-                if isFirstLineOfComment:
-                    # Check for W9401
-                    comment = matchedComment.group()
-                    if (comment.startswith(b"#  ") or
-                        not comment.startswith(b"# ")):
-                        self.add_message('W9401', line=linenum + 1, node=node)
-                    # Check for W9402
-                    strippedComment = comment.lstrip(b"#").lstrip()
-                    if strippedComment:
-                        firstLetter = strippedComment[0:1]
-                        if (firstLetter.isalpha() and
-                            not firstLetter.isupper()):
-                            self.add_message('W9402', line=linenum + 1, node=node)
-                    isFirstLineOfComment = False
-            else:
-                isFirstLineOfComment = True
+                if isDocString:
+                    # We ignore comments in docstrings.
+                    continue
+
+                matchedComment = COMMENT_RGX.search(line)
+                if matchedComment:
+                    if isFirstLineOfComment:
+                        # Check for W9401
+                        comment = matchedComment.group()
+                        if (comment.startswith(b"#  ") or
+                            not comment.startswith(b"# ")):
+                            self.add_message('W9401', line=linenum + 1, node=node)
+                        # Check for W9402
+                        strippedComment = comment.lstrip(b"#").lstrip()
+                        if strippedComment:
+                            firstLetter = strippedComment[0:1]
+                            if (firstLetter.isalpha() and
+                                not firstLetter.isupper()):
+                                self.add_message('W9402', line=linenum + 1, node=node)
+                        isFirstLineOfComment = False
+                else:
+                    isFirstLineOfComment = True
