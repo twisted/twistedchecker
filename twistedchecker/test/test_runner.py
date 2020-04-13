@@ -440,7 +440,7 @@ W9001:  1,0: Missing copyright header
         exitResult = self.assertRaises(SystemExit, runner.run, [moduleName])
 
         os.chdir(workingDir)
-        predictResult = "7:C9302\n11:C0103\n14:C0103\n15:C9302\n"
+        predictResult = "************* Module temp.test\n7:C9302\n11:C0103\n14:C0103\n15:C9302\n"
         outputResult = self.outputStream.getvalue()
         self.assertEqual(outputResult, predictResult)
         self.assertEqual(16, exitResult.code)
