@@ -11,13 +11,15 @@ import operator
 
 from functools import reduce
 
-from twisted.python.compat import NativeStringIO
+from pylint.reporters.text import TextReporter
+
+from io import StringIO
+
 from twisted.trial import unittest
 
 import twistedchecker
 from twistedchecker.core.runner import Runner
 from twistedchecker.checkers.header import HeaderChecker
-from twistedchecker.reporters.test import TestReporter
 
 from twistedchecker.test.test_exceptionfinder import (
     createTestFiles as createTestFilesForFindingExceptions)
@@ -34,9 +36,9 @@ class RunnerTestCase(unittest.TestCase):
         """
         Redirect stdout to a temp C{StringIO} stream.
         """
-        self.outputStream = NativeStringIO()
+        self.outputStream = StringIO()
         self.patch(sys, "stdout", self.outputStream)
-        self.errorStream = NativeStringIO()
+        self.errorStream = StringIO()
         self.patch(sys, "stderr", self.errorStream)
 
 
@@ -44,7 +46,7 @@ class RunnerTestCase(unittest.TestCase):
         """
         A function to clear output stream.
         """
-        self.outputStream = NativeStringIO()
+        self.outputStream = StringIO()
 
 
     def makeRunner(self):
@@ -424,8 +426,10 @@ W9001:  1,0: Missing copyright header
         self.clearOutputStream()
         runner = Runner()
         runner.setOutput(self.outputStream)
-        # Set the reporter to C{twistedchecker.reporters.test.TestReporter}.
-        runner.setReporter(TestReporter())
+
+        runner.linter.set_reporter(TextReporter())
+        runner.linter.config.msg_template = "{line}:{msg_id}"
+        runner.linter.open()
         # Limit messages.
         runner.linter.disable_noerror_messages()
         # Enable invalid function names.
@@ -440,7 +444,7 @@ W9001:  1,0: Missing copyright header
         exitResult = self.assertRaises(SystemExit, runner.run, [moduleName])
 
         os.chdir(workingDir)
-        predictResult = "7:C9302\n11:C0103\n14:C0103\n15:C9302\n"
+        predictResult = "************* Module temp.test\n7:C9302\n11:C0103\n14:C0103\n15:C9302\n"
         outputResult = self.outputStream.getvalue()
         self.assertEqual(outputResult, predictResult)
         self.assertEqual(16, exitResult.code)

@@ -6,9 +6,9 @@ import sys
 import os
 import re
 
+from astroid.modutils import file_from_modpath
 from pylint.checkers.base import NameChecker
 from pylint.lint import PyLinter
-from logilab.common.modutils import file_from_modpath
 
 from twisted.python.compat import NativeStringIO
 
@@ -69,7 +69,7 @@ class Runner():
         # set default output stream to stdout
         self.setOutput(sys.stdout)
         # set default reporter to limited reporter
-        self.setReporter(LimitedReporter(allowedMessages))
+        self.linter.set_reporter(LimitedReporter(allowedMessages))
 
 
     def _makeOptions(self):
@@ -104,15 +104,6 @@ class Runner():
         """
         self.outputStream = stream
         sys.stdout = stream
-
-
-    def setReporter(self, reporter):
-        """
-        Set the reporter of pylint.
-
-        @param reporter: reporter used to show messages
-        """
-        self.linter.set_reporter(reporter)
 
 
     def displayHelp(self):

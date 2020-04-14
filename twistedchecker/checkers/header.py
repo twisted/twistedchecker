@@ -40,13 +40,11 @@ class HeaderChecker(BaseChecker):
 
         @param node: node of current module
         """
-        if not node.file_stream:
-            # failed to open the module
-            return
-        text = node.file_stream.read()
-        self._checkCopyright(text, node)
-        if not isTestModule(node.name) and moduleNeedsTests:
-            self._checkTestReference(text, node)
+        with node.stream() as stream:
+            text = stream.read()
+            self._checkCopyright(text, node)
+            if not isTestModule(node.name) and moduleNeedsTests:
+                self._checkTestReference(text, node)
 
 
     def _checkCopyright(self, text, node):

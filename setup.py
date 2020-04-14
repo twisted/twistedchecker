@@ -30,15 +30,17 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "Topic :: Software Development :: Quality Assurance"
     ],
     keywords=[
         "twisted", "checker", "compliance", "pep8"
     ],
     install_requires=[
-        "pylint == 1.5.6",
-        "logilab-common == 1.2.1",
+        'pylint>=2.4.4',
         'twisted>=15.0.0',
     ],
     extras_require = {
