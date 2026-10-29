@@ -39,3 +39,9 @@ Create a tag on local branch and then push it::
 
     git tag 1.2.3
     git push --tags
+
+
+AI Policy
+---------
+
+TwistedChecker follows the `Twisted AI Policy <https://docs.twisted.org/en/latest/development/ai-policy.html>`_. This means this project does not allow the inclusion of the outputs of generative AI tools.
