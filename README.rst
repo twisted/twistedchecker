@@ -1,6 +1,13 @@
 Twisted Coding Standard Checker
 ===============================
 
+This used to be a tool that was checking for Twisted coding standards,
+but it is no longer used.
+
+Just use pyflakes, black, towncrier and other tools to keep your code clean.
+
+--------
+
 TwistedChecker checks Python code for compliance with the `Twisted coding
 standard <https://twistedmatrix.com/documents/current/core/development/policy/coding-standard.html>`.
 
